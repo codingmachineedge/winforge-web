@@ -24,3 +24,7 @@ app-icon.png
 # Portable build output + download cache
 dist-portable
 tools/.cache
+
+# Ralph loop runtime state (arm/disarm marker + iteration counter)
+.ralph-loop-active
+.ralph-loop-count
