@@ -189,6 +189,15 @@ export const zhHant: Resources = {
     problemsOnly: '只顯示有問題',
     count: '{{count}} 個裝置',
   },
+  htmlent: {
+    encode: '編碼 → 實體',
+    decode: '解碼 → 文字',
+    nonAscii: '連所有非 ASCII 字元都跳脫（變成 &#xHHHH;）',
+    copy: '複製輸出',
+    common: '常用實體',
+    clickRow: '撳任何一行就會將實體名稱複製去剪貼簿。',
+    copied: '已複製去剪貼簿。',
+  },
   loan: {
     principal: '貸款金額（本金）',
     rate: '年利率（%）',

@@ -190,6 +190,15 @@ export const en = {
     problemsOnly: 'Problems only',
     count: '{{count}} devices',
   },
+  htmlent: {
+    encode: 'Encode → entities',
+    decode: 'Decode → text',
+    nonAscii: 'Also escape every non-ASCII character (as &#xHHHH;)',
+    copy: 'Copy output',
+    common: 'Common entities',
+    clickRow: 'Click any row to copy the entity name.',
+    copied: 'Copied to clipboard.',
+  },
   loan: {
     principal: 'Loan amount (principal)',
     rate: 'Annual interest rate (%)',
