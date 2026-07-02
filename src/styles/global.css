@@ -773,6 +773,34 @@ body {
 .mod {
   margin-top: 4px;
 }
+
+/* ---- Module sub-tabs (internal navigation) ---- */
+.mod-tabbar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--stroke-subtle);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.mod-tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 13.5px;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.mod-tab:hover {
+  color: var(--text);
+}
+.mod-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
 .mod-toolbar {
   display: flex;
   align-items: center;

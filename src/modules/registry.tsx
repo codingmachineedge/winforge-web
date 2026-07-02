@@ -8,6 +8,7 @@ import { HostsModule } from './HostsModule';
 import { PackagesModule } from './PackagesModule';
 import { NmapModule } from './NmapModule';
 import { GitModule } from './GitModule';
+import { ProcExplorerModule } from './ProcExplorerModule';
 import { StartupModule } from './StartupModule';
 import { ScheduledTasksModule } from './ScheduledTasksModule';
 import { EventsModule } from './EventsModule';
@@ -22,7 +23,7 @@ import { SysInfoModule } from './SysInfoModule';
 export const moduleRegistry: Record<string, ComponentType> = {
   'module.services': ServicesModule,
   'module.monitor': ProcessesModule,
-  'module.procexp': ProcessesModule,
+  'module.procexp': ProcExplorerModule,
   'module.envvars': EnvVarsModule,
   'module.connections': ConnectionsModule,
   'module.drives': DrivesModule,
