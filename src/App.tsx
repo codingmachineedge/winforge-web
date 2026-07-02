@@ -40,7 +40,12 @@ export function App() {
             sectionId={effectiveView.sectionId}
             query={query}
             lang={lang}
-            onOpen={(tag) => setView({ kind: 'module', tag })}
+            onOpen={(tag) => {
+              // Clear the search so effectiveView stops forcing the catalog and the
+              // module detail actually shows (fixes: clicking a search result did nothing).
+              setQuery('');
+              setView({ kind: 'module', tag });
+            }}
           />
         )}
         {effectiveView.kind === 'module' && (

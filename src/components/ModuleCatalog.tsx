@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { catalog, allModules, type CatalogModule, type CatalogSection } from '../data/catalog';
+import { nonEmptySections } from '../data/catalogHelpers';
 import { pick } from '../i18n';
 import { ModuleCard } from './ModuleCard';
 
@@ -39,7 +40,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
   }, [q, filter]);
 
   const sections: CatalogSection[] = useMemo(
-    () => (sectionId ? catalog.filter((s) => s.id === sectionId) : catalog),
+    () => (sectionId ? catalog.filter((s) => s.id === sectionId) : nonEmptySections(catalog)),
     [sectionId],
   );
 

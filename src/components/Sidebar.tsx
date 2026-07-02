@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { catalog, moduleCount } from '../data/catalog';
+import { sectionCount, nonEmptySections } from '../data/catalogHelpers';
 import { LANGS, setLang, pick, type LangCode } from '../i18n';
 import type { View } from '../types';
 
@@ -53,13 +54,8 @@ export function Sidebar({ view, query, lang, onQuery, onNavigate }: Props) {
         </button>
 
         <div className="nav-header">{t('nav.sections')}</div>
-        {catalog.map((s) => {
-          const count =
-            s.directModules.length +
-            s.groups.reduce(
-              (n, g) => n + g.modules.length + (g.subgroups?.reduce((k, sg) => k + sg.modules.length, 0) ?? 0),
-              0,
-            );
+        {nonEmptySections(catalog).map((s) => {
+          const count = sectionCount(s);
           return (
             <button
               key={s.id}
