@@ -19,6 +19,7 @@ import { ColorToolsModule } from './ColorToolsModule';
 import { TextToolsModule } from './TextToolsModule';
 import { EncoderModule } from './EncoderModule';
 import { RegexTesterModule } from './RegexTesterModule';
+import { PassGenModule } from './PassGenModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -46,6 +47,8 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.texttools': TextToolsModule,
   'module.encoder': EncoderModule,
   'module.regextester': RegexTesterModule,
+  'module.diceware': PassGenModule,
+  'module.passgen': PassGenModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
