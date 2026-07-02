@@ -1112,6 +1112,18 @@ body {
   margin-bottom: 4px;
 }
 
+/* ---- Unit converter ---- */
+.uc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.uc-eq {
+  font-size: 18px;
+  color: var(--text-tertiary);
+}
+
 /* ---- Dependency gate ---- */
 .dep-gate {
   border: 1px dashed color-mix(in srgb, var(--native) 50%, var(--stroke));
