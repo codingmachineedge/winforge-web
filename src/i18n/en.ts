@@ -190,6 +190,18 @@ export const en = {
     problemsOnly: 'Problems only',
     count: '{{count}} devices',
   },
+  flat: {
+    separator: 'Separator',
+    flatten: 'Flatten',
+    unflatten: 'Unflatten',
+    copy: 'Copy',
+    flattened: 'Flattened to dot-path keys.',
+    unflattened: 'Rebuilt the nested structure.',
+    nothing: 'Nothing to copy yet.',
+    copied: 'Copied to clipboard.',
+    inputPlaceholder: 'Paste JSON to flatten (or flat JSON to unflatten)…',
+    outputPlaceholder: 'Result…',
+  },
   percent: {
     ofY: 'X% of Y',
     whatPct: 'X is what % of Y',

@@ -189,6 +189,18 @@ export const zhHant: Resources = {
     problemsOnly: '只顯示有問題',
     count: '{{count}} 個裝置',
   },
+  flat: {
+    separator: '分隔符',
+    flatten: '扁平化',
+    unflatten: '還原',
+    copy: '複製',
+    flattened: '已扁平化成點路徑鍵。',
+    unflattened: '已還原巢狀結構。',
+    nothing: '暫時無嘢可以複製。',
+    copied: '已複製到剪貼簿。',
+    inputPlaceholder: '貼上要扁平化嘅 JSON（或要還原嘅扁平 JSON）…',
+    outputPlaceholder: '結果…',
+  },
   percent: {
     ofY: 'Y 嘅 X%',
     whatPct: 'X 係 Y 嘅百分之幾',
