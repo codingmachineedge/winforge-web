@@ -26,6 +26,11 @@ export const en = {
     filterWeb: 'Web-capable',
     filterNative: 'Native-only',
   },
+  status: {
+    working: 'Working',
+    partial: 'Partial',
+    stub: 'Stub',
+  },
   detail: {
     back: 'Back to catalog',
     tag: 'Page tag',

@@ -315,6 +315,31 @@ body {
   background: color-mix(in srgb, var(--web) 20%, transparent);
   color: var(--web);
 }
+.card-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.status-pill {
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.status-pill.working {
+  background: color-mix(in srgb, var(--web) 26%, transparent);
+  color: var(--web);
+}
+.status-pill.partial {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  color: var(--accent);
+}
+.status-pill.stub {
+  background: color-mix(in srgb, var(--text-tertiary) 22%, transparent);
+  color: var(--text-tertiary);
+}
 
 /* ---- Detail ---- */
 .detail {

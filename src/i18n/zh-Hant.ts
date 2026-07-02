@@ -28,6 +28,11 @@ export const zhHant: Resources = {
     filterWeb: '可上網頁',
     filterNative: '僅限原生',
   },
+  status: {
+    working: '可用',
+    partial: '部分',
+    stub: '待做',
+  },
   detail: {
     back: '返回目錄',
     tag: '頁面標籤',
