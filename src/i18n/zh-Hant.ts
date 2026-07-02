@@ -189,6 +189,10 @@ export const zhHant: Resources = {
     problemsOnly: '只顯示有問題',
     count: '{{count}} 個裝置',
   },
+  markdown: {
+    copyHtml: '複製 HTML',
+    ready: '已就緒 — 打字時預覽即時更新。',
+  },
   diff: {
     aLabel: 'A（原本）',
     bLabel: 'B（改咗）',

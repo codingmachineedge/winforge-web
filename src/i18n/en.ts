@@ -190,6 +190,10 @@ export const en = {
     problemsOnly: 'Problems only',
     count: '{{count}} devices',
   },
+  markdown: {
+    copyHtml: 'Copy HTML',
+    ready: 'Ready — preview updates as you type.',
+  },
   diff: {
     aLabel: 'A (original)',
     bLabel: 'B (changed)',

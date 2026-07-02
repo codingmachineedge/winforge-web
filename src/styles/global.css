@@ -1152,6 +1152,52 @@ body {
   color: var(--text-secondary);
 }
 
+/* ---- Markdown preview ---- */
+.md-preview {
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  padding: 4px 18px;
+  min-height: 360px;
+  overflow: auto;
+  background: var(--bg-elevated);
+}
+.md-preview h1,
+.md-preview h2,
+.md-preview h3 {
+  border-bottom: 1px solid var(--stroke-subtle);
+  padding-bottom: 4px;
+}
+.md-preview code {
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  font-size: 12.5px;
+}
+.md-preview pre {
+  background: #0e0e11;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  overflow: auto;
+}
+.md-preview pre code {
+  background: none;
+  padding: 0;
+  color: #d6d6de;
+}
+.md-preview blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 8px 0;
+  padding: 2px 12px;
+  color: var(--text-secondary);
+}
+.md-preview a {
+  color: var(--accent);
+}
+.md-preview img {
+  border-radius: var(--radius);
+}
+
 /* ---- Dependency gate ---- */
 .dep-gate {
   border: 1px dashed color-mix(in srgb, var(--native) 50%, var(--stroke));
