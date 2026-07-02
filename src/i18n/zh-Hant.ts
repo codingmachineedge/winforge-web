@@ -41,6 +41,10 @@ export const zhHant: Resources = {
     webBody:
       '此模組屬純用戶端運算，適合完整移植至網頁。網頁版本計劃提供可運作嘅實作。',
     openReactor: '開啟反應堆模擬器',
+    backendTitle: '即時後端操作',
+    backendBody: '正喺桌面應用程式運行 — 此模組可透過 Rust 後端查詢即時系統狀態。唯讀。',
+    backendBrowser: '喺桌面（Tauri）版本中，此模組會執行即時後端操作：{{label}}。',
+    running: '執行中…',
   },
   reactor: {
     title: 'PWR 壓水式反應堆模擬器',

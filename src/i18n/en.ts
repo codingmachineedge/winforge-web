@@ -39,6 +39,11 @@ export const en = {
     webBody:
       'This module is pure client-side computation and is a candidate for a full web port. A working implementation is planned for the web build.',
     openReactor: 'Open the reactor simulator',
+    backendTitle: 'Live backend action',
+    backendBody:
+      'Running in the desktop app — this module can query the live system through the Rust backend. Read-only.',
+    backendBrowser: 'In the desktop (Tauri) build this runs a live backend action: {{label}}.',
+    running: 'Running…',
   },
   reactor: {
     title: 'PWR Reactor Simulator',

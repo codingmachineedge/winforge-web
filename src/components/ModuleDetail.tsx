@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { catalog, type CatalogModule } from '../data/catalog';
 import { pick } from '../i18n';
+import { isTauri } from '../tauri/bridge';
+import { actionFor } from '../tauri/nativeActions';
 
 interface Props {
   module: CatalogModule | null;
@@ -97,6 +99,53 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
           <dd style={{ color: 'var(--text-tertiary)', fontSize: 12.5 }}>{module.keywords || '—'}</dd>
         </dl>
       </div>
+
+      <NativeActionPanel tag={module.tag} lang={lang} />
+    </div>
+  );
+}
+
+function NativeActionPanel({ tag, lang }: { tag: string; lang: string }) {
+  const { t } = useTranslation();
+  const action = actionFor(tag);
+  const [output, setOutput] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!action) return null;
+
+  const label = pick(action.labelEn, action.labelZh, lang);
+  const inDesktop = isTauri();
+
+  const run = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      setOutput(await action.run());
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="panel web">
+      <h3>⚡ {t('detail.backendTitle')}</h3>
+      {inDesktop ? (
+        <>
+          <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>{t('detail.backendBody')}</p>
+          <button className="btn" onClick={run} disabled={busy}>
+            {busy ? t('detail.running') : `▶ ${label}`}
+          </button>
+          {error && <pre className="cmd-out error">{error}</pre>}
+          {output !== null && <pre className="cmd-out">{output}</pre>}
+        </>
+      ) : (
+        <p style={{ margin: 0, color: 'var(--text-tertiary)' }}>
+          {t('detail.backendBrowser', { label })}
+        </p>
+      )}
     </div>
   );
 }
