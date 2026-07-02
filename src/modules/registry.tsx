@@ -35,6 +35,7 @@ import { HtmlEntitiesModule } from './HtmlEntitiesModule';
 import { AspectRatioModule } from './AspectRatioModule';
 import { ImgBase64Module } from './ImgBase64Module';
 import { LoremTextModule } from './LoremTextModule';
+import { PercentCalcModule } from './PercentCalcModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -83,6 +84,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.aspectratio': AspectRatioModule,
   'module.imgbase64': ImgBase64Module,
   'module.loremtext': LoremTextModule,
+  'module.percentcalc': PercentCalcModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

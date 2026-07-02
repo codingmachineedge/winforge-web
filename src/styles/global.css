@@ -1123,6 +1123,11 @@ body {
   font-size: 18px;
   color: var(--text-tertiary);
 }
+.pc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
 .lc-field {
   display: flex;
   flex-direction: column;
