@@ -20,3 +20,7 @@ pnpm-debug.log*
 src-tauri/target
 src-tauri/gen/schemas
 app-icon.png
+
+# Portable build output + download cache
+dist-portable
+tools/.cache

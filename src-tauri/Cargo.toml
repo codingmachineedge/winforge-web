@@ -29,5 +29,8 @@ default = []
 panic = "abort"
 codegen-units = 1
 lto = true
-opt-level = "s"
+opt-level = "z"
 strip = true
+# trim binary further: abort on panic (no unwinding tables), tiny alloc error handler
+overflow-checks = false
+incremental = false

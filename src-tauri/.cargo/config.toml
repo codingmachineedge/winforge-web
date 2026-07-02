@@ -1,0 +1,4 @@
+# Statically link the MSVC C runtime so the app does not depend on the VC++
+# redistributable being installed — required for the portable / clean-machine build.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

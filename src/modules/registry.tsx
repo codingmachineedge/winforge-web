@@ -6,6 +6,8 @@ import { ConnectionsModule } from './ConnectionsModule';
 import { DrivesModule } from './DrivesModule';
 import { HostsModule } from './HostsModule';
 import { PackagesModule } from './PackagesModule';
+import { NmapModule } from './NmapModule';
+import { GitModule } from './GitModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -21,6 +23,8 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.drives': DrivesModule,
   'module.hosts': HostsModule,
   'module.packages': PackagesModule,
+  'module.nmap': NmapModule,
+  'module.git': GitModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

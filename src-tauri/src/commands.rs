@@ -122,3 +122,60 @@ pub fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
 pub fn get_env(name: String) -> String {
     std::env::var(&name).unwrap_or_default()
 }
+
+use tauri::Manager;
+
+#[derive(Serialize)]
+pub struct ToolResolution {
+    pub name: String,
+    /// Full path if found, else null.
+    pub path: Option<String>,
+    /// "bundled" (shipped in resources/bin), "path" (found on PATH), or "missing".
+    pub source: String,
+}
+
+fn on_path(name: &str) -> Option<String> {
+    let mut cmd = Command::new("where");
+    cmd.arg(name);
+    #[cfg(windows)]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+    let out = cmd.output().ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    let s = String::from_utf8_lossy(&out.stdout);
+    s.lines().next().map(|l| l.trim().to_string()).filter(|l| !l.is_empty())
+}
+
+/// Resolve a CLI tool: bundled `resources/bin/<name>.exe` first, then PATH.
+/// This is what lets modules use a vendored copy before asking to install anything.
+#[tauri::command]
+pub fn resolve_tool(app: tauri::AppHandle, name: String) -> ToolResolution {
+    if let Ok(res_dir) = app.path().resource_dir() {
+        for cand in [
+            res_dir.join("bin").join(format!("{name}.exe")),
+            res_dir.join("bin").join(&name),
+        ] {
+            if cand.exists() {
+                return ToolResolution {
+                    name,
+                    path: Some(cand.display().to_string()),
+                    source: "bundled".into(),
+                };
+            }
+        }
+    }
+    if let Some(p) = on_path(&name) {
+        return ToolResolution { name, path: Some(p), source: "path".into() };
+    }
+    ToolResolution { name, path: None, source: "missing".into() }
+}
+
+/// Absolute path of the bundled `resources/bin` directory (may not exist in dev).
+#[tauri::command]
+pub fn resource_bin_dir(app: tauri::AppHandle) -> Option<String> {
+    app.path()
+        .resource_dir()
+        .ok()
+        .map(|d| d.join("bin").display().to_string())
+}

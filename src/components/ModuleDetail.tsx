@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { catalog, type CatalogModule } from '../data/catalog';
-import { pick } from '../i18n';
+import { pick, sub } from '../i18n';
 import { isTauri } from '../tauri/bridge';
 import { actionFor } from '../tauri/nativeActions';
 import { realModuleFor } from '../modules/registry';
@@ -52,7 +52,7 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
 
   const isReactor = module.tag === 'module.reactor';
   const title = pick(module.en, module.zh, lang);
-  const sub = lang.startsWith('zh') ? module.en : module.zh;
+  const subtitle = sub(module.en, module.zh, lang);
   const RealModule = realModuleFor(module.tag);
   const inDesktop = isTauri();
 
@@ -66,7 +66,7 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
         <span className="detail-icon glyph">{module.glyph || '▢'}</span>
         <div>
           <h1>{title}</h1>
-          {sub && sub !== title && <div className="zh">{sub}</div>}
+          {subtitle && subtitle !== title && <div className="zh">{subtitle}</div>}
         </div>
       </div>
 

@@ -12,6 +12,8 @@ pub fn run() {
             commands::system_info,
             commands::list_dir,
             commands::get_env,
+            commands::resolve_tool,
+            commands::resource_bin_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running WinForge Web");

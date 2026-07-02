@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { CatalogModule } from '../data/catalog';
-import { pick } from '../i18n';
+import { pick, sub } from '../i18n';
 
 interface Props {
   module: CatalogModule;
@@ -11,14 +11,14 @@ interface Props {
 export function ModuleCard({ module, lang, onOpen }: Props) {
   const { t } = useTranslation();
   const title = pick(module.en, module.zh, lang);
-  const sub = lang.startsWith('zh') ? module.en : module.zh;
+  const subtitle = sub(module.en, module.zh, lang);
   return (
     <button className="card" onClick={() => onOpen(module.tag)}>
       <div className="card-top">
         <span className="card-icon glyph">{module.glyph || '▢'}</span>
         <span>
           <div className="card-title">{title}</div>
-          {sub && sub !== title && <div className="card-sub">{sub}</div>}
+          {subtitle && subtitle !== title && <div className="card-sub">{subtitle}</div>}
         </span>
       </div>
       <span className={`tag-pill ${module.native ? 'native' : 'web'}`}>

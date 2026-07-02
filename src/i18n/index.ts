@@ -3,22 +3,52 @@ import { initReactI18next } from 'react-i18next';
 import { en } from './en';
 import { zhHant } from './zh-Hant';
 
+// Three language modes:
+//   en        — English only
+//   yue       — Cantonese (粵語), written in Traditional Chinese (WinForge wording)
+//   bilingual — English and Cantonese shown together (auto-merged from en + yue)
 export const LANGS = [
-  { code: 'en', label: 'English' },
-  { code: 'zh-Hant', label: '繁體中文' },
+  { code: 'en', label: 'EN' },
+  { code: 'yue', label: '粵語' },
+  { code: 'bilingual', label: 'EN+粵' },
 ] as const;
 
 export type LangCode = (typeof LANGS)[number]['code'];
 
 const STORAGE_KEY = 'winforge-web.lang';
+const PAIR = ' · ';
+
+/** Build the bilingual bundle: every leaf string becomes "English · 粵語". */
+type Tree = { [k: string]: string | Tree };
+function mergeBilingual(enT: Tree, yueT: Tree): Tree {
+  const out: Tree = {};
+  for (const k of Object.keys(enT)) {
+    const ev = enT[k];
+    const yv = yueT?.[k];
+    if (typeof ev === 'string') {
+      out[k] = typeof yv === 'string' && yv && yv !== ev ? `${ev}${PAIR}${yv}` : ev;
+    } else {
+      out[k] = mergeBilingual(ev as Tree, (yv as Tree) ?? {});
+    }
+  }
+  return out;
+}
+
+const bilingual = mergeBilingual(en as unknown as Tree, zhHant as unknown as Tree);
+
+function migrate(code: string | null): LangCode | null {
+  if (code === 'en' || code === 'yue' || code === 'bilingual') return code;
+  if (code === 'zh-Hant' || code === 'zh') return 'yue'; // migrate old two-mode setting
+  return null;
+}
 
 function initialLang(): LangCode {
   if (typeof localStorage !== 'undefined') {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'en' || saved === 'zh-Hant') return saved;
+    const saved = migrate(localStorage.getItem(STORAGE_KEY));
+    if (saved) return saved;
   }
   if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('zh')) {
-    return 'zh-Hant';
+    return 'yue';
   }
   return 'en';
 }
@@ -26,7 +56,8 @@ function initialLang(): LangCode {
 void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
-    'zh-Hant': { translation: zhHant },
+    yue: { translation: zhHant },
+    bilingual: { translation: bilingual as Record<string, unknown> },
   },
   lng: initialLang(),
   fallbackLng: 'en',
@@ -37,13 +68,25 @@ export function setLang(code: LangCode): void {
   void i18n.changeLanguage(code);
   if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, code);
   if (typeof document !== 'undefined') {
-    document.documentElement.lang = code === 'zh-Hant' ? 'zh-Hant' : 'en';
+    document.documentElement.lang = code === 'en' ? 'en' : 'zh-HK';
   }
 }
 
-/** Pick the correct bilingual field from a catalog entry for the active language. */
-export function pick(en: string, zh: string, lang: string): string {
-  return lang.startsWith('zh') ? zh || en : en;
+/** Pick a bilingual catalog field for the active mode. */
+export function pick(enText: string, yueText: string, lang: string): string {
+  if (lang === 'yue') return yueText || enText;
+  if (lang === 'bilingual') return yueText && yueText !== enText ? `${enText}${PAIR}${yueText}` : enText;
+  return enText; // 'en' (and any fallback)
+}
+
+/**
+ * The secondary line under a title. In single-language modes it shows the *other*
+ * language; in bilingual mode the title already carries both, so there is none.
+ */
+export function sub(enText: string, yueText: string, lang: string): string {
+  if (lang === 'bilingual') return '';
+  if (lang === 'yue') return enText;
+  return yueText;
 }
 
 export default i18n;
