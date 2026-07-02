@@ -24,6 +24,7 @@ import { HasherModule } from './HasherModule';
 import { EpochModule } from './EpochModule';
 import { JwtModule } from './JwtModule';
 import { IdGenModule } from './IdGenModule';
+import { CsvJsonModule } from './CsvJsonModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -60,6 +61,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.uuidv7': IdGenModule,
   'module.ulid': IdGenModule,
   'module.shortid': IdGenModule,
+  'module.csvjson': CsvJsonModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
