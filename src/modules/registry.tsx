@@ -26,6 +26,7 @@ import { JwtModule } from './JwtModule';
 import { IdGenModule } from './IdGenModule';
 import { CsvJsonModule } from './CsvJsonModule';
 import { UnitConvertModule } from './UnitConvertModule';
+import { CronModule } from './CronModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -64,6 +65,8 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.shortid': IdGenModule,
   'module.csvjson': CsvJsonModule,
   'module.unitconvert': UnitConvertModule,
+  'module.cronnext': CronModule,
+  'module.cronbuilder': CronModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
