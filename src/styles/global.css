@@ -458,6 +458,220 @@ body {
   border-color: color-mix(in srgb, var(--danger) 50%, var(--stroke));
 }
 
+/* ---- Live modules ---- */
+.panel.live {
+  border-color: color-mix(in srgb, var(--web) 45%, var(--stroke-subtle));
+}
+.panel.live > h3 {
+  color: var(--web);
+}
+.mod {
+  margin-top: 4px;
+}
+.mod-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.mod-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mod-search,
+.mod-select {
+  padding: 7px 11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.mod-search {
+  flex: 1;
+  min-width: 140px;
+}
+.mod-search:focus,
+.mod-select:focus {
+  border-color: var(--accent);
+}
+.mod-msg {
+  font-size: 12.5px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--stroke-subtle));
+  border-radius: var(--radius);
+  padding: 7px 11px;
+  margin: 0 0 12px;
+  word-break: break-word;
+}
+.mini {
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.mini:hover:not(:disabled) {
+  background: var(--bg-card-hover);
+  color: var(--text);
+  border-color: var(--accent);
+}
+.mini:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.mini.primary {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #fff;
+}
+.mini.danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.row-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* ---- Data table ---- */
+.dt-wrap {
+  overflow: auto;
+  max-height: 560px;
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+}
+.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.dt thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-elevated);
+  text-align: left;
+  padding: 9px 12px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  border-bottom: 1px solid var(--stroke);
+  white-space: nowrap;
+  z-index: 1;
+}
+.dt tbody td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--stroke-subtle);
+  color: var(--text);
+  vertical-align: middle;
+}
+.dt tbody tr:hover td {
+  background: var(--bg-card-hover);
+}
+.dt code {
+  font-size: 12px;
+}
+.env-val {
+  font-family: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.status-dot .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+.status-dot.on .dot {
+  background: var(--web);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--web) 70%, transparent);
+}
+.status-dot.off .dot {
+  background: var(--text-tertiary);
+}
+
+/* ---- Drives ---- */
+.drive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.drive-card {
+  border: 1px solid var(--stroke-subtle);
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.drive-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.drive-letter {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.drive-label {
+  font-weight: 600;
+}
+.drive-fs {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.usage-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+.usage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+}
+.usage-fill.hot {
+  background: linear-gradient(90deg, #d35400, var(--danger));
+}
+.drive-stats {
+  margin-top: 8px;
+}
+
+/* ---- Hosts editor ---- */
+.hosts-edit {
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
+  background: #0e0e11;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  color: #d6d6de;
+  font-family: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 12px 14px;
+  outline: none;
+}
+.hosts-edit:focus {
+  border-color: var(--accent);
+}
+
 @media (max-width: 760px) {
   .shell {
     grid-template-columns: 1fr;

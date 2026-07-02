@@ -39,6 +39,23 @@ export function runPowershell(script: string): Promise<CommandOutput> {
   return invoke<CommandOutput>('run_powershell', { script });
 }
 
+/**
+ * Run PowerShell that emits an object/array, piped to `ConvertTo-Json`, and parse it.
+ * Always returns an array (PowerShell collapses single-item arrays, so we re-wrap).
+ * Throws with stderr on non-zero exit.
+ */
+export async function runPowershellJson<T = unknown>(script: string): Promise<T[]> {
+  const wrapped = `$ErrorActionPreference='Stop'; $out = @(${script}); $out | ConvertTo-Json -Depth 5 -Compress`;
+  const res = await runPowershell(wrapped);
+  if (!res.success && !res.stdout.trim()) {
+    throw new Error(res.stderr.trim() || `exit ${res.code}`);
+  }
+  const text = res.stdout.trim();
+  if (!text) return [];
+  const parsed = JSON.parse(text);
+  return Array.isArray(parsed) ? parsed : [parsed];
+}
+
 export function systemInfo(): Promise<SysInfo> {
   return invoke<SysInfo>('system_info');
 }

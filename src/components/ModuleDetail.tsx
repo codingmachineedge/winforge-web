@@ -4,6 +4,7 @@ import { catalog, type CatalogModule } from '../data/catalog';
 import { pick } from '../i18n';
 import { isTauri } from '../tauri/bridge';
 import { actionFor } from '../tauri/nativeActions';
+import { realModuleFor } from '../modules/registry';
 
 interface Props {
   module: CatalogModule | null;
@@ -52,6 +53,8 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
   const isReactor = module.tag === 'module.reactor';
   const title = pick(module.en, module.zh, lang);
   const sub = lang.startsWith('zh') ? module.en : module.zh;
+  const RealModule = realModuleFor(module.tag);
+  const inDesktop = isTauri();
 
   return (
     <div className="detail">
@@ -67,19 +70,31 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
         </div>
       </div>
 
-      <div className={`panel ${module.native ? 'native' : 'web'}`}>
-        <h3>{module.native ? t('detail.nativeTitle') : t('detail.webTitle')}</h3>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-          {module.native ? t('detail.nativeBody') : t('detail.webBody')}
-        </p>
-        {isReactor && (
-          <p style={{ marginBottom: 0 }}>
-            <button className="btn" onClick={onOpenReactor}>
-              ★ {t('detail.openReactor')}
-            </button>
+      {RealModule && inDesktop ? (
+        <div className="panel live">
+          <h3>● {t('detail.liveTitle')}</h3>
+          <RealModule />
+        </div>
+      ) : RealModule && !inDesktop ? (
+        <div className="panel native">
+          <h3>{t('detail.liveTitle')}</h3>
+          <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{t('detail.liveBrowser')}</p>
+        </div>
+      ) : (
+        <div className={`panel ${module.native ? 'native' : 'web'}`}>
+          <h3>{module.native ? t('detail.nativeTitle') : t('detail.webTitle')}</h3>
+          <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+            {module.native ? t('detail.nativeBody') : t('detail.webBody')}
           </p>
-        )}
-      </div>
+          {isReactor && (
+            <p style={{ marginBottom: 0 }}>
+              <button className="btn" onClick={onOpenReactor}>
+                ★ {t('detail.openReactor')}
+              </button>
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="panel">
         <dl className="kv">
@@ -100,7 +115,7 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
         </dl>
       </div>
 
-      <NativeActionPanel tag={module.tag} lang={lang} />
+      {!RealModule && <NativeActionPanel tag={module.tag} lang={lang} />}
     </div>
   );
 }
