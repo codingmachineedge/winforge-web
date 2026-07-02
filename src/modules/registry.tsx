@@ -29,6 +29,7 @@ import { UnitConvertModule } from './UnitConvertModule';
 import { CronModule } from './CronModule';
 import { TextDiffModule } from './TextDiffModule';
 import { MarkdownModule } from './MarkdownModule';
+import { DurationCalcModule } from './DurationCalcModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -71,6 +72,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.cronbuilder': CronModule,
   'module.textdiff': TextDiffModule,
   'module.markdown': MarkdownModule,
+  'module.durationcalc': DurationCalcModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

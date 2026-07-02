@@ -189,6 +189,15 @@ export const zhHant: Resources = {
     problemsOnly: '只顯示有問題',
     count: '{{count}} 個裝置',
   },
+  duration: {
+    addSub: '兩個時長相加或相減',
+    sum: '加總一列時長（每行一個）',
+    convert: '換算一個時長',
+    scale: '時長乘或除',
+    copy: '複製',
+    enter: '輸入一個時長（例如 1:30:00、90m、2.5h、1d 2h）。',
+    divZero: '唔可以除以零。',
+  },
   markdown: {
     copyHtml: '複製 HTML',
     ready: '已就緒 — 打字時預覽即時更新。',

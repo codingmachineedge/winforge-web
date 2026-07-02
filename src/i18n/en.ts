@@ -190,6 +190,15 @@ export const en = {
     problemsOnly: 'Problems only',
     count: '{{count}} devices',
   },
+  duration: {
+    addSub: 'Add or subtract two durations',
+    sum: 'Sum a list of durations (one per line)',
+    convert: 'Convert a duration',
+    scale: 'Multiply or divide a duration',
+    copy: 'Copy',
+    enter: 'Enter a duration (e.g. 1:30:00, 90m, 2.5h, 1d 2h).',
+    divZero: 'Cannot divide by zero.',
+  },
   markdown: {
     copyHtml: 'Copy HTML',
     ready: 'Ready — preview updates as you type.',
