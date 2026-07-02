@@ -14,6 +14,7 @@ import { ScheduledTasksModule } from './ScheduledTasksModule';
 import { EventsModule } from './EventsModule';
 import { DevicesModule } from './DevicesModule';
 import { SysInfoModule } from './SysInfoModule';
+import { JsonToolsModule } from './JsonToolsModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -36,6 +37,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.events': EventsModule,
   'module.devices': DevicesModule,
   'module.winfetch': SysInfoModule,
+  'module.jsontools': JsonToolsModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

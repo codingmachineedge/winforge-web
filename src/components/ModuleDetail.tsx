@@ -70,7 +70,7 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
         </div>
       </div>
 
-      {RealModule && inDesktop ? (
+      {RealModule && (inDesktop || !module.native) ? (
         <div className="panel live">
           <h3>● {t('detail.liveTitle')}</h3>
           <RealModule />

@@ -1004,6 +1004,30 @@ body {
 .hosts-edit:focus {
   border-color: var(--accent);
 }
+.io-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.io-grid .hosts-edit {
+  min-height: 300px;
+}
+@media (max-width: 720px) {
+  .io-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.chk input {
+  accent-color: var(--accent);
+}
 
 /* ---- Dependency gate ---- */
 .dep-gate {
