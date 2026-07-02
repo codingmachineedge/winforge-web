@@ -1,0 +1,28 @@
+{
+  "name": "winforge-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Web (React + TypeScript / Vite) rewrite of WinForge — module catalog browser + PWR reactor simulator, bilingual EN / 繁體中文.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "gen:catalog": "node tools/gen-catalog.mjs"
+  },
+  "dependencies": {
+    "i18next": "^23.16.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.1.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
