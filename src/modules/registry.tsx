@@ -21,6 +21,7 @@ import { EncoderModule } from './EncoderModule';
 import { RegexTesterModule } from './RegexTesterModule';
 import { PassGenModule } from './PassGenModule';
 import { HasherModule } from './HasherModule';
+import { EpochModule } from './EpochModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -51,6 +52,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.diceware': PassGenModule,
   'module.passgen': PassGenModule,
   'module.hasher': HasherModule,
+  'module.epoch': EpochModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
