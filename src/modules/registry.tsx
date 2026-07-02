@@ -18,6 +18,7 @@ import { JsonToolsModule } from './JsonToolsModule';
 import { ColorToolsModule } from './ColorToolsModule';
 import { TextToolsModule } from './TextToolsModule';
 import { EncoderModule } from './EncoderModule';
+import { RegexTesterModule } from './RegexTesterModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -44,6 +45,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.colortools': ColorToolsModule,
   'module.texttools': TextToolsModule,
   'module.encoder': EncoderModule,
+  'module.regextester': RegexTesterModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

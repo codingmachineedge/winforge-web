@@ -1100,6 +1100,18 @@ body {
   flex-wrap: wrap;
 }
 
+/* ---- Regex tester ---- */
+.rx-pattern {
+  font-family: 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  font-size: 13px;
+}
+.rx-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
 /* ---- Dependency gate ---- */
 .dep-gate {
   border: 1px dashed color-mix(in srgb, var(--native) 50%, var(--stroke));
