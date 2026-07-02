@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Sidebar } from './components/Sidebar';
 import { ModuleCatalog } from './components/ModuleCatalog';
 import { ModuleDetail } from './components/ModuleDetail';
-import { ReactorStub } from './components/ReactorStub';
+import { ReactorView } from './components/ReactorView';
 import { About } from './components/About';
 import { allModules } from './data/catalog';
 import type { View } from './types';
@@ -56,7 +56,7 @@ export function App() {
             onOpenReactor={() => setView({ kind: 'reactor' })}
           />
         )}
-        {effectiveView.kind === 'reactor' && <ReactorStub />}
+        {effectiveView.kind === 'reactor' && <ReactorView />}
         {effectiveView.kind === 'about' && <About />}
       </main>
     </div>

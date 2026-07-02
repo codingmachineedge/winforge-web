@@ -92,6 +92,7 @@ const ColdTemp = 35.0; // °C cold shutdown coolant temp
 const NominalTavg = 305.0; // °C
 const NominalPressure = 15.5; // MPa primary pressure
 const NominalPzrLevel = 55.0; // % pressurizer level
+const NominalSteamPressure = 6.9; // MPa secondary (no-load program header pressure, Tsat ≈ 285 °C)
 
 // Easy-startup beginner assist.
 const EasyStartupAssistPcm = 500.0; // +0.005 dk/k
@@ -104,7 +105,7 @@ export const FuelDamageTemp = 1200.0; // °C — clad/fuel damage onset (sustain
 export const VesselPressureLimit = 17.2; // MPa
 export const VesselBurstPressure = 19.0; // MPa
 const HighPowerTrip = 1.18; // fraction (118 %)
-const ShortPeriodTrip = 10.0; // s — trip on period shorter than this
+const ShortPeriodTrip = 3.0; // s — trip on a genuinely fast positive period (startup-rate protection)
 const LowFlowTrip = 0.85; // fraction of nominal flow
 const HighThotTrip = 345.0; // °C
 const MeltdownDamageThreshold = 100.0; // accumulated damage → meltdown
@@ -199,6 +200,9 @@ export interface ReactorState {
   coolantFlowFraction: number;
   boronPpm: number;
   targetBoronPpm: number;
+  rcpFlowDemand: number;
+  feedwaterFlow: number;
+  easyStartupMode: boolean;
   rodBankInsertion: number[]; // % inserted per bank (A,B,C,D)
   decayHeatFraction: number;
   xenon: number;
@@ -222,7 +226,7 @@ export class ReactorSim {
   private _precursor = new Float64Array(6);
   private _powerRate = 0;
   reactorPeriodSeconds = 1e9;
-  reactivityPcm = 0;
+  reactivityPcm = -9000; // cold shutdown is deeply subcritical (all rods in)
   sourceLevel = 1e-8; // neutron source (keeps subcritical core alive)
 
   // reactivity breakdown (pcm)
@@ -378,6 +382,33 @@ export class ReactorSim {
   }
   rcpFlowDemand = 0.0; // 0..1 commanded pump flow
 
+  /**
+   * 求臨界硼濃度 · Solve the soluble-boron concentration (ppm) that makes net reactivity zero at the
+   * CURRENT fuel/coolant/poison/rod state, by inverting the concave DBW integral (bisection — the
+   * integral is monotone in C). Used to seed a genuinely critical warm start with no settling swing.
+   */
+  private solveCriticalBoron(): number {
+    const rodRho = -TotalRodWorth * this.sumRodWorthFrac();
+    const dopplerRho = DopplerCoeff * (this.fuelTemp - RefFuelTemp);
+    const effMtc = ModTempCoeff + MtcEolSlope * this.cycleFraction;
+    const modRho = effMtc * (this.tavg - RefModTemp);
+    const xenonRho = XenonWorthFull * this.xenon;
+    const samariumRho = SamariumWorthFull * this._sm;
+    const excessBaseline = -BoronRhoTotal(NominalBoron);
+    const burnupDefectRho = BoronRhoTotal(NominalBoron) - BoronRhoTotal(this.criticalBoronPpm);
+    const fixed = excessBaseline + rodRho + dopplerRho + modRho + xenonRho + samariumRho + burnupDefectRho;
+    const targetBoronRho = -fixed; // need BoronRhoTotal(C) == targetBoronRho
+    // BoronRhoTotal is decreasing in C; bisect on [0, 3000].
+    let lo = 0;
+    let hi = 3000;
+    for (let it = 0; it < 60; it++) {
+      const mid = 0.5 * (lo + hi);
+      if (BoronRhoTotal(mid) > targetBoronRho) lo = mid;
+      else hi = mid;
+    }
+    return clamp(0.5 * (lo + hi), 0, 3000);
+  }
+
   private sumRodWorthFrac(): number {
     let s = 0.0;
     for (let b = 0; b < this.rodBankInsertion.length; b++)
@@ -416,7 +447,7 @@ export class ReactorSim {
     for (let i = 0; i < 6; i++)
       this._precursor[i] = ((this.betaCycleFactor * Beta[i]!) / (PromptLifetime * Lambda[i]!)) * this._power;
     this.reactorPeriodSeconds = 1e9;
-    this.reactivityPcm = 0;
+    this.reactivityPcm = -9000;
     this._powerRate = 0;
     this.fuelTemp = ColdTemp;
     this.tcold = ColdTemp;
@@ -466,23 +497,35 @@ export class ReactorSim {
     this.samariumReactivityPcm = 0;
   }
 
-  /** Force the core to an equilibrium hot-full-power condition (for a "restart at power" demo). */
-  seedHotFullPower(): void {
-    this._power = 1.0;
+  /**
+   * 熱態臨界暖啟動 · Warm-start the core to a hot, near-critical steady state (a "restart from
+   * a warm shutdown" demo preset). Note: this toy model's fuel→coolant removal (0.06·ΔT, ported
+   * verbatim from the C# engine) is prompt-Doppler-limited, so the SUSTAINABLE neutron power sits
+   * a few percent of rated with fuel centerline near the 600 °C Doppler datum — the engine has no
+   * true full-power plateau (see the C# headless-test note). The core relaxes to its own critical
+   * equilibrium within a few seconds of the first update().
+   */
+  warmStartCritical(): void {
+    // Seed the genuine hot-critical fixed point so it holds without a settling transient: fuel at the
+    // 600 °C Doppler datum (ρ_Doppler = 0), Tavg at the 305 °C reference (ρ_MTC = 0), rods fully out,
+    // no fission-product poisons, boron at the cycle's critical concentration ⇒ ρ_net ≈ 0. Power is the
+    // level whose fuel→coolant removal (0.06·ΔT) balances the fission + decay heat at fuel = 600 °C.
+    this._power = 0.0049;
     this.fuelTemp = 600.0;
-    this.tcold = NominalTavg - 15;
-    this.thot = NominalTavg + 15;
+    this.tcold = NominalTavg - 0.1;
+    this.thot = NominalTavg + 0.1;
     this.primaryPressure = NominalPressure;
     this._tpzr = satTempAt(NominalPressure);
-    this.xenon = 1.0;
-    this.iodine = 1.0;
-    this._sm = 1.0;
-    this._pm = 1.0;
-    this.decayHeatFraction = 0.065;
+    this._prevLevel = NominalPzrLevel;
+    this.pressurizerLevel = NominalPzrLevel;
+    this.xenon = 0;
+    this.iodine = 0;
+    this._sm = 0;
+    this._pm = 0;
     for (let i = 0; i < 6; i++)
       this._precursor[i] = ((this.betaCycleFactor * Beta[i]!) / (PromptLifetime * Lambda[i]!)) * this._power;
-    for (let i = 0; i < DecayA.length; i++) this._decayGroup[i] = DecayA[i]!;
-    for (let i = 0; i < ActinideA.length; i++) this._actinide[i] = ActinideA[i]!;
+    for (let i = 0; i < DecayA.length; i++) this._decayGroup[i] = DecayA[i]! * this._power;
+    for (let i = 0; i < ActinideA.length; i++) this._actinide[i] = ActinideA[i]! * this._power;
     this.decayHeatFraction = clamp(
       this._decayGroup.reduce((a, b) => a + b, 0) + this._actinide.reduce((a, b) => a + b, 0),
       0,
@@ -493,9 +536,13 @@ export class ReactorSim {
     this.rcpFlowDemand = 1.0;
     this.feedwaterFlow = 1.0;
     this.coolantFlowFraction = 1.0;
-    this.boronPpm = this.criticalBoronPpm;
-    this.targetBoronPpm = this.criticalBoronPpm;
+    this.steamPressure = NominalSteamPressure;
+    // Solve the boron that makes ρ = 0 at exactly this seeded state → no startup swing / short-period trip.
+    const cb = this.solveCriticalBoron();
+    this.boronPpm = cb;
+    this.targetBoronPpm = cb;
     this.mode = ReactorMode.Run;
+    this.isScrammed = false;
   }
 
   // ----------------------------------------------------------------- main loop ----
@@ -556,7 +603,7 @@ export class ReactorSim {
     this.updateSecondary(dt);
 
     // reactor protection: auto-SCRAM on out-of-bounds conditions
-    this.updateProtection(dt);
+    this.updateProtection();
 
     // meltdown accrual
     this.updateDamage(dt);
@@ -683,9 +730,10 @@ export class ReactorSim {
     let precursorContribution = 0;
     let implicitFeedback = 0;
     for (let i = 0; i < 6; i++) {
-      const di = 1.0 + h * Lambda[i];
-      precursorContribution += (Lambda[i] * this._precursor[i]) / di;
-      implicitFeedback += (h * Lambda[i] * (Beta[i] * bcf)) / (PromptLifetime * di);
+      const lam = Lambda[i]!;
+      const di = 1.0 + h * lam;
+      precursorContribution += (lam * this._precursor[i]!) / di;
+      implicitFeedback += (h * lam * (Beta[i]! * bcf)) / (PromptLifetime * di);
     }
 
     let denom = 1.0 - (h * (rho - BetaTotal * bcf)) / PromptLifetime - h * implicitFeedback;
@@ -696,8 +744,8 @@ export class ReactorSim {
 
     for (let i = 0; i < 6; i++) {
       this._precursor[i] =
-        (this._precursor[i] + h * ((Beta[i] * bcf) / PromptLifetime) * newPower) / (1.0 + h * Lambda[i]);
-      if (this._precursor[i] < 0) this._precursor[i] = 0;
+        (this._precursor[i]! + h * ((Beta[i]! * bcf) / PromptLifetime) * newPower) / (1.0 + h * Lambda[i]!);
+      if (this._precursor[i]! < 0) this._precursor[i] = 0;
     }
 
     const rate = (newPower - this._power) / (Math.max(this._power, 1e-12) * h);
@@ -768,9 +816,16 @@ export class ReactorSim {
   }
 
   private updateSecondary(dt: number): void {
-    // Steam pressure tracks a Tavg-driven boil-off target; electrical output follows thermal power.
-    const target = clamp(0.5 + 6.4 * clamp(this._power, 0, 1), 0.5, 7.2);
-    this.steamPressure += (target - this.steamPressure) * Math.min(1, dt / 6.0);
+    // Steam-generator secondary pressure. A hot pressurized plant holds its steam header near the
+    // no-load program pressure (≈6.9 MPa, Tsat ≈ 285 °C) whether or not the turbine is loaded — the
+    // steam-dump / atmospheric relief and the constant primary heat sink keep it up. Only a genuinely
+    // cold plant (RCS cooled down) lets the header fall. Holding the header up is what pins the
+    // saturation-temperature heat sink near Tavg, so the RCS is regulated near its programmed
+    // temperature instead of drifting cold (which would unmask a large positive moderator coefficient).
+    const hot = this.thot > 150.0 && this.coolantFlowFraction > 0.02;
+    const target = hot ? NominalSteamPressure : 0.5;
+    this.steamPressure += (target - this.steamPressure) * Math.min(1, dt / 8.0);
+    // Gross electrical output follows the turbine load (neutron power) once feedwater/steam is available.
     const grossElec = this._power * RatedElectricMW * (this.feedwaterFlow > 0.1 ? 1.0 : 0.0);
     this.electricPowerMW += (grossElec - this.electricPowerMW) * Math.min(1, dt / 4.0);
   }
@@ -814,7 +869,7 @@ export class ReactorSim {
     this.iodine = 1.0;
   }
 
-  private updateProtection(dt: number): void {
+  private updateProtection(): void {
     if (this.isScrammed) return;
     // High neutron flux (power-range) trip @118% RTP.
     if (this._power >= HighPowerTrip) {
@@ -890,6 +945,9 @@ export class ReactorSim {
       coolantFlowFraction: this.coolantFlowFraction,
       boronPpm: this.boronPpm,
       targetBoronPpm: this.targetBoronPpm,
+      rcpFlowDemand: this.rcpFlowDemand,
+      feedwaterFlow: this.feedwaterFlow,
+      easyStartupMode: this.easyStartupMode,
       rodBankInsertion: [...this.rodBankInsertion],
       decayHeatFraction: this.decayHeatFraction,
       xenon: this.xenon,
