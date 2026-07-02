@@ -23,6 +23,7 @@ import { PassGenModule } from './PassGenModule';
 import { HasherModule } from './HasherModule';
 import { EpochModule } from './EpochModule';
 import { JwtModule } from './JwtModule';
+import { IdGenModule } from './IdGenModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -56,6 +57,9 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.epoch': EpochModule,
   'module.jwtbuild': JwtModule,
   'module.jwtinspect': JwtModule,
+  'module.uuidv7': IdGenModule,
+  'module.ulid': IdGenModule,
+  'module.shortid': IdGenModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
