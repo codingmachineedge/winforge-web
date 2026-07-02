@@ -8,6 +8,11 @@ import { HostsModule } from './HostsModule';
 import { PackagesModule } from './PackagesModule';
 import { NmapModule } from './NmapModule';
 import { GitModule } from './GitModule';
+import { StartupModule } from './StartupModule';
+import { ScheduledTasksModule } from './ScheduledTasksModule';
+import { EventsModule } from './EventsModule';
+import { DevicesModule } from './DevicesModule';
+import { SysInfoModule } from './SysInfoModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -25,6 +30,11 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.packages': PackagesModule,
   'module.nmap': NmapModule,
   'module.git': GitModule,
+  'module.startup': StartupModule,
+  'module.tasks': ScheduledTasksModule,
+  'module.events': EventsModule,
+  'module.devices': DevicesModule,
+  'module.winfetch': SysInfoModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
