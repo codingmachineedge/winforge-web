@@ -1237,7 +1237,7 @@ export const catalog: CatalogSection[] = [
             "zh": "REST API 用戶端",
             "glyph": "",
             "keywords": "api client rest http postman insomnia request response get post put patch delete head options url query params headers body json raw form url encoded x-www-form-urlencoded bearer token basic auth authorization collections environment variables substitute send httpclient status code response time size pretty print curl endpoint webhook REST 用戶端 客戶端 請求 回應 標頭 內文 查詢參數 驗證 權杖 基本驗證 集合 環境 變數 發送 狀態碼 美化 端點",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.connectors",
@@ -3893,7 +3893,7 @@ export const allModules: CatalogModule[] = [
     "zh": "REST API 用戶端",
     "glyph": "",
     "keywords": "api client rest http postman insomnia request response get post put patch delete head options url query params headers body json raw form url encoded x-www-form-urlencoded bearer token basic auth authorization collections environment variables substitute send httpclient status code response time size pretty print curl endpoint webhook REST 用戶端 客戶端 請求 回應 標頭 內文 查詢參數 驗證 權杖 基本驗證 集合 環境 變數 發送 狀態碼 美化 端點",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.connectors",

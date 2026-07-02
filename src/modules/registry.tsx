@@ -38,6 +38,7 @@ import { LoremTextModule } from './LoremTextModule';
 import { PercentCalcModule } from './PercentCalcModule';
 import { JsonFlattenModule } from './JsonFlattenModule';
 import { CssFormatModule } from './CssFormatModule';
+import { ApiClientModule } from './ApiClientModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -89,6 +90,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.percentcalc': PercentCalcModule,
   'module.jsonflatten': JsonFlattenModule,
   'module.cssformat': CssFormatModule,
+  'module.apiclient': ApiClientModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

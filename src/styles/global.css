@@ -340,6 +340,31 @@ body {
   background: color-mix(in srgb, var(--text-tertiary) 22%, transparent);
   color: var(--text-tertiary);
 }
+.status-pill.ok {
+  background: color-mix(in srgb, var(--web) 26%, transparent);
+  color: var(--web);
+}
+.status-pill.bad {
+  background: color-mix(in srgb, var(--danger) 24%, transparent);
+  color: var(--danger);
+}
+.kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.kv-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kv-row .mod-search {
+  flex: 1;
+}
+.api-resp {
+  margin-top: 4px;
+}
 
 /* ---- Detail ---- */
 .detail {
