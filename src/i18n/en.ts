@@ -190,6 +190,15 @@ export const en = {
     problemsOnly: 'Problems only',
     count: '{{count}} devices',
   },
+  diff: {
+    aLabel: 'A (original)',
+    bLabel: 'B (changed)',
+    ignoreWs: 'Ignore whitespace',
+    ignoreCase: 'Ignore case',
+    copyUnified: 'Copy unified diff',
+    identical: 'The two texts are identical.',
+    tooLarge: 'Input very large — trim it to under 2000 lines per side.',
+  },
   cron: {
     presets: 'Presets',
     every15: 'Every 15 min',

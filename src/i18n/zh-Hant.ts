@@ -189,6 +189,15 @@ export const zhHant: Resources = {
     problemsOnly: '只顯示有問題',
     count: '{{count}} 個裝置',
   },
+  diff: {
+    aLabel: 'A（原本）',
+    bLabel: 'B（改咗）',
+    ignoreWs: '忽略空白',
+    ignoreCase: '忽略大小寫',
+    copyUnified: '複製統一差異',
+    identical: '兩段文字完全相同。',
+    tooLarge: '輸入太大 — 每邊請少於 2000 行。',
+  },
   cron: {
     presets: '預設',
     every15: '每 15 分鐘',
