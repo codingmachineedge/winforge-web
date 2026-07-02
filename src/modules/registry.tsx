@@ -33,6 +33,7 @@ import { DurationCalcModule } from './DurationCalcModule';
 import { LoanCalcModule } from './LoanCalcModule';
 import { HtmlEntitiesModule } from './HtmlEntitiesModule';
 import { AspectRatioModule } from './AspectRatioModule';
+import { ImgBase64Module } from './ImgBase64Module';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -79,6 +80,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.loancalc': LoanCalcModule,
   'module.htmlentities': HtmlEntitiesModule,
   'module.aspectratio': AspectRatioModule,
+  'module.imgbase64': ImgBase64Module,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
