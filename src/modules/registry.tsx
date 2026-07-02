@@ -15,6 +15,7 @@ import { EventsModule } from './EventsModule';
 import { DevicesModule } from './DevicesModule';
 import { SysInfoModule } from './SysInfoModule';
 import { JsonToolsModule } from './JsonToolsModule';
+import { ColorToolsModule } from './ColorToolsModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -38,6 +39,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.devices': DevicesModule,
   'module.winfetch': SysInfoModule,
   'module.jsontools': JsonToolsModule,
+  'module.colortools': ColorToolsModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {

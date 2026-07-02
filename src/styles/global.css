@@ -1029,6 +1029,77 @@ body {
   accent-color: var(--accent);
 }
 
+/* ---- Color Tools ---- */
+.ct-top {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ct-swatch {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--stroke);
+  flex-shrink: 0;
+}
+.ct-fields {
+  flex: 1;
+}
+.ct-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+}
+.ct-slider > span:first-child {
+  width: 16px;
+  color: var(--text-tertiary);
+}
+.ct-slider input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent);
+}
+.ct-val {
+  width: 34px;
+  text-align: right;
+  color: var(--text-secondary);
+}
+.ct-table {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.ct-palette {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.ct-chip {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  cursor: pointer;
+  padding: 0;
+}
+.ct-chip:hover {
+  transform: translateY(-2px);
+}
+.ct-preview {
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke-subtle);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.ct-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* ---- Dependency gate ---- */
 .dep-gate {
   border: 1px dashed color-mix(in srgb, var(--native) 50%, var(--stroke));
