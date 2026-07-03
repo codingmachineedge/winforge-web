@@ -2,6 +2,12 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { en } from './en';
 import { zhHant } from './zh-Hant';
+import { enB, yueB } from './batchB';
+
+// batch-B modules (N–Z) keep their strings in a dedicated file to avoid collisions
+// with concurrent edits to en.ts / zh-Hant.ts. Merge them into the base bundles here.
+const enAll = { ...en, ...enB };
+const yueAll = { ...zhHant, ...yueB };
 
 // Three language modes:
 //   en        — English only
@@ -34,7 +40,7 @@ function mergeBilingual(enT: Tree, yueT: Tree): Tree {
   return out;
 }
 
-const bilingual = mergeBilingual(en as unknown as Tree, zhHant as unknown as Tree);
+const bilingual = mergeBilingual(enAll as unknown as Tree, yueAll as unknown as Tree);
 
 function migrate(code: string | null): LangCode | null {
   if (code === 'en' || code === 'yue' || code === 'bilingual') return code;
@@ -55,8 +61,8 @@ function initialLang(): LangCode {
 
 void i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: en },
-    yue: { translation: zhHant },
+    en: { translation: enAll },
+    yue: { translation: yueAll },
     bilingual: { translation: bilingual as Record<string, unknown> },
   },
   lng: initialLang(),
