@@ -43,6 +43,12 @@ import { CurlGenModule } from './CurlGenModule';
 import { MdTableModule } from './MdTableModule';
 import { TimerModule } from './TimerModule';
 import { SqlFormatModule } from './SqlFormatModule';
+import { CaseConvertModule } from './CaseConvertModule';
+import { JsonPointerModule } from './JsonPointerModule';
+import { JsonSortModule } from './JsonSortModule';
+import { IniEditModule } from './IniEditModule';
+import { EnvSubstModule } from './EnvSubstModule';
+import { HtmlTableModule } from './HtmlTableModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -100,6 +106,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.mdtable': MdTableModule,
   'module.timer': TimerModule,
   'module.sqlformat': SqlFormatModule,
+  'module.caseconvert': CaseConvertModule,
+  'module.jsonpointer': JsonPointerModule,
+  'module.jsonsort': JsonSortModule,
+  'module.iniedit': IniEditModule,
+  'module.envsubst': EnvSubstModule,
+  'module.htmltable': HtmlTableModule,
   ...moduleRegistryB,
 };
 
