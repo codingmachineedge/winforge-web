@@ -245,7 +245,7 @@ export const catalog: CatalogSection[] = [
             "zh": "範本新增",
             "glyph": "",
             "keywords": "new plus newplus powertoys template templates create file folder new menu shellnew context menu date variable substitution scaffold blank boilerplate 範本 新增 範本新增 建立 檔案 資料夾 新增選單 變數 日期 樣板 鷹架",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.archives",
@@ -2941,7 +2941,7 @@ export const allModules: CatalogModule[] = [
     "zh": "壓縮檔",
     "glyph": "",
     "keywords": "zip 7z rar tar gzip compress extract 解壓 壓縮",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.bulkops",

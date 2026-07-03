@@ -1,5 +1,26 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  vertfarm: {
+    "blurb": "A reactor-powered indoor vertical farm. Drawn power runs LED grow-lights (minus HVAC overhead) over a canopy. Crops grow while lit during the 18h \"day\" and spoil slightly when the lights go dark; at 100% growth the canopy auto-harvests.",
+    "start": "Start farm",
+    "stop": "Stop",
+    "idle": "Idle — lights off.",
+    "noPower": "No reactor power — lights out, crops spoiling.",
+    "night": "Night — rest period, no growth.",
+    "growing": "Growing — canopy is lit.",
+    "dark": "Dark — no light delivered.",
+    "phase": "Photoperiod: {{phase}}",
+    "day": "Day (lights)",
+    "nightWord": "Night (rest)",
+    "reactorTitle": "Reactor power",
+    "availableLabel": "Available: {{mw}} MWe of {{max}} MWe",
+    "drawLabel": "Farm draw: {{mw}} MW (max {{max}} MW)",
+    "growth": "Crop growth",
+    "growthPct": "{{pct}}% grown",
+    "canopy": "{{m2}} m² canopy · {{lights}} lights",
+    "growLightMW": "{{mw}} MW to grow-lights",
+    "harvested": "Harvested {{kg}} kg over {{n}} harvest(s)"
+  },
   cropandlock: {
     "blurb": "Pick a window and float a small always-on-top window of just that part. Thumbnail mode keeps it live-mirroring the source; Crop mode shows only that slice. The floating windows are movable, resizable and closable.",
     "desktopNote": "Spawning the floating windows and enumerating open windows needs the WinForge desktop app — the live view is empty in a plain browser.",

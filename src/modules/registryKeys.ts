@@ -275,6 +275,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.uuidv5',
   'module.uuidv7',
   'module.vault-volumes',
+  'module.vertfarm',
   'module.viaproxy',
   'module.virtualbox',
   'module.vivetool',

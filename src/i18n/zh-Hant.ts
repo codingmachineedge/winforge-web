@@ -2,6 +2,27 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  vertfarm: {
+    "blurb": "由反應堆供電嘅室內垂直農場。抽取嘅電力驅動 LED 補光燈（扣除 HVAC 開銷）照住冠層。喺 18 小時「日間」有光就生長，燈熄就輕微腐壞；生長到 100% 就自動收成。",
+    "start": "啟動農場",
+    "stop": "停止",
+    "idle": "閒置 — 燈熄。",
+    "noPower": "冇反應堆電力 — 燈熄，作物腐壞緊。",
+    "night": "夜晚 — 休息期，唔生長。",
+    "growing": "生長中 — 冠層有光。",
+    "dark": "黑暗 — 冇光照。",
+    "phase": "光週期：{{phase}}",
+    "day": "日間（開燈）",
+    "nightWord": "夜晚（休息）",
+    "reactorTitle": "反應堆電力",
+    "availableLabel": "可用：{{mw}} MWe（共 {{max}} MWe）",
+    "drawLabel": "農場抽取：{{mw}} MW（上限 {{max}} MW）",
+    "growth": "作物生長",
+    "growthPct": "已生長 {{pct}}%",
+    "canopy": "{{m2}} m² 冠層 · {{lights}} 盞燈",
+    "growLightMW": "{{mw}} MW 供補光燈",
+    "harvested": "已收成 {{kg}} kg，共 {{n}} 次"
+  },
   cropandlock: {
     "blurb": "揀一個視窗，就會浮出一個細細嘅置頂視窗，只顯示嗰一忽。縮圖模式會即時鏡像來源；裁切模式只顯示揀咗嗰一片。浮窗可以移動、縮放同關閉。",
     "desktopNote": "整浮窗同列出開住嘅視窗要用 WinForge 桌面程式 — 淨係喺瀏覽器嘅話實時檢視係空嘅。",
