@@ -781,7 +781,7 @@ export const catalog: CatalogSection[] = [
             "zh": "指令面板",
             "glyph": "",
             "keywords": "command palette powertoys run launcher quick launch alt space search box global hotkey app launcher calculator run command open url system action lock sleep shutdown restart web search fuzzy spotlight wox flow 指令面板 快速啟動 啟動器 搜尋框 全域熱鍵 計算機 執行 開網址 系統動作 鎖定 睡眠 關機 重啟 網絡搜尋 模糊搜尋",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.contextmenu",
@@ -3445,7 +3445,7 @@ export const allModules: CatalogModule[] = [
     "zh": "指令面板",
     "glyph": "",
     "keywords": "command palette powertoys run launcher quick launch alt space search box global hotkey app launcher calculator run command open url system action lock sleep shutdown restart web search fuzzy spotlight wox flow 指令面板 快速啟動 啟動器 搜尋框 全域熱鍵 計算機 執行 開網址 系統動作 鎖定 睡眠 關機 重啟 網絡搜尋 模糊搜尋",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.contextmenu",

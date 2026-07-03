@@ -161,6 +161,13 @@ import { BitwardenModule } from './BitwardenModule';
 import { KeePassModule } from './KeePassModule';
 import { DecompilerModule } from './DecompilerModule';
 import { AnnouncementsModule } from './AnnouncementsModule';
+import { CommandPaletteModule } from './CommandPaletteModule';
+import { AudioEditorModule } from './AudioEditorModule';
+import { AudioTaggerModule } from './AudioTaggerModule';
+import { MediaPlayerModule } from './MediaPlayerModule';
+import { DiffMergeModule } from './DiffMergeModule';
+import { LibreOfficeModule } from './LibreOfficeModule';
+import { BlenderModule } from './BlenderModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -338,6 +345,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.keepass': KeePassModule,
   'module.decompiler': DecompilerModule,
   'module.announcements': AnnouncementsModule,
+  'module.cmdpalette': CommandPaletteModule,
+  'module.audioeditor': AudioEditorModule,
+  'module.audiotagger': AudioTaggerModule,
+  'module.mediaplayer': MediaPlayerModule,
+  'module.diffmerge': DiffMergeModule,
+  'module.libreoffice': LibreOfficeModule,
+  'module.blender': BlenderModule,
   ...moduleRegistryB,
 };
 
