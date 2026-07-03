@@ -42,6 +42,17 @@ highlighting (in-house, `src/data/fuzzy.ts`), and a searchable settings page
 (typed registry `src/data/settingsRegistry.ts`) with working density/uiScale/
 view-mode effects. Tests 24 → 138. Build: eager chunk 2,332 kB → ~692 kB.
 
+**Wave 3 (same session):** reactor instrumentation UI (AnalogGauge dials, latching
+annunciator, NIS/permissive/MODE panels, Intl.NumberFormat readouts — HANDOFF item 4's
+UI exposure is largely done, fuel-factory screens still pending), catalog
+`content-visibility` virtualization + roving-tabindex keyboard nav, PWA
+(vite-plugin-pwa, guarded SW registration, no-ops in Tauri), Rust `run_op` vetted-op
+allowlist + denylist guard on legacy `run_command`, and `winforge://` deep links
+(tauri-plugin-deep-link → `deep-link` event → App routes to the module). Tests 203.
+Note: npm install bumped typescript to 5.9.3 (^ range) — Intl.Segmenter is now typed.
+Deep links + run_op verified via cargo check/test; end-to-end deep-link needs an
+installed Tauri build.
+
 ⚠️ **New gotcha:** `src/modules/registryKeys.ts` is GENERATED (`npm run
 gen:registry-keys`). After adding/removing modules in any registry file,
 regenerate it — a vitest guard (`registryKeys.test.ts`) fails otherwise. Never
