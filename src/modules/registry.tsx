@@ -169,6 +169,13 @@ import { DiffMergeModule } from './DiffMergeModule';
 import { LibreOfficeModule } from './LibreOfficeModule';
 import { BlenderModule } from './BlenderModule';
 import { DesalModule } from './DesalModule';
+import { PumpedHydroModule } from './PumpedHydroModule';
+import { CropAndLockModule } from './CropAndLockModule';
+import { MouseUtilsModule } from './MouseUtilsModule';
+import { MouseWithoutBordersModule } from './MouseWithoutBordersModule';
+import { ContextMenuModule } from './ContextMenuModule';
+import { ImagingGameModule } from './ImagingGameModule';
+import { CamoufoxModule } from './CamoufoxModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -354,6 +361,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.libreoffice': LibreOfficeModule,
   'module.blender': BlenderModule,
   'module.desal': DesalModule,
+  'module.pumpedhydro': PumpedHydroModule,
+  'module.cropandlock': CropAndLockModule,
+  'module.mouseutils': MouseUtilsModule,
+  'module.mwb': MouseWithoutBordersModule,
+  'module.contextmenu': ContextMenuModule,
+  'module.imaging': ImagingGameModule,
+  'module.camoufox': CamoufoxModule,
   ...moduleRegistryB,
 };
 

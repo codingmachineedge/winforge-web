@@ -237,7 +237,7 @@ export const catalog: CatalogSection[] = [
             "zh": "快速預覽",
             "glyph": "",
             "keywords": "peek preview quick look quicklook file viewer image text code markdown pdf audio video archive metadata previewer prev next folder navigate hotkey 快速預覽 預覽 檔案 圖片 文字 程式碼 影片 音訊 壓縮檔 中繼資料 熱鍵 上一個 下一個",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.newplus",
@@ -2933,7 +2933,7 @@ export const allModules: CatalogModule[] = [
     "zh": "範本新增",
     "glyph": "",
     "keywords": "new plus newplus powertoys template templates create file folder new menu shellnew context menu date variable substitution scaffold blank boilerplate 範本 新增 範本新增 建立 檔案 資料夾 新增選單 變數 日期 樣板 鷹架",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.archives",
