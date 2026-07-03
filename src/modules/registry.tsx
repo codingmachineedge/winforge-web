@@ -137,6 +137,13 @@ import { VolumeMixerModule } from './VolumeMixerModule';
 import { ColorPickerModule } from './ColorPickerModule';
 import { ImageEditorModule } from './ImageEditorModule';
 import { FontManagerModule } from './FontManagerModule';
+import { LightSwitchModule } from './LightSwitchModule';
+import { FancyZonesModule } from './FancyZonesModule';
+import { KomorebiModule } from './KomorebiModule';
+import { GlazeWmModule } from './GlazeWmModule';
+import { AltSnapModule } from './AltSnapModule';
+import { KeyboardModule } from './KeyboardModule';
+import { HotkeyMacroModule } from './HotkeyMacroModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -290,6 +297,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.colorpicker': ColorPickerModule,
   'module.imageeditor': ImageEditorModule,
   'module.fonts': FontManagerModule,
+  'module.lightswitch': LightSwitchModule,
+  'module.fancyzones': FancyZonesModule,
+  'module.komorebi': KomorebiModule,
+  'module.glazewm': GlazeWmModule,
+  'module.altsnap': AltSnapModule,
+  'module.keyboard': KeyboardModule,
+  'module.hotkeys': HotkeyMacroModule,
   ...moduleRegistryB,
 };
 
