@@ -9,6 +9,8 @@ import { SubnetCalcModule } from './SubnetCalcModule';
 import { NumberFormatModule } from './NumberFormatModule';
 import { TextEscapeModule } from './TextEscapeModule';
 import { StringInspectorModule } from './StringInspectorModule';
+import { StringCompareModule } from './StringCompareModule';
+import { SemverRangeModule } from './SemverRangeModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -26,4 +28,6 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.numberformat': NumberFormatModule,
   'module.textescape': TextEscapeModule,
   'module.stringinspector': StringInspectorModule,
+  'module.stringcompare': StringCompareModule,
+  'module.semverrange': SemverRangeModule,
 };
