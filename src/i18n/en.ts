@@ -1,5 +1,26 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  datacenter: {
+    "blurb": "A hyperscale data centre powered by the reactor. Set the IT server load; facility draw = IT × PUE (cooling overhead worsens as the reactor is stressed). If supply cannot meet demand, racks shed and the SLA bleeds downward.",
+    "start": "Start facility",
+    "stop": "Stop",
+    "resetSla": "Reset SLA",
+    "idle": "Idle — facility offline.",
+    "reserve": "On battery/diesel reserve — most racks dark.",
+    "shedding": "Power-starved — {{racks}} racks shed.",
+    "healthy": "Healthy — all racks online.",
+    "power": "Power",
+    "availableLabel": "Reactor available: {{mw}} MWe of {{max}} MWe",
+    "itLabel": "IT server load: {{mw}} MW (max {{max}} MW)",
+    "readouts": "Facility readouts",
+    "pue": "PUE",
+    "draw": "Total draw",
+    "supplied": "Supplied",
+    "racks": "Racks online",
+    "shed": "Racks shed",
+    "requests": "Requests",
+    "sla": "SLA / uptime"
+  },
   vertfarm: {
     "blurb": "A reactor-powered indoor vertical farm. Drawn power runs LED grow-lights (minus HVAC overhead) over a canopy. Crops grow while lit during the 18h \"day\" and spoil slightly when the lights go dark; at 100% growth the canopy auto-harvests.",
     "start": "Start farm",

@@ -2,6 +2,27 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  datacenter: {
+    "blurb": "由反應堆供電嘅超大規模資料中心。設定 IT 伺服器負載；設施用電 = IT × PUE（反應堆越受壓，散熱開銷越差）。供電追唔上需求時，機櫃會斷電，SLA 亦會下跌。",
+    "start": "啟動設施",
+    "stop": "停止",
+    "resetSla": "重設 SLA",
+    "idle": "閒置 — 設施離線。",
+    "reserve": "靠電池／柴油後備 — 大部分機櫃熄咗。",
+    "shedding": "電力不足 — 斷咗 {{racks}} 個機櫃。",
+    "healthy": "健康 — 所有機櫃在線。",
+    "power": "電力",
+    "availableLabel": "反應堆可用：{{mw}} MWe（共 {{max}} MWe）",
+    "itLabel": "IT 伺服器負載：{{mw}} MW（上限 {{max}} MW）",
+    "readouts": "設施讀數",
+    "pue": "PUE",
+    "draw": "總用電",
+    "supplied": "供電",
+    "racks": "在線機櫃",
+    "shed": "斷電機櫃",
+    "requests": "請求量",
+    "sla": "SLA／正常運行"
+  },
   vertfarm: {
     "blurb": "由反應堆供電嘅室內垂直農場。抽取嘅電力驅動 LED 補光燈（扣除 HVAC 開銷）照住冠層。喺 18 小時「日間」有光就生長，燈熄就輕微腐壞；生長到 100% 就自動收成。",
     "start": "啟動農場",

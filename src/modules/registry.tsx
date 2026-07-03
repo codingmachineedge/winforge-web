@@ -177,6 +177,7 @@ import { ContextMenuModule } from './ContextMenuModule';
 import { ImagingGameModule } from './ImagingGameModule';
 import { CamoufoxModule } from './CamoufoxModule';
 import { VertFarmModule } from './VertFarmModule';
+import { DataCenterModule } from './DataCenterModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -370,6 +371,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.imaging': ImagingGameModule,
   'module.camoufox': CamoufoxModule,
   'module.vertfarm': VertFarmModule,
+  'module.datacenter': DataCenterModule,
   ...moduleRegistryB,
 };
 

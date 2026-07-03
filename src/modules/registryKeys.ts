@@ -62,6 +62,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.csvlint',
   'module.curlgen',
   'module.dac',
+  'module.datacenter',
   'module.datecalc',
   'module.decompiler',
   'module.desal',

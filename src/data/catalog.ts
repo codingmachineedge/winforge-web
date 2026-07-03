@@ -253,7 +253,7 @@ export const catalog: CatalogSection[] = [
             "zh": "壓縮檔",
             "glyph": "",
             "keywords": "zip 7z rar tar gzip compress extract 解壓 壓縮",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.bulkops",
@@ -2949,7 +2949,7 @@ export const allModules: CatalogModule[] = [
     "zh": "批次檔案操作",
     "glyph": "",
     "keywords": "bulk file move copy delete attributes 批次 檔案",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.rename",
