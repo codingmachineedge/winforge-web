@@ -4,7 +4,7 @@ import { isTauri, runPowershell } from '../tauri/bridge';
 
 // Faithful port of WinForge WolService — parse MAC, build the 102-byte magic packet.
 // In a browser we compute & show the packet (bytes/hex) as read-only info. In the
-// WinForge desktop app we also SEND it over a UDP broadcast (×3) via the backend.
+// WinForge Web we also SEND it over a UDP broadcast (×3) via the backend.
 
 /** PowerShell that sends the magic packet ×3 over a UDP broadcast (Windows PowerShell + .NET UdpClient). */
 function sendScript(mac: number[], host: string, port: number): string {

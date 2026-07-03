@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { isTauri, runPowershellJson } from '../tauri/bridge';
 
 // Native module — async TCP port scanner via the desktop backend (Windows PowerShell + .NET TcpClient).
-// The browser has no raw sockets, so scanning runs only inside the WinForge desktop app.
+// The browser has no raw sockets, so scanning runs through WinForge Web's backend in the packaged app.
 // Only ever scan hosts you own or are authorised to test.
 
 const WELL_KNOWN: Record<number, string> = {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// Faithful web port of WinForge PathDoctorService. The desktop app reads/writes the
+// Faithful port of WinForge PathDoctorService. WinForge Web reads/writes the
 // User & Machine "Path" environment variables and checks whether each folder exists on
 // disk. A browser cannot read env vars or the filesystem, so this port operates on a
 // PATH string the user pastes in: split, dedupe, remove dead-by-syntax, sort, reorder,

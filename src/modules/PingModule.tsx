@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { isTauri, runPowershellJson } from '../tauri/bridge';
 
 // Native module — ICMP ping & traceroute via the desktop backend (Windows PowerShell + .NET Ping).
-// The browser has no ICMP, so live probing runs only inside the WinForge desktop app.
+// The browser has no ICMP, so live probing runs through WinForge Web's backend in the packaged app.
 
 interface PingRow { seq: number; address: string; latency: number; ttl: number; status: string; success: boolean }
 interface HopRow { hop: number; address: string; latency: number; status: string }

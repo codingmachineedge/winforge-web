@@ -1654,17 +1654,17 @@ export const zhHant: Resources = {
     group: '群組',
     nativeTitle: '僅限原生模組',
     nativeBody:
-      '此模組操作 Windows 系統功能（登錄檔、服務、原生工具、硬件），無法喺瀏覽器運行。喺網頁版本中會顯示為標示清楚嘅佔位介面。請執行 WinForge 桌面應用程式以取得完整功能。',
+      '此模組透過 WinForge Web 內置嘅系統後端操作 Windows 系統功能（登錄檔、服務、原生工具、硬件）。你而家睇緊嘅係瀏覽器預覽 — 已安裝嘅 WinForge Web 會真正執行佢。',
     webTitle: '可移植至網頁嘅模組',
     webBody:
       '此模組屬純用戶端運算，適合完整移植至網頁。網頁版本計劃提供可運作嘅實作。',
     openReactor: '開啟反應堆模擬器',
     backendTitle: '即時後端操作',
-    backendBody: '正喺桌面應用程式運行 — 此模組可透過 Rust 後端查詢即時系統狀態。唯讀。',
+    backendBody: '正喺 WinForge Web 運行 — 此模組透過 Rust 後端查詢即時系統狀態。唯讀。',
     backendBrowser: '喺桌面（Tauri）版本中，此模組會執行即時後端操作：{{label}}。',
     running: '執行中…',
     liveTitle: '即時模組',
-    liveBrowser: '此模組已完整實作，喺桌面（Tauri）版本中會透過 Rust 後端運行。請啟動 WinForge Web 桌面應用程式使用。',
+    liveBrowser: '此模組已完整實作。你而家睇緊瀏覽器預覽 — 已安裝嘅 WinForge Web 會透過 Rust 後端即時運行。',
   },
   modules: {
     loading: '載入中…',

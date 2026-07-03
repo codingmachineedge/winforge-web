@@ -1652,19 +1652,19 @@ export const en = {
     group: 'Group',
     nativeTitle: 'Native-only module',
     nativeBody:
-      'This module drives Windows system features (registry, services, native tools, hardware) and cannot run in a browser. In the web build it is shown as a labelled stub. Run the WinForge desktop app for full functionality.',
+      'This module works with live Windows system features (registry, services, native tools, hardware) through WinForge Web’s built-in system backend. You’re viewing a browser preview here — the installed WinForge Web app runs it for real.',
     webTitle: 'Web-portable module',
     webBody:
-      'This module is pure client-side computation and is a candidate for a full web port. A working implementation is planned for the web build.',
+      'This module runs entirely inside WinForge Web with no system access required.',
     openReactor: 'Open the reactor simulator',
     backendTitle: 'Live backend action',
     backendBody:
-      'Running in the desktop app — this module can query the live system through the Rust backend. Read-only.',
+      'Running in WinForge Web — this module queries the live system through the Rust backend. Read-only.',
     backendBrowser: 'In the desktop (Tauri) build this runs a live backend action: {{label}}.',
     running: 'Running…',
     liveTitle: 'Live module',
     liveBrowser:
-      'This module is fully implemented and runs against the Rust backend in the desktop (Tauri) build. Launch the WinForge Web desktop app to use it.',
+      'This module is fully implemented and runs against the Rust backend. You’re viewing a browser preview — the installed WinForge Web app runs it live.',
   },
   modules: {
     loading: 'Loading…',
