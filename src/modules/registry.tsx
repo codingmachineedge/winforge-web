@@ -39,6 +39,7 @@ import { PercentCalcModule } from './PercentCalcModule';
 import { JsonFlattenModule } from './JsonFlattenModule';
 import { CssFormatModule } from './CssFormatModule';
 import { ApiClientModule } from './ApiClientModule';
+import { CurlGenModule } from './CurlGenModule';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -91,6 +92,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.jsonflatten': JsonFlattenModule,
   'module.cssformat': CssFormatModule,
   'module.apiclient': ApiClientModule,
+  'module.curlgen': CurlGenModule,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
