@@ -178,6 +178,13 @@ import { ImagingGameModule } from './ImagingGameModule';
 import { CamoufoxModule } from './CamoufoxModule';
 import { VertFarmModule } from './VertFarmModule';
 import { DataCenterModule } from './DataCenterModule';
+import { HpcModule } from './HpcModule';
+import { AmuletModule } from './AmuletModule';
+import { MinecraftWorldToolsModule } from './MinecraftWorldToolsModule';
+import { MinecraftServerModule } from './MinecraftServerModule';
+import { MinecraftLauncherModule } from './MinecraftLauncherModule';
+import { MailModule } from './MailModule';
+import { CommsModule } from './CommsModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -372,6 +379,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.camoufox': CamoufoxModule,
   'module.vertfarm': VertFarmModule,
   'module.datacenter': DataCenterModule,
+  'module.hpc': HpcModule,
+  'module.amulet': AmuletModule,
+  'module.minecraftworldtools': MinecraftWorldToolsModule,
+  'module.minecraftserver': MinecraftServerModule,
+  'module.minecraftlauncher': MinecraftLauncherModule,
+  'module.mail': MailModule,
+  'module.comms': CommsModule,
   ...moduleRegistryB,
 };
 

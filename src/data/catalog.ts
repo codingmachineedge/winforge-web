@@ -261,7 +261,7 @@ export const catalog: CatalogSection[] = [
             "zh": "批次檔案操作",
             "glyph": "",
             "keywords": "bulk file move copy delete attributes 批次 檔案",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.rename",
@@ -2957,7 +2957,7 @@ export const allModules: CatalogModule[] = [
     "zh": "批次改名",
     "glyph": "",
     "keywords": "rename bulk powerrename regex 改名 批次",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.duplicates",
