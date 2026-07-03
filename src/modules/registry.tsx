@@ -104,6 +104,7 @@ import { ColorPaletteModule } from './ColorPaletteModule';
 import { ICalendarModule } from './ICalendarModule';
 import { HttpHeaderRefModule } from './HttpHeaderRefModule';
 import { moduleRegistryB } from './registryB';
+import { moduleRegistryA } from './registryA';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -220,6 +221,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.colorpalette': ColorPaletteModule,
   'module.icalendar': ICalendarModule,
   'module.httpheaderref': HttpHeaderRefModule,
+  ...moduleRegistryA,
   ...moduleRegistryB,
 };
 
