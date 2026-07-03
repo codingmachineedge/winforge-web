@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 
 const ROOT = 'C:/Users/cntow/Documents/GitHub/winforge-web';
-const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub/e124d4b3-fc27-4129-bfe7-3aa804bf1fdb/tasks/w86d4ccqv.output';
+const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub-winforge-web-docs/e4efcd44-6660-4ec5-ad58-2e6d614b67a3/tasks/wn6aql3em.output';
 
 // Run journal dir — fallback if the aggregated OUT file lags behind the agents.
-const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub/e124d4b3-fc27-4129-bfe7-3aa804bf1fdb/subagents/workflows/wf_8fb7443a-dfd';
+const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub-winforge-web-docs/e4efcd44-6660-4ec5-ad58-2e6d614b67a3/subagents/workflows/wf_a293b337-a4f';
 
 function fromJournals(dir) {
   const out = [];

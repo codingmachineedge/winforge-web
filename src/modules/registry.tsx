@@ -115,6 +115,12 @@ import { FileSplitModule } from './FileSplitModule';
 import { ClipInspectModule } from './ClipInspectModule';
 import { DnsLookupModule } from './DnsLookupModule';
 import { IpInfoModule } from './IpInfoModule';
+import { DiskHealthModule } from './DiskHealthModule';
+import { BatteryThermalModule } from './BatteryThermalModule';
+import { DiskAnalyzerModule } from './DiskAnalyzerModule';
+import { ClipboardModule } from './ClipboardModule';
+import { DuplicatesModule } from './DuplicatesModule';
+import { SystemDoctorsModule } from './SystemDoctorsModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -246,6 +252,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.clipinspect': ClipInspectModule,
   'module.dnslookup': DnsLookupModule,
   'module.ipinfo': IpInfoModule,
+  'module.diskhealth': DiskHealthModule,
+  'module.battery': BatteryThermalModule,
+  'module.disk': DiskAnalyzerModule,
+  'module.clipboard': ClipboardModule,
+  'module.duplicates': DuplicatesModule,
+  'module.doctors': SystemDoctorsModule,
   ...moduleRegistryB,
 };
 
