@@ -2,6 +2,19 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  feedreader: {
+    "blurb": "訂閱 RSS 同 Atom 消息來源，喺 app 內睇最新文章。消息會經內置背景服務抓取，所以跨網域嘅來源都用得。",
+    "addPh": "消息來源網址（https://…/rss）…",
+    "add": "加入來源",
+    "refreshAll": "全部重新整理",
+    "refreshing": "更新緊…",
+    "allFeeds": "全部來源",
+    "remove": "移除來源",
+    "empty": "未有文章 — 加個來源或者撳重新整理。",
+    "count": "{{articles}} 篇文章",
+    "badUrl": "請輸入完整嘅 http(s) 消息來源網址。",
+    "corsNote": "喺瀏覽器預覽淨係載到容許跨網域嘅來源；已安裝嘅 app 咩來源都抓到。"
+  },
   fancyzones: {
     "blurb": "FancyZones 係 PowerToys 嘅視窗排版功能：將窗拖入自訂嘅分區格網，即刻貼齊。WinForge 幫你安裝同啟動 PowerToys、開分區編輯器、開關模組同調校行為 — 貼齊引擎本身仍然係原生 PowerToys。",
     "desktopOnly": "即時動作同設定要用 WinForge 桌面版（Tauri）。喺瀏覽器入面呢個檢視係唯讀。",

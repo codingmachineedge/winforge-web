@@ -144,6 +144,7 @@ import { GlazeWmModule } from './GlazeWmModule';
 import { AltSnapModule } from './AltSnapModule';
 import { KeyboardModule } from './KeyboardModule';
 import { HotkeyMacroModule } from './HotkeyMacroModule';
+import { FeedReaderModule } from './FeedReaderModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -304,6 +305,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.altsnap': AltSnapModule,
   'module.keyboard': KeyboardModule,
   'module.hotkeys': HotkeyMacroModule,
+  'module.feedreader': FeedReaderModule,
   ...moduleRegistryB,
 };
 

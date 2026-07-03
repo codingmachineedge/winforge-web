@@ -1325,7 +1325,7 @@ export const catalog: CatalogSection[] = [
             "zh": "RSS 閱讀器",
             "glyph": "",
             "keywords": "feed reader rss atom quiterss fluent reader news subscriptions articles summary xml httpclient local json offline in-app native 閱讀器 RSS Atom Feed 訂閱 新聞 文章 摘要 原生 app內 本機",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.quicktype",
@@ -3981,7 +3981,7 @@ export const allModules: CatalogModule[] = [
     "zh": "RSS 閱讀器",
     "glyph": "",
     "keywords": "feed reader rss atom quiterss fluent reader news subscriptions articles summary xml httpclient local json offline in-app native 閱讀器 RSS Atom Feed 訂閱 新聞 文章 摘要 原生 app內 本機",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.quicktype",

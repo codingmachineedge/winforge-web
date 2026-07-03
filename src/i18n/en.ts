@@ -1,5 +1,18 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  feedreader: {
+    "blurb": "Subscribe to RSS and Atom feeds and read the latest articles in-app. Feeds are fetched through the built-in background service, so cross-origin feeds work.",
+    "addPh": "Feed URL (https://…/rss)…",
+    "add": "Add feed",
+    "refreshAll": "Refresh all",
+    "refreshing": "Refreshing…",
+    "allFeeds": "All feeds",
+    "remove": "Remove feed",
+    "empty": "No articles yet — add a feed or press Refresh.",
+    "count": "{{articles}} articles",
+    "badUrl": "Enter an absolute http(s) feed URL.",
+    "corsNote": "In the browser preview only feeds that allow cross-origin requests will load; the installed app fetches any feed."
+  },
   fancyzones: {
     "blurb": "FancyZones is the PowerToys window-tiling feature: drag windows into a custom grid of zones and snap them instantly. WinForge installs and launches PowerToys, opens the zone editor, toggles the module and lets you tune its behaviour — the snap engine stays native PowerToys.",
     "desktopOnly": "Live actions and settings need the WinForge desktop app (Tauri). In a browser this view is read-only.",
