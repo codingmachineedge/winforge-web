@@ -2,6 +2,30 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  fonts: {
+    "blurb": "喺 app 內安裝、預覽同移除字型。個人安裝唔使管理員權限；下面每個已裝字款都有即時預覽。",
+    "filter": "按名稱篩選…",
+    "refresh": "重新整理",
+    "live": "運行中",
+    "preview": "預覽",
+    "previewNote": "喺已安裝嘅 app 上，字型會經內置背景服務列出同管理。",
+    "face": "字款",
+    "previewCol": "預覽",
+    "kind": "類型",
+    "scope": "範圍",
+    "scope_all": "全部",
+    "scope_user": "使用者",
+    "scope_machine": "全機",
+    "user": "使用者",
+    "machine": "全機",
+    "machineNote": "全機字型要管理員權限先移除得。",
+    "uninstall": "移除",
+    "confirmRemove": "移除字型「{{face}}」？檔案同登錄檔項目都會刪除。",
+    "samplePh": "預覽文字…",
+    "installPh": "要安裝嘅 .ttf／.otf／.ttc 完整路徑（個人安裝，唔使 UAC）…",
+    "install": "安裝",
+    "total": "{{shown}} 個字型"
+  },
   media: {
     "blurb": "用 ffmpeg 轉檔、剪裁、整 GIF、擷取畫格、檢視影片／音訊 — 全部喺 app 內。",
     "engineOk": "ffmpeg 已就緒",

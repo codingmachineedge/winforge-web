@@ -77,6 +77,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.faker',
   'module.filelocksmith',
   'module.filesplit',
+  'module.fonts',
   'module.giflab',
   'module.git',
   'module.gitignore',

@@ -1,5 +1,29 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  fonts: {
+    "blurb": "Install, preview and remove fonts in-app. Per-user installs need no admin rights; every installed family previews live below.",
+    "filter": "Filter by name…",
+    "refresh": "Refresh",
+    "live": "Live",
+    "preview": "Preview",
+    "previewNote": "The installed app lists and manages fonts through the built-in background service.",
+    "face": "Family",
+    "previewCol": "Preview",
+    "kind": "Kind",
+    "scope": "Scope",
+    "scope_all": "All",
+    "scope_user": "User",
+    "scope_machine": "Machine",
+    "user": "User",
+    "machine": "Machine",
+    "machineNote": "Machine-wide fonts need administrator rights to remove.",
+    "uninstall": "Remove",
+    "confirmRemove": "Remove the font \"{{face}}\"? The file and its registry entry are deleted.",
+    "samplePh": "Preview text…",
+    "installPh": "Full path to a .ttf / .otf / .ttc file to install (per-user, no UAC)…",
+    "install": "Install",
+    "total": "{{shown}} fonts"
+  },
   media: {
     "blurb": "Convert, trim, make GIFs, grab frames and inspect video/audio with ffmpeg — all in-app.",
     "engineOk": "ffmpeg ready",

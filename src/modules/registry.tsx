@@ -136,6 +136,7 @@ import { GifLabModule } from './GifLabModule';
 import { VolumeMixerModule } from './VolumeMixerModule';
 import { ColorPickerModule } from './ColorPickerModule';
 import { ImageEditorModule } from './ImageEditorModule';
+import { FontManagerModule } from './FontManagerModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -288,6 +289,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.mixer': VolumeMixerModule,
   'module.colorpicker': ColorPickerModule,
   'module.imageeditor': ImageEditorModule,
+  'module.fonts': FontManagerModule,
   ...moduleRegistryB,
 };
 
