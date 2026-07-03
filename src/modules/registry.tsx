@@ -49,6 +49,12 @@ import { JsonSortModule } from './JsonSortModule';
 import { IniEditModule } from './IniEditModule';
 import { EnvSubstModule } from './EnvSubstModule';
 import { HtmlTableModule } from './HtmlTableModule';
+import { JsonPathModule } from './JsonPathModule';
+import { JsonPatchModule } from './JsonPatchModule';
+import { JsonMergePatchModule } from './JsonMergePatchModule';
+import { JsonToTsModule } from './JsonToTsModule';
+import { CsvLintModule } from './CsvLintModule';
+import { FakerModule } from './FakerModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -112,6 +118,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.iniedit': IniEditModule,
   'module.envsubst': EnvSubstModule,
   'module.htmltable': HtmlTableModule,
+  'module.jsonpath': JsonPathModule,
+  'module.jsonpatch': JsonPatchModule,
+  'module.jsonmergepatch': JsonMergePatchModule,
+  'module.jsontots': JsonToTsModule,
+  'module.csvlint': CsvLintModule,
+  'module.faker': FakerModule,
   ...moduleRegistryB,
 };
 
