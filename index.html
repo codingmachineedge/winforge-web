@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WinForge Web · 網頁版 — 314-module Windows toolkit + PWR reactor simulator</title>
+<meta name="description" content="WinForge Web — a Tauri v2 desktop app: a 314-module Windows power-user toolkit headlined by a physics-based PWR nuclear reactor simulator, with native Rust-backed actions. Portable, one-click install. Bilingual EN / 繁體中文." />
+<meta property="og:title" content="WinForge Web · 網頁版" />
+<meta property="og:description" content="314-module Windows toolkit + physics PWR reactor simulator. Native Rust actions. One-line install." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231b1b1f'/%3E%3Ccircle cx='50' cy='50' r='24' fill='none' stroke='%234cc2ff' stroke-width='5'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%234cc2ff'/%3E%3Cg stroke='%234cc2ff' stroke-width='5' stroke-linecap='round'%3E%3Cline x1='50' y1='14' x2='50' y2='24'/%3E%3Cline x1='50' y1='76' x2='50' y2='86'/%3E%3Cline x1='14' y1='50' x2='24' y2='50'/%3E%3Cline x1='76' y1='50' x2='86' y2='50'/%3E%3C/g%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#1b1b1f; --bg-elevated:#26262b; --bg-card:#2a2a30; --bg-card-hover:#33333b;
+    --sidebar-bg:#202024; --stroke:#3a3a42; --stroke-subtle:#2f2f36;
+    --text:#f3f3f5; --text-secondary:#b8b8c0; --text-tertiary:#8a8a94;
+    --accent:#4cc2ff; --accent-strong:#0091f7; --native:#ffb454; --web:#5ad19b; --danger:#ff6b6b;
+    --radius:8px; --radius-lg:12px; --shadow:0 2px 8px rgba(0,0,0,.4);
+    --font:'Segoe UI','Segoe UI Variable',system-ui,-apple-system,'Microsoft JhengHei','PingFang HK',sans-serif;
+    --mono:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(76,194,255,.10),transparent 60%),radial-gradient(900px 500px at 0% 0%,rgba(0,145,247,.08),transparent 55%);}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .alt{display:block;color:var(--text-secondary);font-weight:400;font-size:.86em}
+  body:not(.bi) .alt{display:none}
+
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(27,27,31,.72);border-bottom:1px solid var(--stroke-subtle)}
+  .nav-inner{display:flex;align-items:center;gap:16px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;font-size:1.05rem}
+  .brand .logo{width:26px;height:26px}
+  .nav-links{display:flex;gap:22px;margin-left:24px}
+  .nav-links a{color:var(--text-secondary);font-size:.92rem}
+  .nav-links a:hover{color:var(--text);text-decoration:none}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .langsw{display:flex;background:var(--bg-elevated);border:1px solid var(--stroke);border-radius:999px;padding:3px}
+  .langsw button{background:none;border:0;color:var(--text-secondary);font:inherit;font-size:.82rem;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .langsw button.on{background:var(--accent-strong);color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--radius);padding:10px 18px;font-weight:600;font-size:.92rem;border:1px solid var(--stroke);background:var(--bg-elevated);color:var(--text);cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--bg-card-hover);text-decoration:none}
+  .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent-strong));border-color:transparent;color:#04121f}
+  .btn.primary:hover{filter:brightness(1.07)}
+  @media(max-width:820px){.nav-links{display:none}}
+
+  .hero{padding:72px 0 48px;text-align:center}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--bg-elevated);border:1px solid var(--stroke);border-radius:999px;padding:6px 14px;font-size:.82rem;color:var(--text-secondary);margin-bottom:26px}
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--web);box-shadow:0 0 8px var(--web)}
+  h1.title{font-size:clamp(2.4rem,5.6vw,4rem);line-height:1.06;font-weight:750;letter-spacing:-.02em;margin-bottom:18px}
+  h1.title .grad{background:linear-gradient(120deg,var(--accent),#b98bff 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{font-size:clamp(1.05rem,2.2vw,1.3rem);color:var(--text-secondary);max-width:720px;margin:0 auto 34px}
+  .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+  .cta-row .btn{padding:13px 24px;font-size:1rem}
+
+  .cmd{max-width:820px;margin:0 auto;text-align:left}
+  .cmd-label{font-size:.82rem;color:var(--text-tertiary);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .cmd-box{display:flex;align-items:stretch;background:#0e0e11;border:1px solid var(--stroke);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .cmd-box code{flex:1;font-family:var(--mono);font-size:.86rem;color:#e8e8ee;padding:15px 18px;overflow-x:auto;white-space:nowrap}
+  .cmd-box code .tok{color:var(--accent)}
+  .copybtn{border:0;border-left:1px solid var(--stroke);background:var(--bg-elevated);color:var(--text);padding:0 20px;font:inherit;font-weight:600;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .copybtn:hover{background:var(--accent-strong);color:#fff}
+  .copybtn.done{background:var(--web);color:#04121f}
+  .cmd-note{font-size:.8rem;color:var(--text-tertiary);margin-top:10px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:60px 0}
+  .stat{background:var(--bg-card);border:1px solid var(--stroke-subtle);border-radius:var(--radius-lg);padding:22px;text-align:center}
+  .stat .num{font-size:2rem;font-weight:750;color:var(--accent)}
+  .stat .lbl{font-size:.86rem;color:var(--text-secondary);margin-top:4px}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  section.blk{padding:56px 0}
+  .eyebrow{color:var(--accent);font-weight:650;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+  h2.h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:720;text-align:center;margin:10px 0 12px;letter-spacing:-.01em}
+  .sub{text-align:center;color:var(--text-secondary);max-width:660px;margin:0 auto 42px}
+
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:900px){.features{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.features{grid-template-columns:1fr}}
+  .fcard{background:var(--bg-card);border:1px solid var(--stroke-subtle);border-radius:var(--radius-lg);padding:26px;transition:.18s}
+  .fcard:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow)}
+  .fcard .ico{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:16px;background:rgba(76,194,255,.12)}
+  .fcard h3{font-size:1.12rem;margin-bottom:8px}
+  .fcard p{color:var(--text-secondary);font-size:.92rem}
+
+  .rgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+  @media(max-width:820px){.rgrid{grid-template-columns:1fr}}
+
+  .shots{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:760px){.shots{grid-template-columns:1fr}}
+  .shot{background:var(--bg-card);border:1px solid var(--stroke);border-radius:var(--radius-lg);overflow:hidden}
+  .shot .frame{aspect-ratio:16/10;background:linear-gradient(135deg,#202024,#111);display:flex;align-items:center;justify-content:center;position:relative}
+  .shot .frame img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+  .shot .frame .ph{position:absolute;color:var(--text-tertiary);font-size:2rem;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:20px}
+  .shot .frame .ph span{font-size:.85rem}
+  .shot .cap{padding:13px 18px;font-size:.9rem;color:var(--text-secondary);border-top:1px solid var(--stroke-subtle)}
+  .shot .cap b{color:var(--text)}
+
+  .catgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media(max-width:860px){.catgrid{grid-template-columns:repeat(2,1fr)}}
+  .cat{background:var(--bg-card);border:1px solid var(--stroke-subtle);border-radius:var(--radius-lg);padding:20px}
+  .cat h4{font-size:1rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .cat .tag{font-size:.72rem;padding:2px 8px;border-radius:999px;font-weight:600}
+  .tag.web{background:rgba(90,209,155,.15);color:var(--web)}
+  .tag.native{background:rgba(255,180,84,.15);color:var(--native)}
+  .cat p{font-size:.86rem;color:var(--text-secondary)}
+
+  .install-card{background:var(--bg-card);border:1px solid var(--stroke);border-radius:var(--radius-lg);padding:30px;max-width:860px;margin:0 auto}
+  .steps{display:grid;gap:14px;margin-top:24px}
+  .step{display:flex;gap:16px;align-items:flex-start}
+  .step .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent-strong);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+  .step .txt{font-size:.94rem;color:var(--text-secondary)}
+  .step .txt b{color:var(--text)}
+  .altinstall{margin-top:26px;padding-top:22px;border-top:1px solid var(--stroke-subtle);font-size:.9rem;color:var(--text-secondary)}
+  code.inline{font-family:var(--mono);background:var(--bg-elevated);padding:1px 6px;border-radius:4px;font-size:.85em}
+
+  footer{border-top:1px solid var(--stroke-subtle);padding:40px 0;margin-top:40px;color:var(--text-tertiary);font-size:.88rem}
+  .foot-inner{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center}
+  .foot-links{display:flex;gap:20px;flex-wrap:wrap}
+  .foot-links a{color:var(--text-secondary)}
+  .warn{background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.3);border-radius:var(--radius);padding:12px 16px;font-size:.85rem;color:var(--text-secondary);margin-top:16px}
+</style>
+</head>
+<body class="lang-en">
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#26262b"/><circle cx="50" cy="50" r="24" fill="none" stroke="#4cc2ff" stroke-width="6"/><circle cx="50" cy="50" r="7" fill="#4cc2ff"/><g stroke="#4cc2ff" stroke-width="6" stroke-linecap="round"><line x1="50" y1="12" x2="50" y2="24"/><line x1="50" y1="76" x2="50" y2="88"/><line x1="12" y1="50" x2="24" y2="50"/><line x1="76" y1="50" x2="88" y2="50"/></g></svg>
+      WinForge Web
+    </div>
+    <nav class="nav-links">
+      <a href="#features" data-i="nav_features">Features</a>
+      <a href="#reactor" data-i="nav_reactor">Reactor</a>
+      <a href="#screens" data-i="nav_screens">Screenshots</a>
+      <a href="#install" data-i="nav_install">Install</a>
+      <a href="https://github.com/codingmachineedge/winforge-web/wiki" data-i="nav_docs">Docs</a>
+    </nav>
+    <div class="nav-right">
+      <div class="langsw" role="group" aria-label="Language">
+        <button data-lang="en" class="on">EN</button>
+        <button data-lang="yue">粵語</button>
+        <button data-lang="bi">雙語</button>
+      </div>
+      <a class="btn" href="https://github.com/codingmachineedge/winforge-web" target="_blank" rel="noopener">GitHub ★</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero wrap">
+  <span class="badge"><span class="dot"></span><span data-i="hero_badge">Tauri v2 desktop app · Rust backend · Windows x64</span></span>
+  <h1 class="title"><span data-i="hero_t1">The Windows power-user suite,</span> <span class="grad" data-i="hero_t2">rebuilt for the web era.</span></h1>
+  <p class="tagline" data-i="hero_tag">314 modules in one app — from services, drives and packet capture to a physics-accurate PWR nuclear reactor simulator. Native Rust-backed actions. Portable, one-click install. Fully bilingual.</p>
+  <div class="cta-row">
+    <a class="btn primary" href="#install" data-i="hero_cta1">⬇ One-click install</a>
+    <a class="btn" href="https://github.com/codingmachineedge/winforge-web/releases" target="_blank" rel="noopener" data-i="hero_cta2">Download from Releases</a>
+  </div>
+  <div class="cmd">
+    <div class="cmd-label">⚡ <span data-i="cmd_label">Paste into PowerShell — auto-elevates to Administrator</span></div>
+    <div class="cmd-box">
+      <code id="installcmd">powershell -ExecutionPolicy Bypass -Command "<span class="tok">irm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">iex</span>"</code>
+      <button class="copybtn" id="copybtn" data-i="copy">⧉ Copy</button>
+    </div>
+    <p class="cmd-note" data-i="cmd_note">Downloads the latest signed release installer from GitHub and runs it. No package manager required.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><div class="num">314</div><div class="lbl" data-i="stat_modules">modules</div></div>
+    <div class="stat"><div class="num">4</div><div class="lbl" data-i="stat_sections">catalog sections</div></div>
+    <div class="stat"><div class="num">100+</div><div class="lbl" data-i="stat_working">live-wired modules</div></div>
+    <div class="stat"><div class="num">EN·中</div><div class="lbl" data-i="stat_lang">bilingual UI</div></div>
+  </div>
+</div>
+
+<section class="blk wrap" id="features">
+  <p class="eyebrow" data-i="feat_eyebrow">Everything in one shell</p>
+  <h2 class="h2" data-i="feat_h">One app. 314 tools.</h2>
+  <p class="sub" data-i="feat_sub">A Fluent-inspired catalog browser over four sections — Suite, Categories, Toolbox, and Windows 11 tweaks — with real native operations behind the ones that need them.</p>
+  <div class="features">
+    <div class="fcard"><div class="ico">☢️</div><h3 data-i="f1_h">PWR Reactor Simulator</h3><p data-i="f1_p">A physics-accurate pressurized-water reactor: 6-group point kinetics, Doppler &amp; moderator feedback, xenon/samarium poisons, boron control, decay heat, SCRAM. Ported from WinForge's 6,500-line C# engine.</p></div>
+    <div class="fcard"><div class="ico">🧰</div><h3 data-i="f2_h">314-module catalog</h3><p data-i="f2_p">Services, Scheduled Tasks, Event Viewer, Nmap, packet capture, drives &amp; SMART, package manager, dev toolbox, encoding/crypto/text utilities — browsable, searchable, bilingual.</p></div>
+    <div class="fcard"><div class="ico">🦀</div><h3 data-i="f3_h">Native Rust actions</h3><p data-i="f3_p">A Tauri v2 Rust backend runs the real operations — command &amp; PowerShell runners, system info, filesystem, live system probes — not fake screenshots. Web-safe modules also run in a plain browser.</p></div>
+    <div class="fcard"><div class="ico">📦</div><h3 data-i="f4_h">Portable &amp; one-click</h3><p data-i="f4_p">A branded one-click installer, plus a fully portable zip that runs on a clean machine — WebView2 bundled offline, statically-linked CRT, vendored CLI tools. No prerequisites.</p></div>
+    <div class="fcard"><div class="ico">🌏</div><h3 data-i="f5_h">Bilingual, end to end</h3><p data-i="f5_p">Every module title, keyword and label is English + 繁體中文. Search works in either language; your language choice persists across sessions.</p></div>
+    <div class="fcard"><div class="ico">⚡</div><h3 data-i="f6_h">Modern &amp; fast</h3><p data-i="f6_p">React 18 + TypeScript (strict) + Vite front end in a lightweight WebView shell — native-app responsiveness without an Electron-sized footprint.</p></div>
+  </div>
+</section>
+
+<section class="blk wrap" id="reactor">
+  <div class="rgrid">
+    <div>
+      <p class="eyebrow" style="text-align:left" data-i="r_eyebrow">The headline module</p>
+      <h2 style="text-align:left;font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:720;margin:10px 0 14px" data-i="r_h">A nuclear reactor you can actually operate</h2>
+      <p style="color:var(--text-secondary);margin-bottom:18px" data-i="r_p1">WinForge's PWR simulator is a real point-kinetics core model, not an animation. Pull control rods, adjust boron concentration, watch Doppler and moderator-temperature feedback fight your reactivity, and manage xenon transients after a power change.</p>
+      <ul style="color:var(--text-secondary);list-style:none;display:grid;gap:9px">
+        <li data-i="r_l1">✔ 6-group delayed-neutron point kinetics (backward-Euler)</li>
+        <li data-i="r_l2">✔ Fuel/coolant thermal-hydraulics, RCP flow, decay heat (ANS-5.1)</li>
+        <li data-i="r_l3">✔ Xenon-135 &amp; samarium poison dynamics, critical-boron solver</li>
+        <li data-i="r_l4">✔ Reactor Protection System auto-SCRAM &amp; rod drop</li>
+        <li data-i="r_l5">✔ Live gauges, reactivity bars and trend sparklines</li>
+      </ul>
+      <p style="margin-top:20px"><a class="btn" href="https://github.com/codingmachineedge/winforge-web/wiki/Reactor-Simulator" data-i="r_cta">Read the reactor guide →</a></p>
+    </div>
+    <div class="shot"><div class="frame"><img src="assets/shot-reactor.png" alt="Reactor simulator" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ph" style="display:none">☢️<span data-i="ph_reactor">Reactor control room</span></div></div></div>
+  </div>
+</section>
+
+<section class="blk wrap" id="screens">
+  <p class="eyebrow" data-i="s_eyebrow">A look inside</p>
+  <h2 class="h2" data-i="s_h">Screenshots</h2>
+  <p class="sub" data-i="s_sub">Dark and light Fluent themes, a searchable catalog, and live native panels.</p>
+  <div class="shots">
+    <div class="shot"><div class="frame"><img src="assets/shot-catalog.png" alt="Catalog browser (light theme)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ph" style="display:none">🧰<span data-i="ph_catalog">Module catalog browser</span></div></div><div class="cap"><b data-i="s_c1b">Catalog browser · light</b> — <span data-i="s_c1">314 modules across four sections, bilingual search &amp; web/native filter.</span></div></div>
+    <div class="shot"><div class="frame"><img src="assets/shot-module.png" alt="Toolbox in dark theme, Cantonese UI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ph" style="display:none">🧰<span data-i="ph_module">Toolbox · dark theme</span></div></div><div class="cap"><b data-i="s_c2b">Toolbox · dark</b> — <span data-i="s_c2">153 pure-client utilities, shown here in the 粵語 (Cantonese) UI.</span></div></div>
+  </div>
+</section>
+
+<section class="blk wrap">
+  <p class="eyebrow" data-i="c_eyebrow">The catalog</p>
+  <h2 class="h2" data-i="c_h">Four sections, mirroring WinForge</h2>
+  <p class="sub" data-i="c_sub">The navigation tree is generated directly from WinForge's module registry.</p>
+  <div class="catgrid">
+    <div class="cat"><h4>Suite <span class="tag web" data-i="c_web">web</span></h4><p data-i="c1">Dashboard, the Nuclear Reactor, Reactor Settings, and 18 reactor-powered industrial loads.</p></div>
+    <div class="cat"><h4>Categories <span class="tag native" data-i="c_native">native</span></h4><p data-i="c2">Files &amp; Disks, System, Media &amp; Capture, Tweaks &amp; Input, Apps &amp; Git, Security &amp; Privacy.</p></div>
+    <div class="cat"><h4>Toolbox <span class="tag web" data-i="c_web2">web</span></h4><p data-i="c3">12 groups of pure client-side utilities: JSON/Data, Text, Encoding, Crypto, Web/HTTP, Network, Dev, Time, Calculators, Colors.</p></div>
+    <div class="cat"><h4>Windows 11 <span class="tag native" data-i="c_native2">native</span></h4><p data-i="c4">System tweaks and registry-level Windows 11 customizations.</p></div>
+  </div>
+</section>
+
+<section class="blk wrap" id="install">
+  <p class="eyebrow" data-i="i_eyebrow">Get started</p>
+  <h2 class="h2" data-i="i_h">Install in one line</h2>
+  <p class="sub" data-i="i_sub">Open <b>PowerShell</b> (no need to run as admin — the script elevates itself) and paste:</p>
+  <div class="install-card">
+    <div class="cmd">
+      <div class="cmd-box">
+        <code>powershell -ExecutionPolicy Bypass -Command "<span class="tok">irm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">iex</span>"</code>
+        <button class="copybtn" id="copybtn2" data-i="copy">⧉ Copy</button>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="txt"><b data-i="i_s1b">Paste &amp; run.</b> <span data-i="i_s1">The command downloads <code class="inline">install.ps1</code> and runs it.</span></div></div>
+      <div class="step"><div class="n">2</div><div class="txt"><b data-i="i_s2b">Approve the UAC prompt.</b> <span data-i="i_s2">The script relaunches itself as Administrator via <code class="inline">Start-Process -Verb RunAs</code>.</span></div></div>
+      <div class="step"><div class="n">3</div><div class="txt"><b data-i="i_s3b">It fetches the latest release.</b> <span data-i="i_s3">The newest installer asset is pulled from GitHub Releases and launched.</span></div></div>
+      <div class="step"><div class="n">4</div><div class="txt"><b data-i="i_s4b">Done.</b> <span data-i="i_s4">Follow the one-click setup and launch WinForge Web.</span></div></div>
+    </div>
+    <div class="altinstall">
+      <b data-i="i_alt_b">Prefer to do it manually?</b>
+      <span data-i="i_alt">Grab the installer or portable zip straight from the</span>
+      <a href="https://github.com/codingmachineedge/winforge-web/releases">Releases page</a>,
+      <span data-i="i_alt2">or build from source — see the</span>
+      <a href="https://github.com/codingmachineedge/winforge-web/wiki/Build-from-Source">build guide</a>.
+    </div>
+    <div class="warn" data-i="i_warn">⚠ Windows 10/11 x64. Review any script before piping it to <code class="inline">iex</code> — read <a href="https://codingmachineedge.github.io/winforge-web/install.ps1">install.ps1</a> first if you like.</div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div>
+      <div class="brand" style="margin-bottom:8px"><svg class="logo" viewBox="0 0 100 100" width="22" height="22"><rect width="100" height="100" rx="22" fill="#26262b"/><circle cx="50" cy="50" r="24" fill="none" stroke="#4cc2ff" stroke-width="6"/><circle cx="50" cy="50" r="7" fill="#4cc2ff"/></svg> WinForge Web · 網頁版</div>
+      <div data-i="foot_tag">A React/TypeScript + Tauri v2 rewrite of WinForge. MIT licensed.</div>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/codingmachineedge/winforge-web">GitHub</a>
+      <a href="https://github.com/codingmachineedge/winforge-web/wiki" data-i="foot_docs">Documentation</a>
+      <a href="https://github.com/codingmachineedge/winforge-web/releases" data-i="foot_dl">Downloads</a>
+      <a href="https://github.com/codingmachineedge/winforge-web/wiki/FAQ">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const I = {
+  nav_features:{yue:"功能"}, nav_reactor:{yue:"反應堆"}, nav_screens:{yue:"截圖"}, nav_install:{yue:"安裝"}, nav_docs:{yue:"文件"},
+  hero_badge:{yue:"Tauri v2 桌面應用 · Rust 後端 · Windows x64"},
+  hero_t1:{yue:"Windows 高手工具包，"}, hero_t2:{yue:"為網頁時代重寫。"},
+  hero_tag:{yue:"一個應用入面有 314 個模組 — 由服務、磁碟、封包擷取，去到一個物理準確嘅壓水式核反應堆模擬器。原生 Rust 動作，可攜、一鍵安裝，全程雙語。"},
+  hero_cta1:{yue:"⬇ 一鍵安裝"}, hero_cta2:{yue:"喺 Releases 下載"},
+  cmd_label:{yue:"貼入 PowerShell — 會自動提權做管理員"},
+  cmd_note:{yue:"會由 GitHub 下載最新已簽署嘅安裝程式再執行，唔使裝套件管理器。"},
+  copy:{yue:"⧉ 複製"},
+  stat_modules:{yue:"個模組"}, stat_sections:{yue:"個目錄分區"}, stat_working:{yue:"個已接原生功能"}, stat_lang:{yue:"雙語介面"},
+  feat_eyebrow:{yue:"全部喺同一個殼入面"}, feat_h:{yue:"一個應用，314 件工具。"},
+  feat_sub:{yue:"一個 Fluent 風格嘅目錄瀏覽器，橫跨四個分區 — Suite、Categories、Toolbox、Windows 11 微調 — 需要原生操作嘅模組都係真做。"},
+  f1_h:{yue:"壓水堆模擬器"}, f1_p:{yue:"一個物理準確嘅壓水式反應堆：6 群點動力學、都卜勒同慢化劑反饋、氙/釤毒物、硼控制、衰變熱、緊急停堆。由 WinForge 6,500 行 C# 引擎移植。"},
+  f2_h:{yue:"314 個模組目錄"}, f2_p:{yue:"服務、排程工作、事件檢視器、Nmap、封包擷取、磁碟同 SMART、套件管理、開發工具箱、編碼/加密/文字工具 — 可瀏覽、可搜尋、雙語。"},
+  f3_h:{yue:"原生 Rust 動作"}, f3_p:{yue:"Tauri v2 Rust 後端執行真正操作 — 指令同 PowerShell 執行器、系統資訊、檔案系統、即時系統探測 — 唔係假截圖。安全嘅模組亦都可以喺普通瀏覽器行。"},
+  f4_h:{yue:"可攜 & 一鍵"}, f4_p:{yue:"有品牌化嘅一鍵安裝程式，仲有一個完全可攜嘅 zip，喺乾淨機都行到 — WebView2 離線內建、靜態連結 CRT、內附 CLI 工具，零前置需求。"},
+  f5_h:{yue:"由頭到尾雙語"}, f5_p:{yue:"每個模組標題、關鍵字同標籤都係英文 + 繁體中文。兩種語言都搜到；你揀嘅語言會記住。"},
+  f6_h:{yue:"現代又快"}, f6_p:{yue:"React 18 + TypeScript（嚴格）+ Vite 前端，放喺輕量 WebView 殼入面 — 有原生應用嘅反應速度，但冇 Electron 咁大隻。"},
+  r_eyebrow:{yue:"重點模組"}, r_h:{yue:"一個你真係可以操作嘅核反應堆"},
+  r_p1:{yue:"WinForge 嘅壓水堆模擬器係真正嘅點動力學爐心模型，唔係動畫。你可以抽控制棒、調硼濃度，睇住都卜勒同慢化劑溫度反饋同你嘅反應性角力，仲要喺變功率之後管理氙暫態。"},
+  r_l1:{yue:"✔ 6 群緩發中子點動力學（後向歐拉）"}, r_l2:{yue:"✔ 燃料/冷卻劑熱工水力、主泵流量、衰變熱（ANS-5.1）"},
+  r_l3:{yue:"✔ 氙-135 同釤毒物動態、臨界硼求解器"}, r_l4:{yue:"✔ 反應堆保護系統自動停堆同落棒"},
+  r_l5:{yue:"✔ 即時儀表、反應性條同趨勢曲線"}, r_cta:{yue:"睇反應堆指南 →"},
+  s_eyebrow:{yue:"入面睇睇"}, s_h:{yue:"截圖"}, s_sub:{yue:"深色同淺色 Fluent 主題、可搜尋目錄、即時原生面板。"},
+  s_c1b:{yue:"目錄瀏覽器 · 淺色"}, s_c1:{yue:"四個分區共 314 個模組，雙語搜尋同 網頁/原生 篩選。"},
+  s_c2b:{yue:"工具箱 · 深色"}, s_c2:{yue:"153 個純用戶端工具，呢度用緊粵語介面。"},
+  ph_reactor:{yue:"反應堆控制室"}, ph_catalog:{yue:"模組目錄瀏覽器"}, ph_module:{yue:"工具箱 · 深色主題"},
+  c_eyebrow:{yue:"目錄結構"}, c_h:{yue:"四個分區，對應 WinForge"}, c_sub:{yue:"導覽樹直接由 WinForge 嘅模組登記表生成。"},
+  c_web:{yue:"網頁"}, c_web2:{yue:"網頁"}, c_native:{yue:"原生"}, c_native2:{yue:"原生"},
+  c1:{yue:"概覽、核反應堆、反應堆設定，同 18 個由反應堆供電嘅工業負載。"},
+  c2:{yue:"檔案與磁碟、系統、媒體與擷取、微調與輸入、應用與 Git、安全與私隱。"},
+  c3:{yue:"12 組純用戶端工具：JSON/資料、文字、編碼、加密、Web/HTTP、網絡、開發、時間、計算機、顏色。"},
+  c4:{yue:"系統微調同登錄檔層面嘅 Windows 11 客製化。"},
+  i_eyebrow:{yue:"開始使用"}, i_h:{yue:"一行搞掂安裝"},
+  i_sub:{yue:"開 <b>PowerShell</b>（唔使用管理員身份 — 腳本會自己提權）然後貼："},
+  i_s1b:{yue:"貼上再執行。"}, i_s1:{yue:"呢個指令會下載 <code class='inline'>install.ps1</code> 再執行佢。"},
+  i_s2b:{yue:"批准 UAC 提示。"}, i_s2:{yue:"腳本會透過 <code class='inline'>Start-Process -Verb RunAs</code> 用管理員身份重新啟動自己。"},
+  i_s3b:{yue:"佢會攞最新版本。"}, i_s3:{yue:"由 GitHub Releases 拉取最新嘅安裝程式並啟動。"},
+  i_s4b:{yue:"完成。"}, i_s4:{yue:"跟住一鍵安裝流程，再啟動 WinForge Web。"},
+  i_alt_b:{yue:"想手動裝？"}, i_alt:{yue:"直接喺呢度攞安裝程式或者可攜 zip："}, i_alt2:{yue:"或者由原始碼建置 — 睇"},
+  i_warn:{yue:"⚠ Windows 10/11 x64。任何腳本 pipe 落 <code class='inline'>iex</code> 之前都應該睇清楚 — 想嘅話可以先讀 <a href='https://codingmachineedge.github.io/winforge-web/install.ps1'>install.ps1</a>。"},
+  foot_tag:{yue:"WinForge 嘅 React/TypeScript + Tauri v2 重寫版本。MIT 授權。"},
+  foot_docs:{yue:"文件"}, foot_dl:{yue:"下載"}
+};
+const nodes = document.querySelectorAll('[data-i]');
+const en = {};
+nodes.forEach(n=>{en[n.getAttribute('data-i')] = n.innerHTML;});
+function setLang(mode){
+  document.body.classList.toggle('bi', mode==='bi');
+  nodes.forEach(n=>{
+    const k = n.getAttribute('data-i');
+    const e = en[k]; const y = (I[k]&&I[k].yue) || e;
+    if(mode==='en') n.innerHTML = e;
+    else if(mode==='yue') n.innerHTML = y;
+    else n.innerHTML = e + '<span class="alt">'+y+'</span>';
+  });
+  document.querySelectorAll('.langsw button').forEach(b=>b.classList.toggle('on', b.dataset.lang===mode));
+  document.documentElement.lang = mode==='yue' ? 'yue' : 'en';
+  try{localStorage.setItem('wfw-lang', mode);}catch(e){}
+}
+document.querySelectorAll('.langsw button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+(function(){ let s='en'; try{s=localStorage.getItem('wfw-lang')||'en';}catch(e){} if(s!=='en') setLang(s); })();
+
+const CMD = 'powershell -ExecutionPolicy Bypass -Command "irm https://codingmachineedge.github.io/winforge-web/install.ps1 | iex"';
+function wireCopy(id){
+  const btn = document.getElementById(id); if(!btn) return;
+  btn.addEventListener('click',()=>{
+    navigator.clipboard.writeText(CMD).then(()=>{
+      const old = btn.innerHTML; btn.classList.add('done'); btn.innerHTML='✓ Copied';
+      setTimeout(()=>{btn.classList.remove('done'); btn.innerHTML=old;},1600);
+    });
+  });
+}
+wireCopy('copybtn'); wireCopy('copybtn2');
+</script>
+</body>
+</html>
