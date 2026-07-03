@@ -43,6 +43,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.clipinspect',
   'module.cloudflare',
   'module.cmdpalette',
+  'module.collider',
   'module.colorblind',
   'module.colormix',
   'module.colorname',

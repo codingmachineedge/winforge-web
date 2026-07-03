@@ -269,7 +269,7 @@ export const catalog: CatalogSection[] = [
             "zh": "批次改名",
             "glyph": "",
             "keywords": "rename bulk powerrename regex 改名 批次",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.duplicates",
@@ -2965,7 +2965,7 @@ export const allModules: CatalogModule[] = [
     "zh": "重複檔案搜尋",
     "glyph": "",
     "keywords": "duplicate hash find dedupe 重複",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.everything",

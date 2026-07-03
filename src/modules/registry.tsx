@@ -185,6 +185,7 @@ import { MinecraftServerModule } from './MinecraftServerModule';
 import { MinecraftLauncherModule } from './MinecraftLauncherModule';
 import { MailModule } from './MailModule';
 import { CommsModule } from './CommsModule';
+import { ColliderModule } from './ColliderModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -386,6 +387,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.minecraftlauncher': MinecraftLauncherModule,
   'module.mail': MailModule,
   'module.comms': CommsModule,
+  'module.collider': ColliderModule,
   ...moduleRegistryB,
 };
 

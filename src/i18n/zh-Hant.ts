@@ -2,6 +2,26 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  collider: {
+    "blurb": "超導粒子對撞機。維持束流嘅磁鐵功率隨束流能量嘅平方增長（14 TeV 時約 800 MW）。束流只會喺反應堆供得起所需功率時向目標爬升；反應堆一停就會傾瀉束流。超過 3 TeV 穩定運行就會記錄光度同發現。",
+    "beamOn": "啟動束流",
+    "beamOff": "關束流",
+    "priority": "優先束流",
+    "resetRun": "重設實驗",
+    "standby": "待命 — 束流關咗。",
+    "noPower": "冇反應堆電力 — 磁鐵冷卻。",
+    "dumped": "束流傾瀉 — 失去電力。",
+    "ramping": "爬升中 — {{tev}} TeV。",
+    "colliding": "喺 {{tev}} TeV 對撞 — 記錄緊。",
+    "starved": "功率受限 — 束流被壓喺目標以下。",
+    "availableLabel": "反應堆可用：{{mw}} MWe",
+    "targetLabel": "目標束流能量：{{tev}} TeV",
+    "beam": "束流能量",
+    "beamStat": "{{tev}} TeV · 磁鐵需要 {{req}} MW（可用 {{avail}} MW）",
+    "lumi": "積分光度",
+    "events": "記錄事件",
+    "discoveries": "發現"
+  },
   amulet: {
     "blurb": "設定同啟動 Amulet Minecraft 世界編輯器。WinForge 會掃描你嘅 .minecraft\\saves 資料夾，原生讀取每個世界嘅 level.dat（名稱／版本／維度／大小／上次遊玩），然後喺 Amulet 開啟世界 — 每個世界都可以啟動、備份，仲有即時記錄。Amulet 以自己嘅 GPLv3 程序運行。",
     "savesFound": "搵到存檔",

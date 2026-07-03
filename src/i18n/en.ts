@@ -1,5 +1,25 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  collider: {
+    "blurb": "A superconducting particle collider. Magnet power to hold the beam grows with the square of beam energy (~800 MW at 14 TeV). The beam ramps toward your target only while the reactor can supply the required power; a reactor stop dumps the beam. Above 3 TeV, stable running records luminosity and discoveries.",
+    "beamOn": "Start beam",
+    "beamOff": "Beam off",
+    "priority": "Priority beam",
+    "resetRun": "Reset run",
+    "standby": "Standby — beam off.",
+    "noPower": "No reactor power — magnets cold.",
+    "dumped": "BEAM DUMP — power lost.",
+    "ramping": "Ramping — {{tev}} TeV.",
+    "colliding": "Colliding at {{tev}} TeV — recording.",
+    "starved": "Power-limited — beam capped below target.",
+    "availableLabel": "Reactor available: {{mw}} MWe",
+    "targetLabel": "Target beam energy: {{tev}} TeV",
+    "beam": "Beam energy",
+    "beamStat": "{{tev}} TeV · magnets need {{req}} MW of {{avail}} MW available",
+    "lumi": "Integrated luminosity",
+    "events": "Events recorded",
+    "discoveries": "Discoveries"
+  },
   amulet: {
     "blurb": "Set up and launch the Amulet Minecraft world editor. WinForge scans your .minecraft\\saves folder, reads each world's level.dat (name / version / dimensions / size / last played) natively, and opens a world in Amulet — with per-world launch, backup and a live log. Amulet runs as its own GPLv3 process.",
     "savesFound": "Saves found",
