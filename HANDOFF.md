@@ -31,6 +31,25 @@ Architecture Rules below); it never tells the user to open the old desktop app.
   1/M, startup-rate DPM, P-6..P-10 permissives, Tech-Spec MODE 1–6, time-to-criticality,
   subcooling margin, EN/ZH alarms, fuel-availability gate.
 
+## Shell-features batch (2026-07-03, later session)
+
+Two waves of shortlist features from `FEATURES_SHORTLIST.md` landed on main
+(commits 89cfd4c…fd0eefc): persisted prefs/favorites/recents/toasts/theme stores,
+favorites rail + recents strip + pin star, toast queue, error boundaries,
+Light/Dark/System theme toggle (`data-theme` on :root), reduced-motion, skip link +
+landmarks, route-level code splitting, typo-tolerant fuzzy search + `<mark>`
+highlighting (in-house, `src/data/fuzzy.ts`), and a searchable settings page
+(typed registry `src/data/settingsRegistry.ts`) with working density/uiScale/
+view-mode effects. Tests 24 → 147. Build: eager chunk 2,332 kB → ~692 kB.
+
+⚠️ **New gotcha:** `src/modules/registryKeys.ts` is GENERATED (`npm run
+gen:registry-keys`). After adding/removing modules in any registry file,
+regenerate it — a vitest guard (`registryKeys.test.ts`) fails otherwise. Never
+import `moduleRegistry` from eager code (status checks etc.); use
+`registeredModuleTags` — importing the registry drags all module components
+into the initial bundle. Note batch item 2 below (the 5 batch-B stubs) was
+completed by a concurrent session in d08dd85.
+
 ## What remains (priority order)
 
 1. **Re-run the interrupted native batch of 6** — `diskhealth`, `battery`, `disk`,
