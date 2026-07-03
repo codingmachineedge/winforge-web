@@ -1,0 +1,308 @@
+/* ============================================================================
+   Reactor instrumentation panels — analog gauges, annunciator, NIS, permissive
+   lamps, mode annunciator. Imported by the reactor UI components. Colors use the
+   global design tokens; motion is auto-disabled by the global prefers-reduced-motion
+   reset, so no transitions are duplicated here.
+   ============================================================================ */
+
+/* ---- analog dial gauge ---- */
+.agauge {
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.agauge-primary {
+  background: linear-gradient(160deg, var(--bg-card-hover), var(--bg-card));
+  border-color: var(--stroke);
+}
+.agauge-label {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  align-self: flex-start;
+}
+.agauge-svg {
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  display: block;
+}
+.agauge-track {
+  stroke: var(--stroke);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+.agauge-band-warn {
+  stroke: var(--native);
+  stroke-width: 9;
+  stroke-linecap: butt;
+  opacity: 0.85;
+}
+.agauge-band-danger {
+  stroke: var(--danger);
+  stroke-width: 9;
+  stroke-linecap: butt;
+  opacity: 0.9;
+}
+.agauge-tick {
+  stroke: var(--text-tertiary);
+  stroke-width: 1.5;
+  opacity: 0.5;
+}
+.agauge-needle line {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.agauge-needle {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.agauge-hub {
+  fill: var(--accent-strong);
+  stroke: var(--bg-card);
+  stroke-width: 2;
+}
+.agauge-readout {
+  margin-top: -6px;
+}
+.agauge-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+.agauge-unit {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.agauge-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+/* ---- annunciator ---- */
+.annunciator-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.annunciator-head .panel-title {
+  margin: 0;
+}
+.annunciator-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.annunciator-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.annunciator-count.flashing {
+  color: var(--danger);
+  font-weight: 700;
+}
+.annunciator-ack {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+.annunciator-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.annunciator-empty {
+  grid-column: 1 / -1;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  padding: 8px 0;
+}
+.annunciator-tile {
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: var(--bg-card-hover);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 10px 12px;
+  min-height: 46px;
+  text-align: left;
+  cursor: pointer;
+}
+/* active + unacknowledged → flashing red */
+.annunciator-tile.tile-active {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  animation: annunciator-flash 0.9s steps(1, end) infinite;
+}
+/* active + acknowledged → steady red */
+.annunciator-tile.tile-ackActive {
+  background: color-mix(in srgb, var(--danger) 65%, transparent);
+  border-color: var(--danger);
+  color: #fff;
+}
+/* cleared + unacknowledged → amber ringback (steady) */
+.annunciator-tile.tile-latched {
+  background: color-mix(in srgb, var(--native) 30%, transparent);
+  border-color: var(--native);
+  color: var(--native);
+}
+@keyframes annunciator-flash {
+  50% {
+    background: color-mix(in srgb, var(--danger) 25%, var(--bg-card));
+    border-color: color-mix(in srgb, var(--danger) 50%, var(--stroke));
+  }
+}
+
+/* ---- NIS panel ---- */
+.nis-row {
+  margin-bottom: 12px;
+}
+.nis-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.nis-name {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.nis-abbr {
+  display: inline-block;
+  min-width: 1.4em;
+  font-weight: 700;
+  color: var(--accent);
+}
+.nis-val {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.nis-val.warn {
+  color: var(--native);
+}
+.nis-unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.nis-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--stroke-subtle);
+  overflow: hidden;
+  border: 1px solid var(--stroke-subtle);
+}
+.nis-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-strong), var(--accent));
+}
+.nis-bar-fill.lin {
+  background: linear-gradient(90deg, var(--web), var(--native));
+}
+.nis-note {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.nis-energized {
+  color: var(--native);
+  font-weight: 600;
+}
+.nis-deenergized {
+  color: var(--text-tertiary);
+}
+.nis-row-sur {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 8px;
+  border-top: 1px solid var(--stroke-subtle);
+}
+
+/* ---- permissive lamps ---- */
+.permissive-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+.permissive-lamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-card-hover);
+  text-align: center;
+}
+.permissive-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--stroke);
+  border: 1px solid var(--stroke);
+}
+.permissive-lamp.on .permissive-dot {
+  background: var(--web);
+  border-color: var(--web);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--web) 70%, transparent);
+}
+.permissive-id {
+  font-size: 12px;
+  font-weight: 700;
+}
+.permissive-lamp.on .permissive-id {
+  color: var(--web);
+}
+.permissive-desc {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+
+/* ---- mode annunciator ---- */
+.mode-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mode-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-card-hover);
+  opacity: 0.55;
+}
+.mode-cell.active {
+  opacity: 1;
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg-card));
+  border-color: var(--accent);
+}
+.mode-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 5.2em;
+}
+.mode-cell.active .mode-num {
+  color: var(--accent);
+}
+.mode-name {
+  font-size: 13px;
+}

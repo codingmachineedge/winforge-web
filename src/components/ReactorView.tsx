@@ -1,6 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { ReactorMode, type ReactorState } from '../reactor/physics';
+import { ReactorMode, RatedThermalMW, type ReactorState } from '../reactor/physics';
 import { useReactorSim, type TrendPoint } from '../reactor/useReactorSim';
+import { AnalogGauge } from './reactor/AnalogGauge';
+import { Annunciator } from './reactor/Annunciator';
+import { NisPanel } from './reactor/NisPanel';
+import { PermissiveLamps } from './reactor/PermissiveLamps';
+import { ModeAnnunciator } from './reactor/ModeAnnunciator';
+import { useNumberFmt, type NumberFmt } from './reactor/format';
+import '../styles/reactor-panels.css';
 
 // ---- small presentational helpers ----
 
@@ -73,7 +80,7 @@ function Sparkline({
   );
 }
 
-function ReactivityBar({ label, pcm }: { label: string; pcm: number }) {
+function ReactivityBar({ label, pcm, fmt }: { label: string; pcm: number; fmt: NumberFmt }) {
   // map ±3000 pcm to a bar around the centre.
   const cap = 3000;
   const frac = Math.max(-1, Math.min(1, pcm / cap));
@@ -89,7 +96,7 @@ function ReactivityBar({ label, pcm }: { label: string; pcm: number }) {
           style={{ left: positive ? '50%' : `${50 - width}%`, width: `${width}%` }}
         />
       </div>
-      <div className={`rbar-val ${positive ? 'pos' : 'neg'}`}>{pcm >= 0 ? '+' : ''}{Math.round(pcm)}</div>
+      <div className={`rbar-val ${positive ? 'pos' : 'neg'}`}>{pcm >= 0 ? '+' : ''}{fmt.fmt(pcm, 0)}</div>
     </div>
   );
 }
@@ -133,11 +140,10 @@ function Slider({
 }
 
 // ---- formatting ----
-const fmt = (n: number, d = 1) => n.toFixed(d);
-function fmtPeriod(s: number, stableLabel: string): string {
+function fmtPeriod(s: number, stableLabel: string, fmt: NumberFmt): string {
   if (!Number.isFinite(s) || Math.abs(s) >= 1e6) return `∞ · ${stableLabel}`;
-  if (Math.abs(s) >= 1000) return `${Math.round(s)}`;
-  return s.toFixed(1);
+  if (Math.abs(s) >= 1000) return fmt.fmt(s, 0);
+  return fmt.fmt(s, 1);
 }
 
 function criticalityLabel(st: ReactorState, t: (k: string) => string): { text: string; tone: 'ok' | 'warn' | 'danger' } {
@@ -150,6 +156,7 @@ function criticalityLabel(st: ReactorState, t: (k: string) => string): { text: s
 
 export function ReactorView() {
   const { t } = useTranslation();
+  const nf = useNumberFmt();
   const sim = useReactorSim();
   const st = sim.state;
 
@@ -163,7 +170,6 @@ export function ReactorView() {
     { m: ReactorMode.Run, key: 'reactor.modeRun' },
   ];
 
-  const fuelTone = st.fuelTemp > 1200 ? 'danger' : st.fuelTemp > 900 ? 'warn' : undefined;
   const rho = st.reactivity;
 
   return (
@@ -185,67 +191,104 @@ export function ReactorView() {
         </div>
       </div>
 
-      {/* ---- primary gauges (the four control-room instruments) ---- */}
+      {/* ---- primary gauges (the four control-room instruments, analog dials) ---- */}
       <div className="gauges">
-        <Gauge
+        <AnalogGauge
           primary
           label={t('reactor.power')}
-          value={fmt(st.thermalPowerMW, 1)}
+          value={st.thermalPowerMW}
+          min={0}
+          max={RatedThermalMW * 1.2}
+          warn={RatedThermalMW}
+          danger={RatedThermalMW * 1.18}
+          valueText={nf.fmt(st.thermalPowerMW, 1)}
           unit="MWₜ"
-          sub={`${fmt(powerPct, powerPct < 10 ? 3 : 1)} ${t('reactor.rtp')}`}
-          tone="accent"
+          sub={`${nf.fmt(powerPct, powerPct < 10 ? 3 : 1)} ${t('reactor.rtp')}`}
         />
-        <Gauge
+        <AnalogGauge
           primary
           label={t('reactor.reactivity')}
-          value={`${st.reactivityPcm >= 0 ? '+' : ''}${Math.round(st.reactivityPcm)}`}
+          value={st.reactivityPcm}
+          min={-3000}
+          max={3000}
+          warn={5}
+          danger={800}
+          valueText={`${st.reactivityPcm >= 0 ? '+' : ''}${nf.fmt(st.reactivityPcm, 0)}`}
           unit="pcm"
-          sub={`k-eff ${st.keff.toFixed(5)}`}
-          tone={st.reactivityPcm > 5 ? 'warn' : st.reactivityPcm > -50 ? 'ok' : undefined}
+          sub={`k-eff ${nf.fmt(st.keff, 5)}`}
         />
-        <Gauge
+        <AnalogGauge
           primary
           label={t('reactor.fuelTemp')}
-          value={fmt(st.fuelTemp, 1)}
+          value={st.fuelTemp}
+          min={0}
+          max={2800}
+          warn={900}
+          danger={1200}
+          valueText={nf.fmt(st.fuelTemp, 1)}
           unit="°C"
-          tone={fuelTone}
         />
-        <Gauge
+        <AnalogGauge
           primary
           label={t('reactor.coolantTemp')}
-          value={fmt(st.tavg, 1)}
+          value={st.tavg}
+          min={0}
+          max={350}
+          warn={330}
+          danger={345}
+          valueText={nf.fmt(st.tavg, 1)}
           unit="°C"
-          sub={`${t('reactor.hotLeg')} ${fmt(st.thot, 0)} · ${t('reactor.coldLeg')} ${fmt(st.tcold, 0)}`}
+          sub={`${t('reactor.hotLeg')} ${nf.fmt(st.thot, 0)} · ${t('reactor.coldLeg')} ${nf.fmt(st.tcold, 0)}`}
         />
       </div>
 
-      {/* ---- supporting readouts ---- */}
+      {/* ---- supporting readouts (text, locale-formatted) ---- */}
       <div className="gauges gauges-sm">
-        <Gauge label={t('reactor.electricPower')} value={fmt(st.electricPowerMW, 0)} unit="MWe" />
-        <Gauge label={t('reactor.period')} value={fmtPeriod(st.reactorPeriodSeconds, t('reactor.stable'))} unit="s" />
-        <Gauge label={t('reactor.primaryPressure')} value={fmt(st.primaryPressure, 2)} unit="MPa" />
-        <Gauge label={t('reactor.coolantFlow')} value={fmt(st.coolantFlowFraction * 100, 0)} unit="%" />
-        <Gauge label={t('reactor.boron')} value={fmt(st.boronPpm, 0)} unit="ppm" />
-        <Gauge label={t('reactor.decayHeat')} value={fmt(st.decayHeatFraction * 100, 2)} unit="%" />
-        <Gauge label={t('reactor.xenon')} value={st.xenon.toFixed(2)} sub={`Sm ${st.samarium.toFixed(2)}`} />
+        <Gauge label={t('reactor.electricPower')} value={nf.fmt(st.electricPowerMW, 0)} unit="MWe" />
+        <Gauge label={t('reactor.period')} value={fmtPeriod(st.reactorPeriodSeconds, t('reactor.stable'), nf)} unit="s" />
+        <Gauge label={t('reactor.primaryPressure')} value={nf.fmt(st.primaryPressure, 2)} unit="MPa" />
+        <Gauge label={t('reactor.coolantFlow')} value={nf.fmt(st.coolantFlowFraction * 100, 0)} unit="%" />
+        <Gauge label={t('reactor.boron')} value={nf.fmt(st.boronPpm, 0)} unit="ppm" />
+        <Gauge label={t('reactor.decayHeat')} value={nf.fmt(st.decayHeatFraction * 100, 2)} unit="%" />
+        <Gauge label={t('reactor.xenon')} value={nf.fmt(st.xenon, 2)} sub={`Sm ${nf.fmt(st.samarium, 2)}`} />
         <Gauge
           label={t('reactor.burnup')}
-          value={fmt(st.burnupMwdPerTonne, 0)}
+          value={nf.fmt(st.burnupMwdPerTonne, 0)}
           unit="MWd/t"
-          sub={`${st.coreLifePhase} · ${fmt(st.cycleFraction * 100, 0)}%`}
+          sub={`${st.coreLifePhase} · ${nf.fmt(st.cycleFraction * 100, 0)}%`}
         />
+      </div>
+
+      {/* ---- instrumentation panels ---- */}
+      <div className="reactor-grid">
+        <Annunciator alarms={st.alarms} alarmsZh={st.alarmsZh} />
+
+        <NisPanel
+          sourceRangeCps={st.sourceRangeCps}
+          oneOverM={st.oneOverM}
+          sourceRangeEnergized={st.sourceRangeEnergized}
+          intermediateRangeAmps={st.intermediateRangeAmps}
+          intermediateRangeDecades={st.intermediateRangeDecades}
+          powerRangePercent={st.powerRangePercent}
+          startupRateDpm={st.startupRateDpm}
+          fmt={nf}
+        />
+
+        <PermissiveLamps p6={st.p6} p7={st.p7} p8={st.p8} p9={st.p9} p10={st.p10} />
+
+        <ModeAnnunciator tsMode={st.tsMode} />
       </div>
 
       <div className="reactor-grid">
         {/* ---- reactivity balance ---- */}
         <section className="panel">
           <h2 className="panel-title">{t('reactor.breakdown')}</h2>
-          <ReactivityBar label={t('reactor.rodWorth')} pcm={rho.rod} />
-          <ReactivityBar label={t('reactor.boronWorth')} pcm={rho.boron} />
-          <ReactivityBar label={t('reactor.dopplerWorth')} pcm={rho.doppler} />
-          <ReactivityBar label={t('reactor.moderatorWorth')} pcm={rho.moderator} />
-          <ReactivityBar label={t('reactor.xenonWorth')} pcm={rho.xenon} />
-          <ReactivityBar label={t('reactor.samariumWorth')} pcm={rho.samarium} />
+          <ReactivityBar label={t('reactor.rodWorth')} pcm={rho.rod} fmt={nf} />
+          <ReactivityBar label={t('reactor.boronWorth')} pcm={rho.boron} fmt={nf} />
+          <ReactivityBar label={t('reactor.dopplerWorth')} pcm={rho.doppler} fmt={nf} />
+          <ReactivityBar label={t('reactor.moderatorWorth')} pcm={rho.moderator} fmt={nf} />
+          <ReactivityBar label={t('reactor.xenonWorth')} pcm={rho.xenon} fmt={nf} />
+          <ReactivityBar label={t('reactor.samariumWorth')} pcm={rho.samarium} fmt={nf} />
         </section>
 
         {/* ---- trends ---- */}
