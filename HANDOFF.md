@@ -40,7 +40,7 @@ Light/Dark/System theme toggle (`data-theme` on :root), reduced-motion, skip lin
 landmarks, route-level code splitting, typo-tolerant fuzzy search + `<mark>`
 highlighting (in-house, `src/data/fuzzy.ts`), and a searchable settings page
 (typed registry `src/data/settingsRegistry.ts`) with working density/uiScale/
-view-mode effects. Tests 24 → 147. Build: eager chunk 2,332 kB → ~692 kB.
+view-mode effects. Tests 24 → 138. Build: eager chunk 2,332 kB → ~692 kB.
 
 ⚠️ **New gotcha:** `src/modules/registryKeys.ts` is GENERATED (`npm run
 gen:registry-keys`). After adding/removing modules in any registry file,
