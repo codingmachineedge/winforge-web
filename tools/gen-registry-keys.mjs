@@ -14,7 +14,8 @@ const sources = ['registry.tsx', 'registryA.tsx', 'registryB.tsx'];
 const tags = new Set();
 for (const file of sources) {
   const text = readFileSync(join(root, 'src', 'modules', file), 'utf8');
-  for (const m of text.matchAll(/'(module\.[a-z0-9_-]+)'\s*:/gi)) tags.add(m[1]);
+  // 'dashboard' is the one catalog tag without the module. prefix.
+  for (const m of text.matchAll(/'(module\.[a-z0-9_-]+|dashboard)'\s*:/gi)) tags.add(m[1]);
 }
 
 const sorted = [...tags].sort();

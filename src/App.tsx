@@ -10,6 +10,7 @@ import { allModules } from './data/catalog';
 import { pushRecent } from './state/recents';
 import { useApplyLayoutPrefs } from './state/applyPrefs';
 import { initDeepLinks } from './state/deepLink';
+import { onModuleOpenRequest, onPaletteOpenRequest } from './state/navBus';
 import type { View } from './types';
 
 // Route-level code splitting: the module-detail registry, the reactor simulator,
@@ -49,6 +50,19 @@ export function App() {
     setPaletteSeed(seed);
     setPaletteOpen(true);
   };
+
+  // Nav bus: modules (e.g. the Dashboard tiles) ask the shell to navigate.
+  useEffect(() => {
+    const offModule = onModuleOpenRequest((tag) => {
+      if (moduleByTag.has(tag)) openModule(tag);
+    });
+    const offPalette = onPaletteOpenRequest((seed) => openPalette(seed));
+    return () => {
+      offModule();
+      offPalette();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // winforge://module/<tag> deep links (Tauri only; no-op in the browser).
   // Links may carry the bare tag or the module.-prefixed form — resolve both.

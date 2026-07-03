@@ -19,7 +19,8 @@ for (const f of ['registry.tsx', 'registryA.tsx', 'registryB.tsx']) {
   const p = path.join(root, 'src/modules', f);
   if (fs.existsSync(p)) registry += fs.readFileSync(p, 'utf8');
 }
-const working = new Set([...registry.matchAll(/'(module\.[a-z0-9_-]+)'\s*:/g)].map((x) => x[1]));
+// 'dashboard' is the one catalog tag without the module. prefix.
+const working = new Set([...registry.matchAll(/'(module\.[a-z0-9_-]+|dashboard)'\s*:/g)].map((x) => x[1]));
 
 const native = fs.readFileSync(path.join(root, 'src/tauri/nativeActions.ts'), 'utf8');
 const partial = new Set([...native.matchAll(/'(module\.[a-z0-9]+)':/g)].map((x) => x[1]));

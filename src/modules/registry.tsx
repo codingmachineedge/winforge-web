@@ -121,6 +121,13 @@ import { DiskAnalyzerModule } from './DiskAnalyzerModule';
 import { ClipboardModule } from './ClipboardModule';
 import { DuplicatesModule } from './DuplicatesModule';
 import { SystemDoctorsModule } from './SystemDoctorsModule';
+import { DashboardModule } from './DashboardModule';
+import { ArchivesModule } from './ArchivesModule';
+import { BulkOpsModule } from './BulkOpsModule';
+import { EverythingSearchModule } from './EverythingSearchModule';
+import { FileLocksmithModule } from './FileLocksmithModule';
+import { HexEditorModule } from './HexEditorModule';
+import { DiskBenchmarkModule } from './DiskBenchmarkModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -258,6 +265,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.clipboard': ClipboardModule,
   'module.duplicates': DuplicatesModule,
   'module.doctors': SystemDoctorsModule,
+  'dashboard': DashboardModule,
+  'module.archives': ArchivesModule,
+  'module.bulkops': BulkOpsModule,
+  'module.everything': EverythingSearchModule,
+  'module.filelocksmith': FileLocksmithModule,
+  'module.hexeditor': HexEditorModule,
+  'module.diskbench': DiskBenchmarkModule,
   ...moduleRegistryB,
 };
 
