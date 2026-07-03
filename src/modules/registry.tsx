@@ -91,6 +91,12 @@ import { BaseConvertModule } from './BaseConvertModule';
 import { GitignoreModule } from './GitignoreModule';
 import { CssUnitsModule } from './CssUnitsModule';
 import { CalculatorModule } from './CalculatorModule';
+import { EntropyModule } from './EntropyModule';
+import { DateCalcModule } from './DateCalcModule';
+import { ColorMixModule } from './ColorMixModule';
+import { ContrastGridModule } from './ContrastGridModule';
+import { GlobTesterModule } from './GlobTesterModule';
+import { DnsRefModule } from './DnsRefModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -196,6 +202,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.gitignore': GitignoreModule,
   'module.cssunits': CssUnitsModule,
   'module.calculator': CalculatorModule,
+  'module.entropy': EntropyModule,
+  'module.datecalc': DateCalcModule,
+  'module.colormix': ColorMixModule,
+  'module.contrastgrid': ContrastGridModule,
+  'module.globtester': GlobTesterModule,
+  'module.dnsref': DnsRefModule,
   ...moduleRegistryB,
 };
 
