@@ -3,6 +3,8 @@ import { SlugifyModule } from './SlugifyModule';
 import { RomanNumModule } from './RomanNumModule';
 import { TextSortModule } from './TextSortModule';
 import { UnixPermModule } from './UnixPermModule';
+import { TextStatsModule } from './TextStatsModule';
+import { PhoneticModule } from './PhoneticModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -14,4 +16,6 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.romannum': RomanNumModule,
   'module.textsort': TextSortModule,
   'module.unixperm': UnixPermModule,
+  'module.textstats': TextStatsModule,
+  'module.phonetic': PhoneticModule,
 };
