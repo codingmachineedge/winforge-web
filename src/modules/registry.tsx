@@ -145,6 +145,13 @@ import { AltSnapModule } from './AltSnapModule';
 import { KeyboardModule } from './KeyboardModule';
 import { HotkeyMacroModule } from './HotkeyMacroModule';
 import { FeedReaderModule } from './FeedReaderModule';
+import { FlashcardsModule } from './FlashcardsModule';
+import { AndroidAdbModule } from './AndroidAdbModule';
+import { FastbootModule } from './FastbootModule';
+import { EmulatorModule } from './EmulatorModule';
+import { DockerModule } from './DockerModule';
+import { DockerSshModule } from './DockerSshModule';
+import { AwsCliModule } from './AwsCliModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -306,6 +313,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.keyboard': KeyboardModule,
   'module.hotkeys': HotkeyMacroModule,
   'module.feedreader': FeedReaderModule,
+  'module.flashcards': FlashcardsModule,
+  'module.adb': AndroidAdbModule,
+  'module.fastboot': FastbootModule,
+  'module.emulator': EmulatorModule,
+  'module.docker': DockerModule,
+  'module.dockerssh': DockerSshModule,
+  'module.aws': AwsCliModule,
   ...moduleRegistryB,
 };
 

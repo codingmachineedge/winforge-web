@@ -1037,7 +1037,7 @@ export const catalog: CatalogSection[] = [
             "zh": "間隔重複記憶卡",
             "glyph": "",
             "keywords": "flashcards flash cards anki srs spaced repetition study deck decks card front back review grade again hard good easy sm-2 sm2 ease interval due new mature memorize memorise learn quiz vocabulary csv import export 記憶卡 閃卡 間隔重複 學習 牌組 卡片 正面 背面 複習 評分 到期 成熟 背誦 記憶 默書 詞彙 匯入 匯出",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.rustdesk",
@@ -3693,7 +3693,7 @@ export const allModules: CatalogModule[] = [
     "zh": "間隔重複記憶卡",
     "glyph": "",
     "keywords": "flashcards flash cards anki srs spaced repetition study deck decks card front back review grade again hard good easy sm-2 sm2 ease interval due new mature memorize memorise learn quiz vocabulary csv import export 記憶卡 閃卡 間隔重複 學習 牌組 卡片 正面 背面 複習 評分 到期 成熟 背誦 記憶 默書 詞彙 匯入 匯出",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.rustdesk",
