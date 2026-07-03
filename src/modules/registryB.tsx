@@ -1,5 +1,8 @@
 import type { ComponentType } from 'react';
 import { SlugifyModule } from './SlugifyModule';
+import { RomanNumModule } from './RomanNumModule';
+import { TextSortModule } from './TextSortModule';
+import { UnixPermModule } from './UnixPermModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -8,4 +11,7 @@ import { SlugifyModule } from './SlugifyModule';
  */
 export const moduleRegistryB: Record<string, ComponentType> = {
   'module.slugify': SlugifyModule,
+  'module.romannum': RomanNumModule,
+  'module.textsort': TextSortModule,
+  'module.unixperm': UnixPermModule,
 };
