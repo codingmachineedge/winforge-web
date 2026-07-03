@@ -12,8 +12,14 @@ const m = catalogTs.match(/export const allModules: CatalogModule\[\] = (\[[\s\S
 if (!m) throw new Error('could not extract allModules');
 const allModules = JSON.parse(m[1]);
 
-const registry = fs.readFileSync(path.join(root, 'src/modules/registry.tsx'), 'utf8');
-const working = new Set([...registry.matchAll(/'(module\.[a-z0-9]+)':/g)].map((x) => x[1]));
+// Registered tags live across registry.tsx, registryA.tsx and registryB.tsx
+// (batch registries are spread into the main map), so scan all three.
+let registry = '';
+for (const f of ['registry.tsx', 'registryA.tsx', 'registryB.tsx']) {
+  const p = path.join(root, 'src/modules', f);
+  if (fs.existsSync(p)) registry += fs.readFileSync(p, 'utf8');
+}
+const working = new Set([...registry.matchAll(/'(module\.[a-z0-9_-]+)'\s*:/g)].map((x) => x[1]));
 
 const native = fs.readFileSync(path.join(root, 'src/tauri/nativeActions.ts'), 'utf8');
 const partial = new Set([...native.matchAll(/'(module\.[a-z0-9]+)':/g)].map((x) => x[1]));
