@@ -60,8 +60,9 @@ function describeSpan(ms: number, zh: boolean): string {
   return zh ? `${secs} 秒` : secs === 1 ? '1 second' : `${secs} seconds`;
 }
 
-// Faithful port of CountdownItem.Refresh.
-function countdownText(targetMs: number, nowMs: number, zh: boolean): string {
+// English and 粵語 halves of CountdownItem.Refresh, returned as a pair so the
+// caller can render either or both (bilingual mode).
+function countdownParts(targetMs: number, nowMs: number): { en: string; zh: string } {
   const diff = targetMs - nowMs;
   if (diff >= 0) {
     const totalSeconds = Math.floor(diff / 1000);
@@ -70,11 +71,12 @@ function countdownText(targetMs: number, nowMs: number, zh: boolean): string {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
     const clock = `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
-    return zh ? `仲有 ${days} 日，${clock}` : `${days} days, ${clock} left`;
+    return { en: `${days} days, ${clock} left`, zh: `仲有 ${days} 日，${clock}` };
   }
-  return zh
-    ? `已經過咗 ${describeSpan(nowMs - targetMs, true)}`
-    : `passed ${describeSpan(nowMs - targetMs, false)} ago`;
+  return {
+    en: `passed ${describeSpan(nowMs - targetMs, false)} ago`,
+    zh: `已經過咗 ${describeSpan(nowMs - targetMs, true)}`,
+  };
 }
 
 // yyyy-MM-dd HH:mm in local time (matches C# Target.LocalDateTime.ToString).
@@ -100,7 +102,7 @@ const todayDate = (): string => {
 
 export function CountdownEventModule() {
   const { t, i18n } = useTranslation();
-  const zh = pick('', 'zh', i18n.language) === 'zh';
+  const lang = i18n.language;
 
   const [events, setEvents] = useState<EventEntry[]>(() => {
     const loaded = loadEvents();
@@ -127,14 +129,15 @@ export function CountdownEventModule() {
     () =>
       events.map((ev) => {
         const ms = new Date(ev.target).getTime();
+        const parts = countdownParts(ms, now);
         return {
           name: ev.name,
           target: ev.target,
           targetLabel: targetText(ms),
-          text: countdownText(ms, now, zh),
+          text: pick(parts.en, parts.zh, lang),
         };
       }),
-    [events, now, zh]
+    [events, now, lang]
   );
 
   const addEvent = () => {

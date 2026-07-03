@@ -103,6 +103,12 @@ import { CalendarMonthModule } from './CalendarMonthModule';
 import { ColorPaletteModule } from './ColorPaletteModule';
 import { ICalendarModule } from './ICalendarModule';
 import { HttpHeaderRefModule } from './HttpHeaderRefModule';
+import { LoremImgModule } from './LoremImgModule';
+import { HeaderScoreModule } from './HeaderScoreModule';
+import { HarAnalyzerModule } from './HarAnalyzerModule';
+import { CountdownEventModule } from './CountdownEventModule';
+import { ExpenseSplitModule } from './ExpenseSplitModule';
+import { HabitTrackerModule } from './HabitTrackerModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -222,6 +228,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.icalendar': ICalendarModule,
   'module.httpheaderref': HttpHeaderRefModule,
   ...moduleRegistryA,
+  'module.loremimg': LoremImgModule,
+  'module.headerscore': HeaderScoreModule,
+  'module.haranalyzer': HarAnalyzerModule,
+  'module.countdownevent': CountdownEventModule,
+  'module.expensesplit': ExpenseSplitModule,
+  'module.habittracker': HabitTrackerModule,
   ...moduleRegistryB,
 };
 

@@ -357,7 +357,7 @@ export function HarAnalyzerModule() {
     const a = analyze(json, (en, zh) => p(en, zh));
     setAnalysis(a);
     if (a.ok) {
-      setStatus({ ok: true, msg: t('haranalyzer.analyzed', { count: a.result.totalRequests }) });
+      setStatus({ ok: true, msg: t('haranalyzer.analyzed', { num: a.result.totalRequests }) });
     } else {
       setStatus({ ok: false, msg: t('haranalyzer.couldNot') + a.error });
     }

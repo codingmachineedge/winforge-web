@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { pick } from '../i18n';
 
-// Port of WinForge HabitTracker (page + HabitTrackerService). A list of named habits,
-// each keeping the set of ISO "yyyy-MM-dd" dates it was completed. Shows this week
-// (Mon–Sun, today highlighted), current streak (consecutive days done up to today) and
-// total days done. Add / rename / delete; toggling a day persists immediately.
-// WinForge persisted to %LOCALAPPDATA%\WinForge\habits\habits.json — the web port keeps
-// the same data shape in localStorage (client-side only, never throws).
+// Port of WinForge HabitTrackerModule (page + HabitTrackerService). A list of named
+// habits, each keeping the set of ISO "yyyy-MM-dd" dates it was completed. Each habit
+// shows this week (Mon–Sun, today highlighted), the current streak (consecutive days
+// done counting back from today) and the total days done. Add / rename / delete habits;
+// toggling a day persists immediately. WinForge persisted to
+// %LOCALAPPDATA%\WinForge\habits\habits.json — the web port keeps the same {name, done[]}
+// data shape in localStorage (client-side only, sanitised, never throws).
 
 const STORAGE_KEY = 'winforge.habits';
 
@@ -49,7 +49,8 @@ function currentWeek(today: Date): Date[] {
   return week;
 }
 
-// Load & sanitise from localStorage: drop nulls, coalesce names, de-dupe dates.
+// Load & sanitise from localStorage: drop nulls, coalesce names, de-dupe dates
+// (mirrors HabitTrackerService.LoadAsync). Never throws.
 function loadHabits(): Habit[] {
   let raw: string | null = null;
   try {
@@ -82,6 +83,7 @@ function loadHabits(): Habit[] {
   return out;
 }
 
+// Save (mirrors HabitTrackerService.SaveAsync). Returns true on success; never throws.
 function saveHabits(habits: Habit[]): boolean {
   try {
     const snapshot: StoredHabit[] = habits.map((h) => ({
@@ -95,7 +97,7 @@ function saveHabits(habits: Habit[]): boolean {
   }
 }
 
-// Current streak: consecutive days marked done counting back from today.
+// Current streak: consecutive days marked done counting back from today (UpdateDerived).
 function computeStreak(done: Set<string>, today: Date): number {
   let streak = 0;
   let day = dateOnly(today);
@@ -108,7 +110,6 @@ function computeStreak(done: Set<string>, today: Date): number {
 
 export function HabitTrackerModule() {
   const { t, i18n } = useTranslation();
-  const P = (en: string, zh: string) => pick(en, zh, i18n.language);
 
   const today = useMemo(() => dateOnly(new Date()), []);
   const todayIso = isoDate(today);
@@ -130,13 +131,13 @@ export function HabitTrackerModule() {
 
   const dayLabels = useMemo(
     () => [
-      P('Mon', '一'),
-      P('Tue', '二'),
-      P('Wed', '三'),
-      P('Thu', '四'),
-      P('Fri', '五'),
-      P('Sat', '六'),
-      P('Sun', '日'),
+      t('habittracker.dayMon'),
+      t('habittracker.dayTue'),
+      t('habittracker.dayWed'),
+      t('habittracker.dayThu'),
+      t('habittracker.dayFri'),
+      t('habittracker.daySat'),
+      t('habittracker.daySun'),
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [i18n.language],
@@ -261,6 +262,7 @@ export function HabitTrackerModule() {
                           style={{ minWidth: 120 }}
                           autoFocus
                           value={editName}
+                          placeholder={t('habittracker.namePlaceholder')}
                           onChange={(e) => setEditName(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') commitRename(h.id);

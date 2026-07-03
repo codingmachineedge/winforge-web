@@ -1,11 +1,17 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { pick } from '../i18n';
 
-// Port of WinForge ExpenseSplitService — given people and per-person paid totals,
-// compute paid / fair-share / net balance, then a MINIMAL greedy settle-up transfer
-// list (biggest creditor pays biggest debtor). Pure; never throws.
+// 夾錢分帳 · Expense Splitter — add people, log who paid for what, and get a MINIMAL
+// greedy settle-up plan ("X pays Y $Z"). Pure client, no I/O beyond the clipboard.
+
 const EPSILON = 0.005; // half a cent — below this we treat as settled
+
+interface ExpenseRow {
+  id: number;
+  description: string;
+  payer: string | null;
+  amount: number;
+}
 
 interface PersonBalance {
   name: string;
@@ -28,45 +34,36 @@ interface SplitResult {
   transfers: Transfer[];
 }
 
-interface ExpenseRow {
-  id: number;
-  description: string;
-  payer: string; // '' = none picked
-  amount: number;
-}
+const EMPTY_RESULT: SplitResult = { grandTotal: 0, fairShare: 0, peopleCount: 0, balances: [], transfers: [] };
 
 function sanitizeAmount(v: number): number {
   if (Number.isNaN(v) || !Number.isFinite(v) || v < 0) return 0;
   return v;
 }
 
-function maxIndex(list: { name: string; amt: number }[]): number {
-  let idx = 0;
-  let best = Number.NEGATIVE_INFINITY;
-  for (let i = 0; i < list.length; i++) {
-    const cur = list[i]!;
-    if (cur.amt > best) {
-      best = cur.amt;
-      idx = i;
-    }
-  }
-  return idx;
+function money(symbol: string, value: number): string {
+  const sym = symbol || '$';
+  return `${sym}${value.toFixed(2)}`;
 }
 
-function roundAway(v: number): number {
-  // Math.round is half-up for positives, which matches AwayFromZero for the
-  // non-negative transfer amounts we produce here.
-  return Math.round(v * 100) / 100;
-}
-
+// Greedy minimal settle-up: repeatedly match the biggest creditor with the biggest debtor.
 function settleUp(balances: PersonBalance[]): Transfer[] {
   const result: Transfer[] = [];
-  const creditors = balances
-    .filter((b) => b.net > EPSILON)
-    .map((b) => ({ name: b.name, amt: b.net }));
-  const debtors = balances
-    .filter((b) => b.net < -EPSILON)
-    .map((b) => ({ name: b.name, amt: -b.net }));
+  const creditors = balances.filter((b) => b.net > EPSILON).map((b) => ({ name: b.name, amt: b.net }));
+  const debtors = balances.filter((b) => b.net < -EPSILON).map((b) => ({ name: b.name, amt: -b.net }));
+
+  const maxIndex = (list: { name: string; amt: number }[]): number => {
+    let idx = 0;
+    let best = -Infinity;
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i]!;
+      if (item.amt > best) {
+        best = item.amt;
+        idx = i;
+      }
+    }
+    return idx;
+  };
 
   let guard = 0;
   const maxIterations = (creditors.length + debtors.length) * 4 + 8;
@@ -78,7 +75,7 @@ function settleUp(balances: PersonBalance[]): Transfer[] {
 
     const pay = Math.min(c.amt, d.amt);
     if (pay > EPSILON) {
-      result.push({ from: d.name, to: c.name, amount: roundAway(pay) });
+      result.push({ from: d.name, to: c.name, amount: Math.round(pay * 100) / 100 });
     }
 
     const newC = c.amt - pay;
@@ -92,295 +89,325 @@ function settleUp(balances: PersonBalance[]): Transfer[] {
 }
 
 function compute(people: string[], paidByPerson: Map<string, number>): SplitResult {
-  const empty: SplitResult = {
-    grandTotal: 0,
-    fairShare: 0,
-    peopleCount: 0,
-    balances: [],
-    transfers: [],
-  };
-
-  const names = people
-    .filter((n) => n.trim().length > 0)
-    .map((n) => n.trim());
-  if (names.length === 0) return empty;
+  const names = people.map((n) => n.trim()).filter((n) => n.length > 0);
+  if (names.length === 0) return EMPTY_RESULT;
 
   let grand = 0;
   const paid = new Map<string, number>();
   for (const n of names) paid.set(n, 0);
-  paidByPerson.forEach((value, key) => {
-    const k = key.trim();
+  for (const [key, value] of paidByPerson) {
     const amt = sanitizeAmount(value);
-    if (paid.has(k)) paid.set(k, (paid.get(k) ?? 0) + amt);
+    if (paid.has(key)) paid.set(key, paid.get(key)! + amt);
     grand += amt;
-  });
+  }
 
   const share = grand / names.length;
-
   const balances: PersonBalance[] = names.map((n) => {
-    const p = paid.get(n) ?? 0;
+    const p = paid.get(n)!;
     return { name: n, paid: p, share, net: p - share };
   });
-
-  const transfers = settleUp(balances);
 
   return {
     grandTotal: grand,
     fairShare: share,
     peopleCount: names.length,
     balances,
-    transfers,
+    transfers: settleUp(balances),
   };
 }
 
-function money(symbol: string, value: number): string {
-  const sym = symbol || '$';
-  return `${sym}${value.toFixed(2)}`;
-}
-
 export function ExpenseSplitModule() {
-  const { t, i18n } = useTranslation();
-  const P = (en: string, zh: string) => pick(en, zh, i18n.language);
-
-  const [symbol, setSymbol] = useState('$');
+  const { t } = useTranslation();
+  const [currency, setCurrency] = useState('$');
   const [people, setPeople] = useState<string[]>([]);
   const [newPerson, setNewPerson] = useState('');
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
   const [nextId, setNextId] = useState(1);
-  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState('');
+  const [copied, setCopied] = useState('');
 
-  const sym = symbol.trim() || '$';
+  const symbol = useMemo(() => currency.trim() || '$', [currency]);
 
-  const addPerson = () => {
-    const name = newPerson.trim();
-    if (!name) return;
-    if (people.some((p) => p.toLowerCase() === name.toLowerCase())) return;
-    setPeople([...people, name]);
-    setNewPerson('');
-  };
-
-  const removePerson = (name: string) => {
-    setPeople(people.filter((p) => p !== name));
-    // Any expense that was paid by this person loses its payer.
-    setExpenses(expenses.map((ex) => (ex.payer === name ? { ...ex, payer: '' } : ex)));
-  };
-
-  const addExpense = () => {
-    const first = people[0] ?? '';
-    setExpenses([...expenses, { id: nextId, description: '', payer: first, amount: 0 }]);
-    setNextId(nextId + 1);
-  };
-
-  const removeExpense = (id: number) => {
-    setExpenses(expenses.filter((ex) => ex.id !== id));
-  };
-
-  const updateExpense = (id: number, patch: Partial<ExpenseRow>) => {
-    setExpenses(expenses.map((ex) => (ex.id === id ? { ...ex, ...patch } : ex)));
-  };
-
-  // Aggregate what each person paid, and note validation states, mirroring Recompute().
-  const { result, anyAmount, missingPayer } = useMemo(() => {
+  const result = useMemo<SplitResult>(() => {
+    if (people.length === 0) return EMPTY_RESULT;
     const paid = new Map<string, number>();
-    let any = false;
-    let missing = false;
+    for (const ex of expenses) {
+      const amt = Number.isNaN(ex.amount) || ex.amount < 0 ? 0 : ex.amount;
+      if (amt <= 0) continue;
+      if (!ex.payer) continue;
+      paid.set(ex.payer, (paid.get(ex.payer) ?? 0) + amt);
+    }
+    return compute(people, paid);
+  }, [people, expenses]);
+
+  // Derive the status line the same way WinForge does.
+  const computedStatus = useMemo(() => {
+    if (people.length === 0) return t('expensesplit.statusAddPerson');
+    let anyAmount = false;
+    let missingPayer = false;
     for (const ex of expenses) {
       const amt = Number.isNaN(ex.amount) || ex.amount < 0 ? 0 : ex.amount;
       if (amt <= 0) continue;
       if (!ex.payer) {
-        missing = true;
+        missingPayer = true;
         continue;
       }
-      any = true;
-      paid.set(ex.payer, (paid.get(ex.payer) ?? 0) + amt);
+      anyAmount = true;
     }
-    const res = compute(people, paid);
-    return { result: res, anyAmount: any, missingPayer: missing };
-  }, [people, expenses]);
+    if (!anyAmount) return t('expensesplit.statusAddExpense');
+    if (missingPayer) return t('expensesplit.statusMissingPayer');
+    if (result.transfers.length === 0) return t('expensesplit.statusSettled');
+    return t('expensesplit.statusTransfers', { n: result.transfers.length });
+  }, [people, expenses, result, t]);
 
-  const statusMsg = (): string => {
-    if (people.length === 0) return P('Add at least one person to begin.', '先加最少一個人開始。');
-    if (!anyAmount)
-      return P('Add an expense with a payer and amount to see the split.', '加一項有付款人同金額嘅支出就會計數。');
-    if (missingPayer) return P('Some expenses have no payer — pick one for each.', '有啲支出未揀付款人 — 逐項揀返。');
-    if (result.transfers.length === 0) return P('All settled — no transfers needed.', '全部找清，唔使轉帳。');
-    return t('expensesplit.transferCount', { count: result.transfers.length });
+  const shownStatus = status || computedStatus;
+
+  const addPerson = () => {
+    setCopied('');
+    const name = newPerson.trim();
+    if (!name) {
+      setStatus(t('expensesplit.errTypeName'));
+      return;
+    }
+    if (people.some((p) => p.toLowerCase() === name.toLowerCase())) {
+      setStatus(t('expensesplit.errNameExists'));
+      return;
+    }
+    setPeople([...people, name]);
+    setNewPerson('');
+    setStatus('');
   };
 
-  const netTag = (net: number): string =>
-    net > EPSILON ? P('is owed', '應收') : net < -EPSILON ? P('owes', '應付') : P('settled', '已平');
+  const removePerson = (name: string) => {
+    setCopied('');
+    setPeople(people.filter((p) => p !== name));
+    // Any expense paid by this person loses its payer.
+    setExpenses(expenses.map((ex) => (ex.payer === name ? { ...ex, payer: null } : ex)));
+    setStatus('');
+  };
 
-  const buildPlanText = (): string => {
+  const addExpense = () => {
+    setCopied('');
+    const row: ExpenseRow = {
+      id: nextId,
+      description: '',
+      payer: people[0] ?? null,
+      amount: 0,
+    };
+    setNextId(nextId + 1);
+    setExpenses([...expenses, row]);
+    setStatus('');
+  };
+
+  const removeExpense = (id: number) => {
+    setCopied('');
+    setExpenses(expenses.filter((ex) => ex.id !== id));
+    setStatus('');
+  };
+
+  const updateExpense = (id: number, patch: Partial<ExpenseRow>) => {
+    setCopied('');
+    setExpenses(expenses.map((ex) => (ex.id === id ? { ...ex, ...patch } : ex)));
+    setStatus('');
+  };
+
+  const summaryLines = useMemo<string[]>(() => {
+    if (people.length === 0) return [];
     const lines: string[] = [];
-    lines.push(P('Expense Splitter — settle-up plan', '夾錢分帳 — 找數方案'));
     lines.push(
-      P(
-        `People: ${result.peopleCount}   Total: ${money(sym, result.grandTotal)}   Fair share: ${money(sym, result.fairShare)}`,
-        `人數：${result.peopleCount}   總數：${money(sym, result.grandTotal)}   人均：${money(sym, result.fairShare)}`,
-      ),
+      t('expensesplit.summaryHead', {
+        people: result.peopleCount,
+        total: money(symbol, result.grandTotal),
+        share: money(symbol, result.fairShare),
+      }),
     );
     lines.push('');
-    lines.push(P('Balances:', '結餘：'));
+    lines.push(t('expensesplit.balancesLabel'));
     for (const b of result.balances) {
+      const tag =
+        b.net > EPSILON ? t('expensesplit.isOwed') : b.net < -EPSILON ? t('expensesplit.owes') : t('expensesplit.settled');
       lines.push(
-        `  ${b.name}: ${P('paid', '已付')} ${money(sym, b.paid)}, ${netTag(b.net)} ${money(sym, Math.abs(b.net))}`,
+        `  ${b.name}: ${t('expensesplit.paid')} ${money(symbol, b.paid)}, ${tag} ${money(symbol, Math.abs(b.net))}`,
       );
     }
     lines.push('');
-    lines.push(P('Transfers:', '轉帳：'));
+    lines.push(t('expensesplit.transfersLabel'));
     if (result.transfers.length === 0) {
-      lines.push(P('  Everyone is settled — nothing to transfer.', '  大家已經找清，唔使轉帳。'));
+      lines.push(`  ${t('expensesplit.nothingToTransfer')}`);
     } else {
       for (const tr of result.transfers) {
-        lines.push(
-          '  ' + P(`${tr.from} pays ${tr.to} ${money(sym, tr.amount)}`, `${tr.from} 俾 ${tr.to} ${money(sym, tr.amount)}`),
-        );
+        lines.push(`  ${t('expensesplit.transferLine', { from: tr.from, to: tr.to, amount: money(symbol, tr.amount) })}`);
       }
     }
+    return lines;
+  }, [people, result, symbol, t]);
+
+  const buildPlanText = (): string => {
+    const lines: string[] = [];
+    lines.push(t('expensesplit.planTitle'));
+    lines.push(...summaryLines);
     return lines.join('\n');
   };
 
   const copyPlan = () => {
-    if (people.length === 0) return;
-    navigator.clipboard?.writeText(buildPlanText());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    if (people.length === 0) {
+      setStatus(t('expensesplit.errNothingCopy'));
+      return;
+    }
+    void navigator.clipboard?.writeText(buildPlanText());
+    setStatus('');
+    setCopied(t('expensesplit.copied'));
   };
-
-  const section = { marginTop: 18 } as const;
-  const h3 = { margin: '0 0 10px', fontSize: 14 } as const;
 
   return (
     <div className="mod">
-      <p className="count-note" style={{ marginBottom: 8 }}>{t('expensesplit.blurb')}</p>
+      <p className="count-note" style={{ marginTop: 0 }}>
+        {t('expensesplit.blurb')}
+      </p>
 
-      <div className="mod-toolbar" style={{ alignItems: 'center' }}>
-        <span className="count-note">{t('expensesplit.currency')}</span>
+      {/* Currency */}
+      <div className="mod-toolbar">
+        <span className="count-note">{t('expensesplit.currencyLabel')}</span>
         <input
           className="mod-search"
           style={{ maxWidth: 80 }}
           maxLength={4}
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value)}
+          value={currency}
+          onChange={(e) => {
+            setCopied('');
+            setCurrency(e.target.value);
+          }}
         />
       </div>
 
-      <section style={section}>
-        <h3 style={h3}>{t('expensesplit.people')}</h3>
-        <div className="mod-toolbar" style={{ flexWrap: 'wrap' }}>
-          <input
-            className="mod-search"
-            style={{ minWidth: 200 }}
-            placeholder={t('expensesplit.namePlaceholder')}
-            value={newPerson}
-            onChange={(e) => setNewPerson(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') addPerson();
-            }}
-          />
-          <button className="mini primary" onClick={addPerson}>{t('expensesplit.addPerson')}</button>
+      {/* People */}
+      <h3 className="group-title" style={{ fontSize: 15, margin: '14px 0 6px' }}>
+        {t('expensesplit.peopleTitle')}
+      </h3>
+      <div className="mod-toolbar">
+        <input
+          className="mod-search"
+          style={{ flex: 1, minWidth: 200 }}
+          placeholder={t('expensesplit.namePlaceholder')}
+          value={newPerson}
+          onChange={(e) => setNewPerson(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') addPerson();
+          }}
+        />
+        <button className="mini primary" onClick={addPerson}>
+          {t('expensesplit.addPerson')}
+        </button>
+      </div>
+      {people.length > 0 && (
+        <div className="kv-list" style={{ marginTop: 8 }}>
+          {people.map((name) => (
+            <div className="kv-row" key={name}>
+              <span style={{ flex: 1 }}>{name}</span>
+              <button className="mini danger" onClick={() => removePerson(name)} aria-label={t('expensesplit.remove')}>
+                {t('expensesplit.remove')}
+              </button>
+            </div>
+          ))}
         </div>
-        {people.length > 0 && (
-          <ul className="kv-list" style={{ marginTop: 10, listStyle: 'none', padding: 0 }}>
-            {people.map((name) => (
-              <li key={name} className="kv-row" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ flex: 1 }}>{name}</span>
-                <button className="mini" onClick={() => removePerson(name)}>{t('expensesplit.remove')}</button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      )}
 
-      <section style={section}>
-        <h3 style={h3}>{t('expensesplit.expenses')}</h3>
-        <button className="mini" onClick={addExpense} disabled={people.length === 0}>
+      {/* Expenses */}
+      <h3 className="group-title" style={{ fontSize: 15, margin: '14px 0 6px' }}>
+        {t('expensesplit.expensesTitle')}
+      </h3>
+      <div className="mod-toolbar">
+        <button className="mini" onClick={addExpense}>
           {t('expensesplit.addExpense')}
         </button>
-        {expenses.length > 0 && (
-          <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {expenses.map((ex) => (
-              <div key={ex.id} className="mod-toolbar" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-                <input
-                  className="mod-search"
-                  style={{ minWidth: 140, flex: 1 }}
-                  placeholder={t('expensesplit.descPlaceholder')}
-                  value={ex.description}
-                  onChange={(e) => updateExpense(ex.id, { description: e.target.value })}
-                />
-                <select
-                  className="mod-select"
-                  value={ex.payer}
-                  onChange={(e) => updateExpense(ex.id, { payer: e.target.value })}
-                >
-                  <option value="">{t('expensesplit.pickPayer')}</option>
-                  {people.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-                <input
-                  className="mod-search"
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  style={{ maxWidth: 120 }}
-                  value={ex.amount}
-                  onChange={(e) => updateExpense(ex.id, { amount: Math.max(0, +e.target.value || 0) })}
-                />
-                <button className="mini" onClick={() => removeExpense(ex.id)}>{t('expensesplit.remove')}</button>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section style={section}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h3 style={{ ...h3, margin: 0, flex: 1 }}>{t('expensesplit.summary')}</h3>
-          <button className="mini" onClick={copyPlan} disabled={people.length === 0}>
-            {copied ? t('expensesplit.copied') : t('expensesplit.copyPlan')}
-          </button>
-        </div>
-        <p className="count-note" style={{ marginTop: 8 }}>{statusMsg()}</p>
-
-        {people.length > 0 && anyAmount && (
-          <>
-            <dl className="kv" style={{ marginTop: 10 }}>
-              <dt>{t('expensesplit.peopleCount')}</dt><dd>{result.peopleCount}</dd>
-              <dt>{t('expensesplit.total')}</dt><dd>{money(sym, result.grandTotal)}</dd>
-              <dt>{t('expensesplit.fairShare')}</dt><dd>{money(sym, result.fairShare)}</dd>
-            </dl>
-
-            <h3 style={{ ...h3, marginTop: 16 }}>{t('expensesplit.balances')}</h3>
-            <dl className="kv">
-              {result.balances.map((b) => (
-                <span key={b.name} style={{ display: 'contents' }}>
-                  <dt>{b.name}</dt>
-                  <dd>
-                    {P('paid', '已付')} {money(sym, b.paid)}, {netTag(b.net)} {money(sym, Math.abs(b.net))}
-                  </dd>
-                </span>
+      </div>
+      {expenses.length > 0 && (
+        <div className="dt-wrap" style={{ marginTop: 8 }}>
+          <table className="dt">
+            <thead>
+              <tr>
+                <th>{t('expensesplit.colDescription')}</th>
+                <th style={{ width: 150 }}>{t('expensesplit.colPayer')}</th>
+                <th style={{ width: 130 }}>{t('expensesplit.colAmount')}</th>
+                <th style={{ width: 44 }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {expenses.map((ex) => (
+                <tr key={ex.id}>
+                  <td>
+                    <input
+                      className="mod-search"
+                      style={{ width: '100%' }}
+                      placeholder={t('expensesplit.descPlaceholder')}
+                      value={ex.description}
+                      onChange={(e) => updateExpense(ex.id, { description: e.target.value })}
+                    />
+                  </td>
+                  <td>
+                    <select
+                      className="mod-select"
+                      style={{ width: '100%' }}
+                      value={ex.payer ?? ''}
+                      onChange={(e) => updateExpense(ex.id, { payer: e.target.value || null })}
+                    >
+                      <option value="">{t('expensesplit.pickPayer')}</option>
+                      {people.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      className="mod-search"
+                      type="number"
+                      min={0}
+                      step={1}
+                      style={{ width: '100%' }}
+                      value={Number.isNaN(ex.amount) ? '' : ex.amount}
+                      onChange={(e) => updateExpense(ex.id, { amount: Math.max(0, Number(e.target.value) || 0) })}
+                    />
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <button
+                      className="mini danger"
+                      onClick={() => removeExpense(ex.id)}
+                      aria-label={t('expensesplit.remove')}
+                    >
+                      {t('expensesplit.remove')}
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </dl>
+            </tbody>
+          </table>
+        </div>
+      )}
 
-            <h3 style={{ ...h3, marginTop: 16 }}>{t('expensesplit.transfers')}</h3>
-            {result.transfers.length === 0 ? (
-              <p className="count-note">{t('expensesplit.nothingToTransfer')}</p>
-            ) : (
-              <ul className="kv-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {result.transfers.map((tr, idx) => (
-                  <li key={idx} className="kv-row" style={{ fontFamily: 'monospace' }}>
-                    {P(
-                      `${tr.from} pays ${tr.to} ${money(sym, tr.amount)}`,
-                      `${tr.from} 俾 ${tr.to} ${money(sym, tr.amount)}`,
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </section>
+      {/* Summary + transfers */}
+      <div className="mod-toolbar" style={{ marginTop: 14 }}>
+        <h3 className="group-title" style={{ fontSize: 15, margin: 0, flex: 1 }}>
+          {t('expensesplit.summaryTitle')}
+        </h3>
+        <button className="mini" onClick={copyPlan}>
+          {t('expensesplit.copyPlan')}
+        </button>
+      </div>
+      {(shownStatus || copied) && (
+        <p className="count-note" style={{ marginTop: 6 }}>
+          {copied || shownStatus}
+        </p>
+      )}
+      {summaryLines.length > 0 && (
+        <pre
+          className="hosts-edit"
+          style={{ marginTop: 8, whiteSpace: 'pre-wrap', fontFamily: 'var(--mono, Consolas, monospace)' }}
+        >
+          {summaryLines.join('\n')}
+        </pre>
+      )}
     </div>
   );
 }
