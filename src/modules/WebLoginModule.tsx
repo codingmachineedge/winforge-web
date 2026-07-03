@@ -247,7 +247,7 @@ export function WebLoginModule() {
           onChange={(e) => onProviderChange(Number(e.target.value))}
         >
           {PRESETS.map((p, i) => (
-            <option key={p.key} value={i}>{t(`weblogin.provider.${p.key}`)}</option>
+            <option key={p.key} value={i}>{t(`weblogin.prov_${p.key}`)}</option>
           ))}
         </select>
 
