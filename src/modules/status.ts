@@ -1,4 +1,7 @@
-import { moduleRegistry } from './registry';
+// registryKeys (generated) instead of the registry itself: status checks only
+// need the tag set, and importing moduleRegistry would pull every module
+// component into the eager bundle, defeating route-level code splitting.
+import { registeredModuleTags } from './registryKeys';
 import { nativeActions } from '../tauri/nativeActions';
 
 // Honest implementation status of a module, independent of its web/native capability.
@@ -8,7 +11,7 @@ import { nativeActions } from '../tauri/nativeActions';
 export type ModuleStatus = 'working' | 'partial' | 'stub';
 
 export function moduleStatus(tag: string): ModuleStatus {
-  if (tag in moduleRegistry) return 'working';
+  if (registeredModuleTags.has(tag)) return 'working';
   if (tag in nativeActions) return 'partial';
   return 'stub';
 }
