@@ -13,6 +13,22 @@ Fully **bilingual: English + 繁體中文**.
 > yet stay labelled stubs. The same frontend still runs in a plain browser (`npm run dev`), where
 > `isTauri()` is false and native panels degrade to labelled stubs.
 
+## Install (one line)
+
+Open **PowerShell** — no need to run it as administrator; the script self-elevates — and paste:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://codingmachineedge.github.io/winforge-web/install.ps1 | iex"
+```
+
+It self-elevates via `Start-Process -Verb RunAs`, downloads the latest release installer from
+GitHub Releases, and runs it. Landing page & docs:
+**<https://codingmachineedge.github.io/winforge-web/>** ·
+[Wiki](https://github.com/codingmachineedge/winforge-web/wiki) ·
+[Releases](https://github.com/codingmachineedge/winforge-web/releases).
+Prefer to do it by hand? Grab the installer or portable zip from
+[Releases](https://github.com/codingmachineedge/winforge-web/releases), or build from source (below).
+
 ## What's here
 
 | Area | Status |
