@@ -42,6 +42,7 @@ import { ApiClientModule } from './ApiClientModule';
 import { CurlGenModule } from './CurlGenModule';
 import { MdTableModule } from './MdTableModule';
 import { TimerModule } from './TimerModule';
+import { SqlFormatModule } from './SqlFormatModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -98,6 +99,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.curlgen': CurlGenModule,
   'module.mdtable': MdTableModule,
   'module.timer': TimerModule,
+  'module.sqlformat': SqlFormatModule,
   ...moduleRegistryB,
 };
 
