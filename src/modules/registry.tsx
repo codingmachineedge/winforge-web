@@ -61,6 +61,12 @@ import { TableFormatModule } from './TableFormatModule';
 import { EnvFileModule } from './EnvFileModule';
 import { XPathTesterModule } from './XPathTesterModule';
 import { HexDumpModule } from './HexDumpModule';
+import { JsonDiffModule } from './JsonDiffModule';
+import { LineToolsModule } from './LineToolsModule';
+import { HtmlToMdModule } from './HtmlToMdModule';
+import { HtmlFormatModule } from './HtmlFormatModule';
+import { MetaTagsModule } from './MetaTagsModule';
+import { BinaryTextModule } from './BinaryTextModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -136,6 +142,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.envfile': EnvFileModule,
   'module.xpathtester': XPathTesterModule,
   'module.hexdump': HexDumpModule,
+  'module.jsondiff': JsonDiffModule,
+  'module.linetools': LineToolsModule,
+  'module.htmltomd': HtmlToMdModule,
+  'module.htmlformat': HtmlFormatModule,
+  'module.metatags': MetaTagsModule,
+  'module.binarytext': BinaryTextModule,
   ...moduleRegistryB,
 };
 
