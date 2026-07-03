@@ -4,6 +4,8 @@ import { allModules, type CatalogModule } from '../data/catalog';
 import { featureTextFor, matchedFeature, sectionByTag } from '../data/featureIndex';
 import { moduleStatus, type ModuleStatus } from '../modules/status';
 import { pick, sub } from '../i18n';
+import { fuzzyScore, fuzzyRanges, mergeRanges, type Range } from '../data/fuzzy';
+import { Highlight } from './Highlight';
 
 type Capability = 'all' | 'web' | 'native';
 type StatusFilter = 'any' | 'working' | 'stub';
@@ -21,9 +23,27 @@ interface Hit {
   status: ModuleStatus;
   score: number;
   feature: string | null; // feature snippet when matched via features only
+  featureRanges: Range[]; // highlight ranges within the feature snippet (plain substring)
 }
 
 const terms = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
+
+// Exact-substring ranges of every term within `text` (already lower-cased match on
+// the lower-cased haystack, but indices apply to the original-cased text too since
+// lower-casing here is 1:1 for our Latin/CJK content). Used for feature snippets.
+function substringRanges(text: string, ts: string[]): Range[] {
+  const lc = text.toLowerCase();
+  const out: Range[] = [];
+  for (const t of ts) {
+    let from = 0;
+    let idx: number;
+    while ((idx = lc.indexOf(t, from)) >= 0) {
+      out.push({ start: idx, end: idx + t.length });
+      from = idx + t.length;
+    }
+  }
+  return mergeRanges(out);
+}
 
 function rank(m: CatalogModule, ts: string[]): { score: number; feature: string | null } | null {
   if (ts.length === 0) return { score: 0, feature: null };
@@ -36,13 +56,35 @@ function rank(m: CatalogModule, ts: string[]): { score: number; feature: string 
     const inTitle = title.includes(t);
     const inKeys = keys.includes(t);
     const inFeat = feat.includes(t);
-    if (!inTitle && !inKeys && !inFeat) return null; // every term must match somewhere
-    if (inTitle) score += 6;
-    else if (inKeys) score += 3;
-    else score += 1;
-    if (inTitle || inKeys) viaFeatureOnly = false;
-    // exact title start bonus
-    if (m.en.toLowerCase().startsWith(t)) score += 4;
+    if (inTitle) {
+      // Exact fast path (dominant tier, unchanged weights).
+      score += 6;
+      viaFeatureOnly = false;
+      if (m.en.toLowerCase().startsWith(t)) score += 4; // exact title start bonus
+      continue;
+    }
+    if (inKeys) {
+      score += 3;
+      viaFeatureOnly = false;
+      continue;
+    }
+    if (inFeat) {
+      score += 1; // feature substring fallback
+      continue;
+    }
+    // Fuzzy fallback tier — only on title/keys (features are huge → substring only).
+    // Ranks strictly below exact matches: fuzzy title ~2, fuzzy keys ~1.
+    if (fuzzyScore(t, title) !== null) {
+      score += 2;
+      viaFeatureOnly = false;
+      continue;
+    }
+    if (fuzzyScore(t, keys) !== null) {
+      score += 1;
+      viaFeatureOnly = false;
+      continue;
+    }
+    return null; // every term must match somewhere (exact or fuzzy)
   }
   return { score, feature: viaFeatureOnly ? matchedFeature(m.tag, ts) : null };
 }
@@ -77,7 +119,8 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
       if (statusFilter === 'stub' && status !== 'stub') continue;
       const r = rank(m, ts);
       if (!r) continue;
-      out.push({ m, status, score: r.score, feature: r.feature });
+      const featureRanges = r.feature ? substringRanges(r.feature, ts) : [];
+      out.push({ m, status, score: r.score, feature: r.feature, featureRanges });
     }
     out.sort((a, b) => b.score - a.score || a.m.en.localeCompare(b.m.en));
     return out.slice(0, 60);
@@ -162,6 +205,9 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
               const title = pick(h.m.en, h.m.zh, lang);
               const subtitle = sub(h.m.en, h.m.zh, lang);
               const section = sectionByTag.get(h.m.tag);
+              // Highlight matched characters in the displayed title (best match per term,
+              // merged). Uses fuzzyRanges so exact + typo + subsequence all highlight.
+              const titleRanges = mergeRanges(ts.flatMap((term) => fuzzyRanges(term, title)));
               return (
                 <button
                   key={h.m.tag}
@@ -173,12 +219,13 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
                   <span className="cp-glyph glyph">{h.m.glyph || '▢'}</span>
                   <span className="cp-main">
                     <span className="cp-title">
-                      {title}
+                      <Highlight text={title} ranges={titleRanges} />
                       {subtitle && subtitle !== title && <span className="cp-sub">{subtitle}</span>}
                     </span>
                     {h.feature ? (
                       <span className="cp-feature">
-                        <span className="cp-feature-tag">{t('palette.inFeatures')}</span> {h.feature}
+                        <span className="cp-feature-tag">{t('palette.inFeatures')}</span>{' '}
+                        <Highlight text={h.feature} ranges={h.featureRanges} />
                       </span>
                     ) : (
                       section && <span className="cp-section">{pick(section.en, section.zh, lang)}</span>

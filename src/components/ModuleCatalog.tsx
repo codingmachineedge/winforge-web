@@ -6,6 +6,9 @@ import { pick } from '../i18n';
 import { ModuleCard } from './ModuleCard';
 import { FavoritesRail } from './FavoritesRail';
 import { RecentStrip } from './RecentStrip';
+import { useLayoutPref } from '../state/prefs';
+import { catalogMatches } from '../data/fuzzy';
+import '../styles/settings.css';
 
 type Filter = 'all' | 'web' | 'native';
 
@@ -16,20 +19,15 @@ interface Props {
   onOpen: (tag: string) => void;
 }
 
-function matches(m: CatalogModule, q: string): boolean {
-  if (!q) return true;
-  const hay = `${m.en} ${m.zh} ${m.keywords} ${m.tag}`.toLowerCase();
-  return q
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean)
-    .every((term) => hay.includes(term));
-}
-
 export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<Filter>('all');
+  const [viewMode, setViewMode] = useLayoutPref('viewMode');
   const q = query.trim();
+
+  // 'list' opts the shared .card-grid into the single-column list layout
+  // defined in settings.css; 'grid' keeps the default multi-column grid.
+  const gridClass = viewMode === 'list' ? 'card-grid list' : 'card-grid';
 
   const passesFilter = (m: CatalogModule) =>
     filter === 'all' || (filter === 'native' ? m.native : !m.native);
@@ -37,7 +35,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
   // Search mode: flat result grid across all modules.
   const searchResults = useMemo(() => {
     if (!q) return null;
-    return allModules.filter((m) => matches(m, q) && passesFilter(m));
+    return allModules.filter((m) => catalogMatches(m, q) && passesFilter(m));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, filter]);
 
@@ -53,13 +51,13 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
           <h1>{t('catalog.heading')}</h1>
           <p>{t('catalog.resultsFor', { query: q })}</p>
         </div>
-        <FilterChips filter={filter} setFilter={setFilter} />
+        <FilterChips filter={filter} setFilter={setFilter} viewMode={viewMode} setViewMode={setViewMode} />
         {searchResults.length === 0 ? (
           <p className="count-note">{t('catalog.noResults')}</p>
         ) : (
           <>
             <p className="count-note">{t('catalog.count', { count: searchResults.length })}</p>
-            <div className="card-grid">
+            <div className={gridClass}>
               {searchResults.map((m) => (
                 <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
               ))}
@@ -94,7 +92,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
         <h1>{heading}</h1>
         <p>{t('app.tagline')}</p>
       </div>
-      <FilterChips filter={filter} setFilter={setFilter} />
+      <FilterChips filter={filter} setFilter={setFilter} viewMode={viewMode} setViewMode={setViewMode} />
       <p className="count-note">{t('catalog.count', { count: total })}</p>
 
       {!sectionId && (
@@ -113,7 +111,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
             </div>
           )}
           {s.directModules.filter(passesFilter).length > 0 && (
-            <div className="card-grid">
+            <div className={gridClass}>
               {s.directModules.filter(passesFilter).map((m) => (
                 <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
               ))}
@@ -127,7 +125,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
               <div key={g.id}>
                 <h2 className="group-title">{pick(g.en, g.zh, lang)}</h2>
                 {mods.length > 0 && (
-                  <div className="card-grid">
+                  <div className={gridClass}>
                     {mods.map((m) => (
                       <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
                     ))}
@@ -139,7 +137,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
                       <h3 className="group-title" style={{ fontSize: 13.5, opacity: 0.8 }}>
                         {pick(sg.en, sg.zh, lang)}
                       </h3>
-                      <div className="card-grid">
+                      <div className={gridClass}>
                         {sm.map((m) => (
                           <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
                         ))}
@@ -156,7 +154,17 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
   );
 }
 
-function FilterChips({ filter, setFilter }: { filter: Filter; setFilter: (f: Filter) => void }) {
+function FilterChips({
+  filter,
+  setFilter,
+  viewMode,
+  setViewMode,
+}: {
+  filter: Filter;
+  setFilter: (f: Filter) => void;
+  viewMode: 'grid' | 'list';
+  setViewMode: (v: 'grid' | 'list') => void;
+}) {
   const { t } = useTranslation();
   const opts: { key: Filter; label: string }[] = [
     { key: 'all', label: t('catalog.filterAll') },
@@ -164,7 +172,7 @@ function FilterChips({ filter, setFilter }: { filter: Filter; setFilter: (f: Fil
     { key: 'native', label: t('catalog.filterNative') },
   ];
   return (
-    <div className="filters">
+    <div className="filters with-view-toggle">
       {opts.map((o) => (
         <button
           key={o.key}
@@ -174,6 +182,28 @@ function FilterChips({ filter, setFilter }: { filter: Filter; setFilter: (f: Fil
           {o.label}
         </button>
       ))}
+      <div className="view-toggle" role="group" aria-label={t('shellsettings.viewModeLabel')}>
+        <button
+          type="button"
+          className={`view-toggle-btn glyph${viewMode === 'grid' ? ' active' : ''}`}
+          aria-pressed={viewMode === 'grid'}
+          title={t('shellsettings.viewModeGrid')}
+          aria-label={t('shellsettings.viewModeGrid')}
+          onClick={() => setViewMode('grid')}
+        >
+          ▦
+        </button>
+        <button
+          type="button"
+          className={`view-toggle-btn glyph${viewMode === 'list' ? ' active' : ''}`}
+          aria-pressed={viewMode === 'list'}
+          title={t('shellsettings.viewModeList')}
+          aria-label={t('shellsettings.viewModeList')}
+          onClick={() => setViewMode('list')}
+        >
+          ▤
+        </button>
+      </div>
     </div>
   );
 }

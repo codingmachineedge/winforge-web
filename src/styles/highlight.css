@@ -1,0 +1,10 @@
+/* Match highlighting for fuzzy search results. Transparent background + accent
+   colour so it reads correctly in both dark and light themes (the default <mark>
+   yellow background would clash with the panel surfaces). */
+.hl-mark {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  /* Keep the highlight inline and inheriting surrounding font metrics. */
+  padding: 0;
+}
