@@ -91,6 +91,11 @@ import { ScreenRecorderModule } from './ScreenRecorderModule';
 import { ResumeWriterModule } from './ResumeWriterModule';
 import { AppUninstallerModule } from './AppUninstallerModule';
 import { VpnMeshModule } from './VpnMeshModule';
+import { RegeditModule } from './RegeditModule';
+import { WindowManagerModule } from './WindowManagerModule';
+import { WorkspacesModule } from './WorkspacesModule';
+import { WslVmModule } from './WslVmModule';
+import { OpenSourceAppHubModule } from './OpenSourceAppHubModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -192,4 +197,9 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.resume': ResumeWriterModule,
   'module.uninstall': AppUninstallerModule,
   'module.vpn': VpnMeshModule,
+  'module.regedit': RegeditModule,
+  'module.windows': WindowManagerModule,
+  'module.workspaces': WorkspacesModule,
+  'module.wslvm': WslVmModule,
+  'module.ossapps': OpenSourceAppHubModule,
 };
