@@ -1,5 +1,6 @@
 mod commands;
 mod ops;
+mod awake;
 
 use tauri::Emitter;
 #[cfg(desktop)]
@@ -45,6 +46,8 @@ pub fn run() {
             commands::resolve_tool,
             commands::resource_bin_dir,
             ops::run_op,
+            awake::awake_set,
+            awake::awake_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running WinForge Web");

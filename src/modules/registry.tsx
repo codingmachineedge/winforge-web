@@ -129,6 +129,13 @@ import { FileLocksmithModule } from './FileLocksmithModule';
 import { HexEditorModule } from './HexEditorModule';
 import { DiskBenchmarkModule } from './DiskBenchmarkModule';
 import { MouseModule } from './MouseModule';
+import { AwakeModule } from './AwakeModule';
+import { MediaModule } from './MediaModule';
+import { CaptureStudioModule } from './CaptureStudioModule';
+import { GifLabModule } from './GifLabModule';
+import { VolumeMixerModule } from './VolumeMixerModule';
+import { ColorPickerModule } from './ColorPickerModule';
+import { ImageEditorModule } from './ImageEditorModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -274,6 +281,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.hexeditor': HexEditorModule,
   'module.diskbench': DiskBenchmarkModule,
   'module.mouse': MouseModule,
+  'module.awake': AwakeModule,
+  'module.media': MediaModule,
+  'module.capture': CaptureStudioModule,
+  'module.giflab': GifLabModule,
+  'module.mixer': VolumeMixerModule,
+  'module.colorpicker': ColorPickerModule,
+  'module.imageeditor': ImageEditorModule,
   ...moduleRegistryB,
 };
 
