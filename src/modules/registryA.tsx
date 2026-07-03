@@ -12,6 +12,17 @@ import { CountdownEventModule } from './CountdownEventModule';
 import { ExpenseSplitModule } from './ExpenseSplitModule';
 import { HabitTrackerModule } from './HabitTrackerModule';
 import { FileSplitModule } from './FileSplitModule';
+import { GridDispatchModule } from './GridDispatchModule';
+import { H2PlantModule } from './H2PlantModule';
+import { AiClusterModule } from './AiClusterModule';
+import { ComputeMineModule } from './ComputeMineModule';
+import { SmelterModule } from './SmelterModule';
+import { EvChargeModule } from './EvChargeModule';
+import { DistrictHeatModule } from './DistrictHeatModule';
+import { DacModule } from './DacModule';
+import { SteelMillModule } from './SteelMillModule';
+import { CementKilnModule } from './CementKilnModule';
+import { CakeFactoryModule } from './CakeFactoryModule';
 
 /**
  * Batch-A (A–M) module registrations in their own file so this agent adds modules
@@ -31,4 +42,15 @@ export const moduleRegistryA: Record<string, ComponentType> = {
   'module.expensesplit': ExpenseSplitModule,
   'module.habittracker': HabitTrackerModule,
   'module.filesplit': FileSplitModule,
+  'module.griddispatch': GridDispatchModule,
+  'module.h2plant': H2PlantModule,
+  'module.aicluster': AiClusterModule,
+  'module.computemine': ComputeMineModule,
+  'module.smelter': SmelterModule,
+  'module.evcharge': EvChargeModule,
+  'module.districtheat': DistrictHeatModule,
+  'module.dac': DacModule,
+  'module.steelmill': SteelMillModule,
+  'module.cementkiln': CementKilnModule,
+  'module.cakefactory': CakeFactoryModule,
 };
