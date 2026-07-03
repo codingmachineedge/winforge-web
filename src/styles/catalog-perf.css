@@ -1,0 +1,72 @@
+/* ======================================================================
+ * catalog-perf.css — native virtualization + keyboard-grid focus ring
+ * for the ~320-module ModuleCatalog.
+ *
+ * Owned by the "Virtualized Module Grid" / "Keyboard-Navigable Grid Focus"
+ * slice. Imported from ModuleCatalog.tsx. Do NOT put general card styling
+ * here — that lives in global.css / settings.css.
+ * ====================================================================== */
+
+/* ---- content-visibility virtualization ----
+ * `content-visibility: auto` lets Chromium skip layout + paint for blocks that
+ * are off-screen, rendering them lazily as they scroll into view. This gives
+ * us list-virtualization-grade perf with zero JS bookkeeping and no absolute
+ * positioning, so scroll restoration, the skip-link, and focus order all keep
+ * working normally.
+ *
+ * `contain-intrinsic-size: auto <fallback>` supplies a placeholder size for
+ * skipped blocks so the scrollbar and total page height stay stable (no jump
+ * when a block renders). The `auto` keyword tells the browser to REMEMBER the
+ * real rendered size after a block has been laid out once, so subsequent
+ * skips use the exact measured height — eliminating scrollbar drift entirely.
+ *
+ * The fallback lengths below are measured from current card geometry:
+ *   .card min-height ≈ 96px (title 20 + sub 16 + gap 8 + badges 22 + pad 28),
+ *   .card-grid columns = minmax(230px, 1fr), gap 12px.
+ * A typical group holds ~2 rows of cards; a section wraps several groups.
+ * These are only first-paint estimates — `auto` corrects them after layout.
+ */
+
+/* Section wrapper: several groups. Wider intrinsic block. */
+.cv-auto-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}
+
+/* Group / subgroup wrapper: a heading + one card grid (~2 rows). */
+.cv-auto-group {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+
+/* Individual card virtualization inside long single grids (e.g. flat search
+ * results and directModules grids). Height matches a single card row; width
+ * is left to the grid so `auto` measures the real column width. */
+.cv-auto-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 96px;
+}
+
+/* content-visibility:auto clips overflow to the padding box; a translateY
+ * hover lift would otherwise be cropped. Keep cards from clipping their own
+ * 1px lift by not adding intrinsic width constraints (height-only above).
+ * The grid gap already separates rows, so the lift stays visible. */
+
+/* ---- keyboard-grid focus ring ----
+ * The roving-tabindex hook moves focus among .card buttons with arrow keys.
+ * Cards had no dedicated focus-visible ring, so add one here. :focus-visible
+ * only shows for keyboard/programmatic focus, never on mouse click, matching
+ * the rest of the app's controls. */
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  /* Keep the ring above neighboring cards' borders. */
+  position: relative;
+  z-index: 1;
+}
+
+/* Respect reduced-motion users: content-visibility itself has no animation,
+ * but ensure the focus ring doesn't inherit any transition delay. */
+.card:focus-visible {
+  transition-property: background, border-color, transform;
+}

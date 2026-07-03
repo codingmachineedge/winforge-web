@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { catalog, allModules, type CatalogModule, type CatalogSection } from '../data/catalog';
 import { nonEmptySections } from '../data/catalogHelpers';
@@ -8,7 +8,9 @@ import { FavoritesRail } from './FavoritesRail';
 import { RecentStrip } from './RecentStrip';
 import { useLayoutPref } from '../state/prefs';
 import { catalogMatches } from '../data/fuzzy';
+import { useRovingGrid } from '../state/rovingGrid';
 import '../styles/settings.css';
+import '../styles/catalog-perf.css';
 
 type Filter = 'all' | 'web' | 'native';
 
@@ -24,6 +26,15 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
   const [filter, setFilter] = useState<Filter>('all');
   const [viewMode, setViewMode] = useLayoutPref('viewMode');
   const q = query.trim();
+
+  // One roving-tabindex scope covers every visible ModuleCard (across all
+  // section/group/subgroup grids, or the flat search grid). The hook queries
+  // `.card` descendants of this container, so a single ref on a wrapper around
+  // the whole catalog body is the simplest correct scope. Arrow keys move
+  // focus by row/column (columns measured from live geometry), Home/End jump
+  // to row start/end, Enter/Space use native button behavior.
+  const rovingRef = useRef<HTMLDivElement>(null);
+  const { onKeyDown } = useRovingGrid(rovingRef);
 
   // 'list' opts the shared .card-grid into the single-column list layout
   // defined in settings.css; 'grid' keeps the default multi-column grid.
@@ -57,10 +68,12 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
         ) : (
           <>
             <p className="count-note">{t('catalog.count', { count: searchResults.length })}</p>
-            <div className={gridClass}>
-              {searchResults.map((m) => (
-                <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
-              ))}
+            <div ref={rovingRef} onKeyDown={onKeyDown} className="catalog-roving">
+              <div className={gridClass}>
+                {searchResults.map((m) => (
+                  <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} className="cv-auto-card" />
+                ))}
+              </div>
             </div>
           </>
         )}
@@ -102,54 +115,58 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
         </>
       )}
 
-      {sections.map((s) => (
-        <section key={s.id}>
-          {!sectionId && (
-            <div className="section-title">
-              {pick(s.en, s.zh, lang)}
-              <span className="rule" />
-            </div>
-          )}
-          {s.directModules.filter(passesFilter).length > 0 && (
-            <div className={gridClass}>
-              {s.directModules.filter(passesFilter).map((m) => (
-                <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
-              ))}
-            </div>
-          )}
-          {s.groups.map((g) => {
-            const mods = g.modules.filter(passesFilter);
-            const subs = (g.subgroups ?? []).map((sg) => ({ sg, mods: sg.modules.filter(passesFilter) }));
-            if (mods.length === 0 && subs.every((x) => x.mods.length === 0)) return null;
-            return (
-              <div key={g.id}>
-                <h2 className="group-title">{pick(g.en, g.zh, lang)}</h2>
-                {mods.length > 0 && (
-                  <div className={gridClass}>
-                    {mods.map((m) => (
-                      <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
-                    ))}
-                  </div>
-                )}
-                {subs.map(({ sg, mods: sm }) =>
-                  sm.length === 0 ? null : (
-                    <div key={sg.id}>
-                      <h3 className="group-title" style={{ fontSize: 13.5, opacity: 0.8 }}>
-                        {pick(sg.en, sg.zh, lang)}
-                      </h3>
-                      <div className={gridClass}>
-                        {sm.map((m) => (
-                          <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
-                        ))}
-                      </div>
-                    </div>
-                  ),
-                )}
+      <div ref={rovingRef} onKeyDown={onKeyDown} className="catalog-roving">
+        {sections.map((s) => (
+          <section key={s.id} className="cv-auto-section">
+            {!sectionId && (
+              <div className="section-title">
+                {pick(s.en, s.zh, lang)}
+                <span className="rule" />
               </div>
-            );
-          })}
-        </section>
-      ))}
+            )}
+            {s.directModules.filter(passesFilter).length > 0 && (
+              <div className="cv-auto-group">
+                <div className={gridClass}>
+                  {s.directModules.filter(passesFilter).map((m) => (
+                    <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {s.groups.map((g) => {
+              const mods = g.modules.filter(passesFilter);
+              const subs = (g.subgroups ?? []).map((sg) => ({ sg, mods: sg.modules.filter(passesFilter) }));
+              if (mods.length === 0 && subs.every((x) => x.mods.length === 0)) return null;
+              return (
+                <div key={g.id} className="cv-auto-group">
+                  <h2 className="group-title">{pick(g.en, g.zh, lang)}</h2>
+                  {mods.length > 0 && (
+                    <div className={gridClass}>
+                      {mods.map((m) => (
+                        <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
+                      ))}
+                    </div>
+                  )}
+                  {subs.map(({ sg, mods: sm }) =>
+                    sm.length === 0 ? null : (
+                      <div key={sg.id} className="cv-auto-group">
+                        <h3 className="group-title" style={{ fontSize: 13.5, opacity: 0.8 }}>
+                          {pick(sg.en, sg.zh, lang)}
+                        </h3>
+                        <div className={gridClass}>
+                          {sm.map((m) => (
+                            <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
+                          ))}
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              );
+            })}
+          </section>
+        ))}
+      </div>
     </>
   );
 }

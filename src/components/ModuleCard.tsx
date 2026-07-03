@@ -7,15 +7,17 @@ interface Props {
   module: CatalogModule;
   lang: string;
   onOpen: (tag: string) => void;
+  /** Extra classes (e.g. `cv-auto-card` for per-card native virtualization). */
+  className?: string;
 }
 
-export function ModuleCard({ module, lang, onOpen }: Props) {
+export function ModuleCard({ module, lang, onOpen, className }: Props) {
   const { t } = useTranslation();
   const title = pick(module.en, module.zh, lang);
   const subtitle = sub(module.en, module.zh, lang);
   const status = moduleStatus(module.tag);
   return (
-    <button className="card" onClick={() => onOpen(module.tag)}>
+    <button className={className ? `card ${className}` : 'card'} onClick={() => onOpen(module.tag)}>
       <div className="card-top">
         <span className="card-icon glyph">{module.glyph || '▢'}</span>
         <span>
