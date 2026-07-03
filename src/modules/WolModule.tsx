@@ -1,9 +1,20 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isTauri, runPowershell } from '../tauri/bridge';
 
 // Faithful port of WinForge WolService — parse MAC, build the 102-byte magic packet.
-// Web-only: a browser can't open a raw UDP socket, so we compute & show the packet
-// (bytes/hex) and the target endpoint as read-only info. We never claim to actually send.
+// In a browser we compute & show the packet (bytes/hex) as read-only info. In the
+// WinForge desktop app we also SEND it over a UDP broadcast (×3) via the backend.
+
+/** PowerShell that sends the magic packet ×3 over a UDP broadcast (Windows PowerShell + .NET UdpClient). */
+function sendScript(mac: number[], host: string, port: number): string {
+  const bytes = mac.map((b) => `0x${b.toString(16).padStart(2, '0')}`).join(',');
+  return `$mac=[byte[]]@(${bytes}); $packet=New-Object byte[] 102; ` +
+    `for($i=0;$i -lt 6;$i++){$packet[$i]=0xFF}; for($r=0;$r -lt 16;$r++){[Array]::Copy($mac,0,$packet,6+$r*6,6)}; ` +
+    `$udp=New-Object System.Net.Sockets.UdpClient; $udp.EnableBroadcast=$true; ` +
+    `$ep=New-Object System.Net.IPEndPoint([System.Net.IPAddress]::Parse('${host}'),${port}); ` +
+    `for($i=0;$i -lt 3;$i++){[void]$udp.Send($packet,102,$ep)}; $udp.Close(); 'sent'`;
+}
 
 /** Parse a MAC in any common notation into 6 bytes, or null (never throws). */
 function tryParseMac(input: string | null | undefined): number[] | null {
@@ -50,6 +61,9 @@ export function WolModule() {
   const [broadcast, setBroadcast] = useState('255.255.255.255');
   const [port, setPort] = useState(9);
   const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendMsg, setSendMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const desktop = isTauri();
 
   const model = useMemo(() => {
     const mac = tryParseMac(macText);
@@ -83,6 +97,21 @@ export function WolModule() {
     navigator.clipboard?.writeText(model.hexStr);
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
+  };
+
+  const send = async () => {
+    if (!model.ok) return;
+    setSending(true);
+    setSendMsg(null);
+    try {
+      const res = await runPowershell(sendScript(model.mac, model.host, model.port));
+      if (!res.success) throw new Error(res.stderr.trim() || `exit ${res.code}`);
+      setSendMsg({ ok: true, text: t('wol.sent', { mac: model.macStr, host: model.host, port: model.port }) });
+    } catch (e) {
+      setSendMsg({ ok: false, text: String(e instanceof Error ? e.message : e) });
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -133,10 +162,20 @@ export function WolModule() {
           <div className="panel">
             <div className="mod-toolbar" style={{ justifyContent: 'space-between' }}>
               <h4 style={{ margin: 0 }}>{t('wol.packetTitle')}</h4>
-              <button className="mini" onClick={copyHex}>
-                {copied ? t('wol.copied') : t('wol.copyHex')}
-              </button>
+              <span style={{ display: 'flex', gap: 8 }}>
+                {desktop && (
+                  <button className="mini primary" disabled={sending} onClick={send}>
+                    {sending ? t('wol.sending') : t('wol.send')}
+                  </button>
+                )}
+                <button className="mini" onClick={copyHex}>
+                  {copied ? t('wol.copied') : t('wol.copyHex')}
+                </button>
+              </span>
             </div>
+            {sendMsg && (
+              <p className="count-note" style={{ marginTop: 8, color: sendMsg.ok ? undefined : 'var(--danger)' }}>{sendMsg.text}</p>
+            )}
             <textarea
               className="hosts-edit"
               spellCheck={false}
@@ -151,7 +190,7 @@ export function WolModule() {
         <p className="count-note" style={{ color: 'var(--danger)' }}>{model.msg}</p>
       )}
 
-      <p className="count-note" style={{ marginTop: 10 }}>{t('wol.webNote')}</p>
+      <p className="count-note" style={{ marginTop: 10 }}>{desktop ? t('wol.desktopNote') : t('wol.webNote')}</p>
     </div>
   );
 }

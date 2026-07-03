@@ -40,9 +40,13 @@ import { WolModule } from './WolModule';
 import { WordFreqModule } from './WordFreqModule';
 import { WorldClockModule } from './WorldClockModule';
 import { YamlJsonModule } from './YamlJsonModule';
+import { PingModule } from './PingModule';
+import { PortScanModule } from './PortScanModule';
+import { RecycleBinModule } from './RecycleBinModule';
 
 /**
- * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
+ * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
+ * tools that run against the desktop backend). Kept in a
  * dedicated file so this agent never collides with concurrent edits to registry.tsx.
  * Merged into moduleRegistry by registry.tsx.
  */
@@ -89,4 +93,7 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.worldclock': WorldClockModule,
   'module.yamljson': YamlJsonModule,
   'module.numwords': NumWordsXModule,
+  'module.ping': PingModule,
+  'module.portscan': PortScanModule,
+  'module.recyclebin': RecycleBinModule,
 };

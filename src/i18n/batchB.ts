@@ -917,6 +917,10 @@ export const enB = {
     copied: "Copied",
     packetNote: "6×0xFF followed by the MAC repeated 16 times.",
     webNote: "This is a web preview: it builds and shows the magic packet but cannot send UDP from the browser. Use the WinForge desktop app to actually send it.",
+    send: 'Send magic packet',
+    sending: 'Sending…',
+    sent: 'Magic packet sent to {{mac}} via {{host}}:{{port}} (×3).',
+    desktopNote: 'Desktop app: the packet is sent over a UDP broadcast (×3). Wake-on-LAN must be enabled in the target BIOS/NIC.',
   },
   wordfreq: {
     blurb: "Paste any text and see which words, word-pairs or characters appear most. Ranked with counts, bars and percentages — copy the table as CSV.",
@@ -975,6 +979,25 @@ export const enB = {
     phYaml: "Paste YAML here…",
     phJson: "Paste JSON here…",
     phOutput: "Result appears here",
+  },
+  ping: {
+    desktopOnly: 'Live probing needs the WinForge desktop app (ICMP is unavailable in a browser).',
+    host: 'Host', count: 'Count', maxHops: 'Max hops', ping: 'Ping', pinging: 'Pinging…',
+    traceroute: 'Traceroute', tracing: 'Tracing…', address: 'Address', latency: 'Latency', statusCol: 'Status', hop: 'Hop',
+    summary: 'Sent {{sent}} · Received {{ok}} · Loss {{loss}}% · Avg {{avg}} ms',
+    note: 'ICMP echo via the native backend. Only probe hosts you are authorised to test.',
+  },
+  portscan: {
+    desktopOnly: 'Port scanning needs the WinForge desktop app (raw sockets are unavailable in a browser).',
+    host: 'Host', common: 'Common ports', range: 'Port range', timeout: 'Timeout (ms)', scan: 'Scan', scanning: 'Scanning…',
+    resolved: 'Resolved {{ip}} · {{n}} open', none: 'No open ports found in the scanned set.', port: 'Port', service: 'Service',
+    warn: 'Only scan hosts you own or are explicitly authorised to test.',
+  },
+  recyclebin: {
+    desktopOnly: 'The Recycle Bin needs the WinForge desktop app (a browser cannot read it).',
+    refresh: 'Refresh', empty: 'Empty Recycle Bin', confirm: 'Permanently delete all items?', confirmYes: 'Yes, empty', cancel: 'Cancel',
+    emptied: 'Recycle Bin emptied.', totals: '{{count}} items · {{size}}', empty0: 'The Recycle Bin is empty.',
+    name: 'Name', location: 'Original location', size: 'Size', deleted: 'Date deleted',
   },
 };
 
@@ -1892,6 +1915,10 @@ export const yueB = {
     copied: "已複製",
     packetNote: "6×0xFF 之後係 MAC 重複 16 次。",
     webNote: "呢個係網頁預覽：會整同顯示魔術封包，但瀏覽器唔可以傳送 UDP。要真正傳送請用 WinForge 桌面程式。",
+    send: '傳送魔術封包',
+    sending: '傳送緊…',
+    sent: '魔術封包已送去 {{mac}}，經 {{host}}:{{port}}（×3）。',
+    desktopNote: '桌面程式：封包會經 UDP 廣播傳送（×3）。目標主機 BIOS/網卡要開啟 Wake-on-LAN。',
   },
   wordfreq: {
     blurb: "貼入任何文字，睇下邊啲詞、詞組或者字元出現得最多。附上次數、長條同百分比排名 — 可以複製成 CSV。",
@@ -1950,5 +1977,24 @@ export const yueB = {
     phYaml: "喺呢度貼上 YAML…",
     phJson: "喺呢度貼上 JSON…",
     phOutput: "結果會喺呢度出現",
+  },
+  ping: {
+    desktopOnly: '即時探測需要 WinForge 桌面版（瀏覽器冇 ICMP）。',
+    host: '主機', count: '次數', maxHops: '最多躍點', ping: 'Ping', pinging: 'Ping 緊…',
+    traceroute: '路由追蹤', tracing: '追蹤緊…', address: '位址', latency: '延遲', statusCol: '狀態', hop: '躍點',
+    summary: '送出 {{sent}} · 收到 {{ok}} · 丟失 {{loss}}% · 平均 {{avg}} ms',
+    note: '經原生後端做 ICMP echo。只可以探測你有權測試嘅主機。',
+  },
+  portscan: {
+    desktopOnly: '連接埠掃描需要 WinForge 桌面版（瀏覽器冇原始通訊端）。',
+    host: '主機', common: '常見連接埠', range: '連接埠範圍', timeout: '逾時（毫秒）', scan: '掃描', scanning: '掃描緊…',
+    resolved: '已解析 {{ip}} · {{n}} 個開啟', none: '掃描範圍內冇搵到開啟嘅連接埠。', port: '連接埠', service: '服務',
+    warn: '只可以掃描你擁有或者獲明確授權測試嘅主機。',
+  },
+  recyclebin: {
+    desktopOnly: '回收筒需要 WinForge 桌面版（瀏覽器讀唔到）。',
+    refresh: '重新整理', empty: '清空回收筒', confirm: '永久刪除所有項目？', confirmYes: '係，清空', cancel: '取消',
+    emptied: '回收筒已清空。', totals: '{{count}} 個項目 · {{size}}', empty0: '回收筒係空嘅。',
+    name: '名稱', location: '原始位置', size: '大小', deleted: '刪除日期',
   },
 };
