@@ -7,7 +7,6 @@ const utf8Bytes = (s: string) => new TextEncoder().encode(s).length;
 function countCodePoints(s: string): number { return [...s].length; }
 function countGraphemes(s: string): number {
   try {
-    // @ts-expect-error Intl.Segmenter may be untyped in older lib versions
     const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
     let n = 0;
     for (const _ of seg.segment(s)) n++;
@@ -80,7 +79,6 @@ function codePointRows(s: string, max = 512): Row[] {
 
 function reverse(s: string): string {
   try {
-    // @ts-expect-error Segmenter typing
     const seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
     return [...seg.segment(s)].map((x: { segment: string }) => x.segment).reverse().join('');
   } catch { return [...s].reverse().join(''); }

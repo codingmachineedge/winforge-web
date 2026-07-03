@@ -4,6 +4,7 @@ import './i18n';
 import './styles/global.css';
 import './styles/a11y.css';
 import { initTheme } from './state/theme';
+import { initPwa } from './pwa';
 import { App } from './App';
 
 // Apply the persisted theme before first paint to avoid a wrong-theme flash.
@@ -17,3 +18,6 @@ createRoot(rootEl).render(
     <App />
   </StrictMode>,
 );
+
+// Register the browser PWA service worker (no-op in Tauri / non-http contexts).
+initPwa();
