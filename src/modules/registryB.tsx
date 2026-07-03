@@ -79,6 +79,12 @@ import { ShortcutGuideModule } from './ShortcutGuideModule';
 import { TaskbarTweakerModule } from './TaskbarTweakerModule';
 import { TextOcrModule } from './TextOcrModule';
 import { TimeLensModule } from './TimeLensModule';
+import { TimeUnitModule } from './TimeUnitModule';
+import { VaultVolumesModule } from './VaultVolumesModule';
+import { ViaProxyModule } from './ViaProxyModule';
+import { VoiceModule } from './VoiceModule';
+import { WebClonerModule } from './WebClonerModule';
+import { WebLoginModule } from './WebLoginModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -168,4 +174,10 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.taskbar-tweaker': TaskbarTweakerModule,
   'module.textocr': TextOcrModule,
   'module.timelens': TimeLensModule,
+  'module.timeunit': TimeUnitModule,
+  'module.vault-volumes': VaultVolumesModule,
+  'module.viaproxy': ViaProxyModule,
+  'module.voice': VoiceModule,
+  'module.webcloner': WebClonerModule,
+  'module.weblogin': WebLoginModule,
 };
