@@ -73,6 +73,12 @@ import { ProxmoxModule } from './ProxmoxModule';
 import { QuickAccentModule } from './QuickAccentModule';
 import { RenameModule } from './RenameModule';
 import { RichPreviewModule } from './RichPreviewModule';
+import { ScreenRulerModule } from './ScreenRulerModule';
+import { ShellMenuModule } from './ShellMenuModule';
+import { ShortcutGuideModule } from './ShortcutGuideModule';
+import { TaskbarTweakerModule } from './TaskbarTweakerModule';
+import { TextOcrModule } from './TextOcrModule';
+import { TimeLensModule } from './TimeLensModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -156,4 +162,10 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.quickaccent': QuickAccentModule,
   'module.rename': RenameModule,
   'module.richpreview': RichPreviewModule,
+  'module.screenruler': ScreenRulerModule,
+  'module.shellmenu': ShellMenuModule,
+  'module.shortcutguide': ShortcutGuideModule,
+  'module.taskbar-tweaker': TaskbarTweakerModule,
+  'module.textocr': TextOcrModule,
+  'module.timelens': TimeLensModule,
 };
