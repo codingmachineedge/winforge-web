@@ -322,6 +322,19 @@ export const enB = {
     total: 'Total across counters',
     defaultName: 'Counter {{n}}',
   },
+  numwords: {
+    value: 'Number',
+    currency: 'Currency',
+    cardinal: 'English cardinal',
+    ordinalWords: 'English ordinal (words)',
+    ordinalNumeric: 'Ordinal (numeric)',
+    currencyWords: 'Currency words',
+    chineseLower: 'Chinese 小寫',
+    chineseUpper: 'Chinese 大寫',
+    chineseCurrency: 'Chinese currency 元角分',
+    copy: 'Copy',
+    badNumber: 'Enter a number to spell out.',
+  },
 };
 
 export const yueB = {
@@ -642,5 +655,18 @@ export const yueB = {
     reset: '歸零',
     total: '所有計數器總和',
     defaultName: '計數器 {{n}}',
+  },
+  numwords: {
+    value: '數字',
+    currency: '貨幣',
+    cardinal: '英文基數',
+    ordinalWords: '英文序數（文字）',
+    ordinalNumeric: '序數（數字）',
+    currencyWords: '貨幣文字',
+    chineseLower: '中文小寫',
+    chineseUpper: '中文大寫',
+    chineseCurrency: '中文金額 元角分',
+    copy: '複製',
+    badNumber: '請輸入要轉換嘅數字。',
   },
 };

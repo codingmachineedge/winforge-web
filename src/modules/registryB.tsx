@@ -18,6 +18,7 @@ import { NumSeqModule } from './NumSeqModule';
 import { UrlToolsModule } from './UrlToolsModule';
 import { TextColumnsModule } from './TextColumnsModule';
 import { TallyCounterModule } from './TallyCounterModule';
+import { NumWordsXModule } from './NumWordsXModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -44,4 +45,5 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.urltools': UrlToolsModule,
   'module.textcolumns': TextColumnsModule,
   'module.tallycounter': TallyCounterModule,
+  'module.numwordsx': NumWordsXModule,
 };
