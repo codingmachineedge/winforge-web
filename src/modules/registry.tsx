@@ -79,6 +79,12 @@ import { EncodingConvModule } from './EncodingConvModule';
 import { AsciiArtModule } from './AsciiArtModule';
 import { ColorBlindModule } from './ColorBlindModule';
 import { GradientModule } from './GradientModule';
+import { Ascii85Module } from './Ascii85Module';
+import { MorseModule } from './MorseModule';
+import { GuidGenModule } from './GuidGenModule';
+import { CheckDigitModule } from './CheckDigitModule';
+import { MimeTypesModule } from './MimeTypesModule';
+import { BarcodeModule } from './BarcodeModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -172,6 +178,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.asciiart': AsciiArtModule,
   'module.colorblind': ColorBlindModule,
   'module.gradient': GradientModule,
+  'module.ascii85': Ascii85Module,
+  'module.morse': MorseModule,
+  'module.guidgen': GuidGenModule,
+  'module.checkdigit': CheckDigitModule,
+  'module.mimetypes': MimeTypesModule,
+  'module.barcode': BarcodeModule,
   ...moduleRegistryB,
 };
 
