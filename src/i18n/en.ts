@@ -1,5 +1,472 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  cloudflare: {
+    "blurb": "Run cloudflared from inside WinForge: named tunnels, free quick tunnels, route DNS, Cloudflare Access, DNS-over-HTTPS and WARP.",
+    "cfReady": "cloudflared ready",
+    "cfMissing": "cloudflared not found",
+    "warpReady": "WARP ready",
+    "warpMissing": "WARP not found",
+    "installHint": "cloudflared was not found on PATH. Install it (winget install Cloudflare.cloudflared) to enable these operations — no restart needed.",
+    "field": {
+      "tunnel": "Tunnel name",
+      "hostname": "Hostname",
+      "localUrl": "Local service"
+    },
+    "placeholderHint": "Tip: many operations use these placeholders — tunnel name, hostname (app.example.com), and local service (http://localhost:8080). Edit them to your values before running.",
+    "warpTitle": "WARP",
+    "warpConnected": "Connected",
+    "warpDisconnected": "Disconnected",
+    "tunnelsTitle": "Named tunnels",
+    "noTunnels": "No tunnels found. Log in first (Tunnel login), then create one.",
+    "tun": {
+      "name": "Name",
+      "id": "Tunnel ID",
+      "connections": "Connections",
+      "created": "Created"
+    },
+    "use": "Use",
+    "filter": "Filter operations…",
+    "opsCount": "{{total}} operations",
+    "running": "Running…",
+    "close": "Close",
+    "destructive": "destructive",
+    "admin": "admin",
+    "longRunning": "long-running",
+    "longRunningNote": "This command normally runs until you stop it (tunnel/proxy/login). It was run once here and its output captured; for a persistent connection run it in a terminal.",
+    "doneNoOutput": "Done — no output.",
+    "failedNoOutput": "Command failed with no output.",
+    "confirmDestructive": "Run \"{{name}}\"? This may be hard to undo.",
+    "confirmAdmin": "\"{{name}}\" needs administrator rights. Continue?",
+    "group": {
+      "basics": "Basics",
+      "auth": "Authentication",
+      "tunnels": "Named tunnels",
+      "quick": "Quick tunnel",
+      "service": "Windows service",
+      "access": "Cloudflare Access",
+      "doh": "DNS over HTTPS",
+      "warp": "WARP"
+    },
+    "op": {
+      "version": {
+        "title": "cloudflared version",
+        "desc": "Show the installed cloudflared version.",
+        "btn": "Check"
+      },
+      "update": {
+        "title": "Update cloudflared",
+        "desc": "Update cloudflared to the latest release.",
+        "btn": "Update"
+      },
+      "help": {
+        "title": "cloudflared help",
+        "desc": "Show the cloudflared top-level help.",
+        "btn": "Show"
+      },
+      "login": {
+        "title": "Tunnel login",
+        "desc": "Open a browser to authorise this machine with your Cloudflare account (creates a cert.pem).",
+        "btn": "Login"
+      },
+      "tunnelList": {
+        "title": "List tunnels",
+        "desc": "List all named tunnels on your account.",
+        "btn": "List"
+      },
+      "tunnelCreate": {
+        "title": "Create tunnel",
+        "desc": "Create a named tunnel with the name above.",
+        "btn": "Create"
+      },
+      "tunnelInfo": {
+        "title": "Tunnel info",
+        "desc": "Show details and connections for the named tunnel.",
+        "btn": "Info"
+      },
+      "tunnelToken": {
+        "title": "Tunnel token",
+        "desc": "Print the connector token for the named tunnel.",
+        "btn": "Token"
+      },
+      "routeDns": {
+        "title": "Route DNS to tunnel",
+        "desc": "Point the hostname at the tunnel via a DNS record.",
+        "btn": "Route"
+      },
+      "routeIpAdd": {
+        "title": "Route IP range",
+        "desc": "Route a private IP range (10.0.0.0/24) through the tunnel (WARP-to-Tunnel).",
+        "btn": "Route"
+      },
+      "routeIpList": {
+        "title": "List routed IPs",
+        "desc": "List the private IP routes for your tunnels.",
+        "btn": "List"
+      },
+      "tunnelRun": {
+        "title": "Run tunnel",
+        "desc": "Run the named tunnel (stays open until you close it).",
+        "btn": "Run"
+      },
+      "tunnelCleanup": {
+        "title": "Clean up tunnel",
+        "desc": "Clean up stale connections for the named tunnel.",
+        "btn": "Clean"
+      },
+      "tunnelDelete": {
+        "title": "Delete tunnel",
+        "desc": "Delete the named tunnel.",
+        "btn": "Delete"
+      },
+      "quickTunnel": {
+        "title": "Quick tunnel (try Cloudflare)",
+        "desc": "Expose the local service over a free *.trycloudflare.com URL (no account).",
+        "btn": "Start"
+      },
+      "serviceInstall": {
+        "title": "Install service",
+        "desc": "Install cloudflared as a Windows service (run as admin).",
+        "btn": "Install"
+      },
+      "serviceUninstall": {
+        "title": "Uninstall service",
+        "desc": "Remove the cloudflared Windows service.",
+        "btn": "Uninstall"
+      },
+      "accessLogin": {
+        "title": "Access login",
+        "desc": "Authenticate to a Cloudflare Access app at the hostname.",
+        "btn": "Login"
+      },
+      "accessCurl": {
+        "title": "Access curl",
+        "desc": "Make an authenticated request to a protected URL.",
+        "btn": "Run"
+      },
+      "accessTcp": {
+        "title": "Access TCP bind",
+        "desc": "Bind a protected TCP service (e.g. SSH) to a local port. Stays open.",
+        "btn": "Bind"
+      },
+      "accessSsh": {
+        "title": "Access SSH config",
+        "desc": "Print SSH ProxyCommand config for a protected host.",
+        "btn": "Show"
+      },
+      "doh": {
+        "title": "DNS over HTTPS proxy",
+        "desc": "Run a local DNS-over-HTTPS proxy on port 5053 → https://1.1.1.1/dns-query. Stays open.",
+        "btn": "Start"
+      },
+      "warpVersion": {
+        "title": "WARP version",
+        "desc": "Show the installed WARP client version.",
+        "btn": "Check"
+      },
+      "warpRegister": {
+        "title": "WARP register",
+        "desc": "Register this device with WARP.",
+        "btn": "Register"
+      },
+      "warpConnect": {
+        "title": "WARP connect",
+        "desc": "Connect the WARP tunnel.",
+        "btn": "Connect"
+      },
+      "warpDisconnect": {
+        "title": "WARP disconnect",
+        "desc": "Disconnect the WARP tunnel.",
+        "btn": "Disconnect"
+      },
+      "warpStatus": {
+        "title": "WARP status",
+        "desc": "Show the WARP connection status.",
+        "btn": "Status"
+      },
+      "warpSettings": {
+        "title": "WARP settings",
+        "desc": "Show current WARP settings.",
+        "btn": "Show"
+      },
+      "warpModeWarp": {
+        "title": "WARP mode: WARP",
+        "desc": "Set the client mode to full WARP (encrypted tunnel).",
+        "btn": "Set"
+      },
+      "warpModeDoh": {
+        "title": "WARP mode: DoH",
+        "desc": "Set the client mode to DNS-only (1.1.1.1 over HTTPS).",
+        "btn": "Set"
+      },
+      "warpAccount": {
+        "title": "WARP account",
+        "desc": "Show the WARP account / registration details.",
+        "btn": "Show"
+      }
+    }
+  },
+  filezilla: {
+    "subtitle": "Native FileZilla-style FTP / FTPS / SFTP: your saved sites with encrypted credentials, a live local browser, and reachability probing — all driven from the live system.",
+    "quickconnect": "Quickconnect",
+    "host": "host · 主機",
+    "port": "port",
+    "user": "user · 使用者",
+    "testConnection": "Test connection",
+    "qcNoHost": "Enter a host first.",
+    "qcChecking": "Checking…",
+    "qcReachable": "Reachable · {{host}}:{{port}} accepted a TCP connection.",
+    "qcUnreachable": "Unreachable · {{host}}:{{port}} did not accept a TCP connection.",
+    "qcFailed": "Check failed",
+    "siteManager": "Site Manager",
+    "siteCount": "{{sites}} saved sites",
+    "trustedCount": "{{trusted}} trusted",
+    "storeNote": "Read from %LOCALAPPDATA%\\WinForge\\ftp-sites.json. Passwords and key passphrases stay DPAPI-encrypted at rest and are never shown here.",
+    "noSites": "No saved sites yet. Add sites in the WinForge desktop client's Site Manager.",
+    "colName": "Name",
+    "colProtocol": "Protocol",
+    "colEndpoint": "Host : Port",
+    "colUser": "User",
+    "colAuth": "Auth",
+    "authPassword": "Password",
+    "authKey": "Key file",
+    "colTrust": "Host key",
+    "trusted": "Trusted",
+    "untrusted": "Not trusted",
+    "colReach": "Reachability",
+    "testReach": "Test",
+    "reachable": "Reachable",
+    "unreachable": "Unreachable",
+    "localPane": "Local",
+    "up": "Up",
+    "go": "Go",
+    "pathPlaceholder": "Local path…",
+    "newFolder": "New folder",
+    "newFolderPrompt": "New folder name:",
+    "newFolderConfirm": "Create folder \"{{name}}\" in {{dir}}?",
+    "newFolderOk": "Created folder \"{{name}}\".",
+    "newFolderFail": "Create failed",
+    "colSize": "Size",
+    "colModified": "Modified",
+    "itemCount": "{{items}} items",
+    "emptyFolder": "This folder is empty.",
+    "protocolsTitle": "Supported protocols",
+    "protocolsBody": "FTP (plain, port 21), FTPS (FTP over explicit TLS, port 21) and SFTP (SSH, port 22). The desktop client supports resumable transfers on all three: FTP via REST, SFTP via byte-offset append.",
+    "securityBody": "Saved-site passwords and key passphrases are encrypted at rest with Windows DPAPI (current-user scope). Unknown SFTP host keys / FTPS certificates prompt for trust on first use (TOFU)."
+  },
+  fileserver: {
+    "blurb": "Host one of your folders out over SFTP or FTP/FTPS by running a server in Docker. Each share runs on its own auto-picked port, so you can host several at once and connect from another machine.",
+    "desktopOnly": "This module drives Docker on your PC and only works in the WinForge desktop app.",
+    "dockerDown": "Docker engine not reachable. Start Docker Desktop (or the engine) to host shares. You can still edit definitions.",
+    "securityTitle": "Before you host",
+    "securityBody": "Bind-mounting grants the container read/write to the exact folder you choose — never a drive root. Plain FTP is unencrypted; prefer SFTP. Opening a port may need a Windows Firewall rule. Keep it on your LAN unless you mean to expose it.",
+    "newTitle": "Host a folder",
+    "newDesc": "Pick a folder, a protocol and credentials, then add the share and start the container.",
+    "nameLabel": "Share name",
+    "namePlaceholder": "My files",
+    "folderLabel": "Folder",
+    "protoLabel": "Protocol",
+    "protoSftp": "SFTP (atmoz/sftp)",
+    "protoFtp": "FTP / FTPS (alpine-ftp-server)",
+    "loginLabel": "Login",
+    "userPlaceholder": "username",
+    "pwPlaceholder": "password",
+    "portLabel": "Host port",
+    "autoPort": "Auto-pick a free port",
+    "addShare": "Add share",
+    "needFolder": "Pick a folder first.",
+    "needPassword": "Set a password.",
+    "defaultName": "Share",
+    "added": "Share \"{{name}}\" added. Enter its password and press Start to host it.",
+    "sharesTitle": "Hosted shares",
+    "empty": "No shares yet.",
+    "count": "{{running}} running · {{total}} total",
+    "stRunning": "Running",
+    "stStopped": "Stopped",
+    "reenterPw": "re-enter password to start",
+    "enterPwToStart": "Enter this share's password to start it.",
+    "start": "Start",
+    "stop": "Stop",
+    "copy": "Copy connection",
+    "remove": "Remove",
+    "confirmRemove": "Stop and remove \"{{name}}\"? Your folder's contents are not touched.",
+    "started": "{{name}} is up at {{conn}}",
+    "stopped": "Share \"{{name}}\" stopped.",
+    "removed": "Share \"{{name}}\" removed.",
+    "copied": "Copied: {{conn}}",
+    "dockerFailed": "docker command failed",
+    "outputTitle": "Output",
+    "outputHint": "Container output appears here.",
+    "clear": "Clear"
+  },
+  bitwarden: {
+    "blurb": "A native, live view of your self-hosted Bitwarden vault. Lists the Vaultwarden servers running on this machine (via Docker) and reports the Bitwarden CLI's login and lock state. Read-only — keys are never read or logged.",
+    "safeNote": "Read-only view. Start/stop/restart act only on the container process and never delete any data volume; each is gated behind a confirmation.",
+    "filter": "Filter servers",
+    "summary": "Docker {{version}} · {{running}}/{{servers}} servers running",
+    "serversTitle": "Self-hosted servers (Vaultwarden via Docker)",
+    "serversBlurb": "Run your own Bitwarden-compatible server locally. Each instance has its own data volume and host port, so several can run at once. Requires a running Docker engine.",
+    "engineDown": "Docker engine not reachable. Start Docker Desktop (or the Docker engine) to list and manage self-hosted Vaultwarden servers.",
+    "noServers": "No Vaultwarden or Bitwarden servers found. Create one with Docker, then refresh.",
+    "noPort": "no published port",
+    "open": "Open in browser",
+    "probe": "Check",
+    "probing": "Checking…",
+    "reachable": "reachable",
+    "unreachable": "unreachable",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart",
+    "actionFailed": "Could not update {{name}}",
+    "col": {
+      "state": "State",
+      "name": "Name",
+      "url": "Local URL",
+      "image": "Image",
+      "status": "Status"
+    },
+    "state": {
+      "running": "running",
+      "stopped": "stopped"
+    },
+    "confirm": {
+      "stop": "Stop the container '{{name}}'? Its data volume is left untouched.",
+      "restart": "Restart the container '{{name}}'?"
+    },
+    "did": {
+      "start": "Started {{name}}.",
+      "stop": "Stopped {{name}}.",
+      "restart": "Restarted {{name}}."
+    },
+    "cliTitle": "Bitwarden CLI vault status",
+    "cliBlurb": "Reads the Bitwarden CLI (bw status) to show which server you are signed in to and whether the vault is unlocked. No master password or session key is ever read.",
+    "cli": {
+      "unauthenticated": "Signed out",
+      "locked": "Locked",
+      "unlocked": "Unlocked",
+      "unknown": "Unknown",
+      "server": "Server",
+      "official": "Official Bitwarden (bitwarden.com)",
+      "account": "Account",
+      "lastSync": "Last sync",
+      "notInstalled": "The Bitwarden CLI (bw) is not installed or reported no status. Install it to see your vault's login and lock state here."
+    }
+  },
+  keepass: {
+    "blurb": "A native local password-vault companion. WinForge scans your system for real KeePass .kdbx databases (reading each file's KDBX signature and version), shows which KeePass tool can open them, and includes the same built-in strong-password generator as the desktop app. Nothing is launched, decrypted or uploaded — no master password is entered here.",
+    "generatorTitle": "Password generator",
+    "regenerate": "Regenerate",
+    "copy": "Copy",
+    "copyFailed": "Copy failed.",
+    "copiedClears": "Copied (clears in ~12s)",
+    "clipCleared": "Clipboard cleared.",
+    "length": "Length",
+    "entropy": "{{bits}} bits",
+    "strength": {
+      "weak": "Weak",
+      "fair": "Fair",
+      "strong": "Strong",
+      "strongVery": "Very strong"
+    },
+    "upper": "Uppercase (A-Z)",
+    "lower": "Lowercase (a-z)",
+    "digits": "Digits (0-9)",
+    "symbols": "Symbols (!@#…)",
+    "notInstalled": "not installed",
+    "vaultsTitle": "KeePass databases (.kdbx) found",
+    "filter": "Filter by name or folder",
+    "vaultCount": "{{num}} vault(s)",
+    "scanNote": "Read-only scan of your profile, Documents, Desktop, Downloads and OneDrive for .kdbx files. Version is read from the KDBX file header; the vault contents are never decrypted.",
+    "noVaults": "No .kdbx databases found in the scanned locations.",
+    "colName": "Database",
+    "colVersion": "Format",
+    "notKdbx": "Not KDBX",
+    "colSize": "Size",
+    "colModified": "Modified",
+    "copyPath": "Copy path",
+    "pathCopied": "Path copied.",
+    "vault": "Vault"
+  },
+  decompiler: {
+    "blurb": "Open a managed .dll or .exe and browse it like ILSpy — namespaces, types and members — then inspect any type's real member signatures. See assembly metadata, referenced assemblies and resources, and search by name. Runs entirely in-app on native .NET reflection; no external tool is launched.",
+    "pathPlaceholder": "Path to a managed .NET assembly (.dll / .exe)",
+    "open": "Open assembly",
+    "loading": "Loading…",
+    "presets": "Quick open:",
+    "presetFwXml": "System.Xml",
+    "presetFwData": "System.Data",
+    "presetFwCore": "System.dll",
+    "webNote": "Live reflection runs in the desktop app. In a plain browser the backend is inert — open WinForge to read an assembly.",
+    "loadFailed": "Could not load assembly",
+    "notManaged": "Not a managed .NET assembly, or could not be read.",
+    "searchPlaceholder": "Search types / members",
+    "noSelection": "No selection",
+    "emptyHint": "Select a type on the left to inspect its members.",
+    "membersNote": "Member signatures via native .NET reflection (ReflectionOnlyLoad).",
+    "noMembers": "No declared members.",
+    "memberCount": "{{members}} members",
+    "copy": "Copy",
+    "copied": "Copied",
+    "refsResTitle": "References & resources",
+    "none": "(none)",
+    "mName": "Name",
+    "mVersion": "Version",
+    "mArch": "Architecture",
+    "mPkt": "Public key token",
+    "mKind": "Kind",
+    "mFull": "Full name",
+    "mTypes": "Types",
+    "mRefs": "Referenced assemblies",
+    "mRes": "Resources",
+    "exe": "Executable (.exe)",
+    "dll": "Library (.dll)",
+    "footer": "Managed reflection engine: native System.Reflection (ReflectionOnlyLoad). Fully in-process, read-only — no external tool is launched."
+  },
+  advancedpaste: {
+    "blurb": "Transform text with one click, then copy the result. Paste your clipboard in, pick an action — everything runs locally.",
+    "pasteIn": "Paste from clipboard",
+    "filter": "Filter actions…",
+    "inputLabel": "Input",
+    "inputPh": "Type or paste text here…",
+    "outputLabel": "Result",
+    "outputPh": "Pick an action to transform the input.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "actionsLabel": "{{total}} actions",
+    "act_plaintext": "Plain text",
+    "desc_plaintext": "Strip formatting, keep the text as-is.",
+    "act_plainfromhtml": "Text from HTML",
+    "desc_plainfromhtml": "Extract readable text from HTML markup.",
+    "act_json": "Pretty JSON",
+    "desc_json": "Reformat JSON with indentation (or quote plain text as JSON).",
+    "act_uppercase": "UPPERCASE",
+    "desc_uppercase": "Convert to UPPER CASE.",
+    "act_lowercase": "lowercase",
+    "desc_lowercase": "Convert to lower case.",
+    "act_titlecase": "Title Case",
+    "desc_titlecase": "Capitalise The First Letter Of Each Word.",
+    "act_trim": "Trim lines",
+    "desc_trim": "Trim leading/trailing whitespace on every line.",
+    "act_removeblank": "Remove blank lines",
+    "desc_removeblank": "Drop empty lines.",
+    "act_sortlines": "Sort lines",
+    "desc_sortlines": "Sort lines alphabetically.",
+    "act_uniquelines": "Unique lines",
+    "desc_uniquelines": "Remove duplicate lines.",
+    "act_transposecsv": "Transpose CSV",
+    "desc_transposecsv": "Swap rows and columns of CSV text.",
+    "act_urlencode": "URL encode",
+    "desc_urlencode": "Percent-encode for use in a URL.",
+    "act_urldecode": "URL decode",
+    "desc_urldecode": "Decode percent-encoded text.",
+    "act_base64encode": "Base64 encode",
+    "desc_base64encode": "Encode text as Base64.",
+    "act_base64decode": "Base64 decode",
+    "desc_base64decode": "Decode Base64 back to text.",
+    "act_htmlencode": "HTML encode",
+    "desc_htmlencode": "Escape &, <, >, quotes for HTML.",
+    "act_htmldecode": "HTML decode",
+    "desc_htmldecode": "Unescape HTML entities back to text."
+  },
   diagram: {
     "hint": "Drag a shape to move it. Click to select, then Connect to draw an arrow to another shape. Double-click to rename. Save to JSON or export a PNG — everything stays on your machine.",
     "rect": "Rectangle",

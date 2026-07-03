@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 
 const ROOT = 'C:/Users/cntow/Documents/GitHub/winforge-web';
-const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/tasks/wxvzw30je.output';
+const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/tasks/wwej3qbdc.output';
 
 // Run journal dir — fallback if the aggregated OUT file lags behind the agents.
-const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/subagents/workflows/wf_81de997f-414';
+const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/subagents/workflows/wf_c34c5417-211';
 void RUNDIR;
 
 function fromJournals(dir) {
@@ -90,6 +90,7 @@ for (const m of modules) {
   const resolves = (k) => enLeaves.has(k) || PLURALS.some((s) => enLeaves.has(k + s));
   for (const k of staticKeys) {
     if (!k) continue; // empty subkey = a dynamic/commented reference, not a real key
+    if (k.endsWith('.')) continue; // trailing dot = a dynamic prefix, e.g. t('ns.strength.' + level)
     if (!resolves(k)) problems.push(`${ns}: module references t('${ns}.${k}') but no such key was provided`);
   }
 

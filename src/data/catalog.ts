@@ -893,7 +893,7 @@ export const catalog: CatalogSection[] = [
             "zh": "進階貼上",
             "glyph": "",
             "keywords": "advanced paste transform smart paste plain text markdown json uppercase lowercase title case base64 url encode html ocr image to text csv transpose sort unique lines ai win+shift+v 進階 貼上 轉換 純文字 大小寫 編碼 解碼 排序 去重複 圖片轉文字",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.powertoys",
@@ -3557,7 +3557,7 @@ export const allModules: CatalogModule[] = [
     "zh": "進階貼上",
     "glyph": "",
     "keywords": "advanced paste transform smart paste plain text markdown json uppercase lowercase title case base64 url encode html ocr image to text csv transpose sort unique lines ai win+shift+v 進階 貼上 轉換 純文字 大小寫 編碼 解碼 排序 去重複 圖片轉文字",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.powertoys",

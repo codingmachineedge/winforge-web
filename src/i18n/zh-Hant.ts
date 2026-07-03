@@ -2,6 +2,473 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  cloudflare: {
+    "blurb": "喺 WinForge 直接用 cloudflared：具名 tunnel、免費快速 tunnel、DNS 路由、Cloudflare Access、DNS-over-HTTPS 同 WARP。",
+    "cfReady": "cloudflared 就緒",
+    "cfMissing": "搵唔到 cloudflared",
+    "warpReady": "WARP 就緒",
+    "warpMissing": "搵唔到 WARP",
+    "installHint": "PATH 上搵唔到 cloudflared。安裝佢（winget install Cloudflare.cloudflared）就用得呢啲操作 — 唔使重開。",
+    "field": {
+      "tunnel": "Tunnel 名",
+      "hostname": "主機名",
+      "localUrl": "本機服務"
+    },
+    "placeholderHint": "提示：好多操作用咗呢啲佔位符 — tunnel 名、主機名（app.example.com）同本機服務（http://localhost:8080）。行之前改成你嘅值。",
+    "warpTitle": "WARP",
+    "warpConnected": "已連線",
+    "warpDisconnected": "未連線",
+    "tunnelsTitle": "具名 tunnel",
+    "noTunnels": "搵唔到 tunnel。先登入（Tunnel 登入），再建立一個。",
+    "tun": {
+      "name": "名稱",
+      "id": "Tunnel ID",
+      "connections": "連線數",
+      "created": "建立日期"
+    },
+    "use": "採用",
+    "filter": "篩選操作…",
+    "opsCount": "{{total}} 項操作",
+    "running": "執行中…",
+    "close": "關閉",
+    "destructive": "破壞性",
+    "admin": "管理員",
+    "longRunning": "長時間",
+    "longRunningNote": "呢句指令通常會一直行到你停佢為止（tunnel／proxy／登入）。呢度只行咗一次並擷取輸出；要持續連線就喺終端機行。",
+    "doneNoOutput": "完成 — 冇輸出。",
+    "failedNoOutput": "指令失敗，冇輸出。",
+    "confirmDestructive": "確定行「{{name}}」？呢個動作可能難以復原。",
+    "confirmAdmin": "「{{name}}」需要管理員權限。繼續？",
+    "group": {
+      "basics": "基本",
+      "auth": "驗證",
+      "tunnels": "具名 tunnel",
+      "quick": "快速 tunnel",
+      "service": "Windows 服務",
+      "access": "Cloudflare Access",
+      "doh": "DNS over HTTPS",
+      "warp": "WARP"
+    },
+    "op": {
+      "version": {
+        "title": "cloudflared 版本",
+        "desc": "顯示已安裝嘅 cloudflared 版本。",
+        "btn": "查睇"
+      },
+      "update": {
+        "title": "更新 cloudflared",
+        "desc": "將 cloudflared 更新到最新版本。",
+        "btn": "更新"
+      },
+      "help": {
+        "title": "cloudflared 說明",
+        "desc": "顯示 cloudflared 頂層說明。",
+        "btn": "顯示"
+      },
+      "login": {
+        "title": "Tunnel 登入",
+        "desc": "開瀏覽器，將呢部機授權畀你嘅 Cloudflare 帳戶（會產生 cert.pem）。",
+        "btn": "登入"
+      },
+      "tunnelList": {
+        "title": "列出 Tunnel",
+        "desc": "列出你帳戶上所有具名 tunnel。",
+        "btn": "列出"
+      },
+      "tunnelCreate": {
+        "title": "建立 Tunnel",
+        "desc": "用上面嘅名建立一個具名 tunnel。",
+        "btn": "建立"
+      },
+      "tunnelInfo": {
+        "title": "Tunnel 資料",
+        "desc": "顯示該具名 tunnel 嘅詳情同連線。",
+        "btn": "查睇"
+      },
+      "tunnelToken": {
+        "title": "Tunnel 權杖",
+        "desc": "印出該具名 tunnel 嘅連接器權杖。",
+        "btn": "權杖"
+      },
+      "routeDns": {
+        "title": "DNS 路由到 Tunnel",
+        "desc": "用 DNS 記錄將主機名指去 tunnel。",
+        "btn": "路由"
+      },
+      "routeIpAdd": {
+        "title": "路由 IP 範圍",
+        "desc": "將私有 IP 範圍（10.0.0.0/24）經 tunnel 路由（WARP-to-Tunnel）。",
+        "btn": "路由"
+      },
+      "routeIpList": {
+        "title": "列出已路由 IP",
+        "desc": "列出你 tunnel 嘅私有 IP 路由。",
+        "btn": "列出"
+      },
+      "tunnelRun": {
+        "title": "執行 Tunnel",
+        "desc": "執行該具名 tunnel（會一直開住）。",
+        "btn": "執行"
+      },
+      "tunnelCleanup": {
+        "title": "清理 Tunnel",
+        "desc": "清理該具名 tunnel 殘留嘅連線。",
+        "btn": "清理"
+      },
+      "tunnelDelete": {
+        "title": "刪除 Tunnel",
+        "desc": "刪除該具名 tunnel。",
+        "btn": "刪除"
+      },
+      "quickTunnel": {
+        "title": "快速 Tunnel（免費試）",
+        "desc": "用免費 *.trycloudflare.com 網址公開本機服務（唔使帳戶）。",
+        "btn": "開始"
+      },
+      "serviceInstall": {
+        "title": "安裝服務",
+        "desc": "將 cloudflared 安裝做 Windows 服務（需管理員）。",
+        "btn": "安裝"
+      },
+      "serviceUninstall": {
+        "title": "移除服務",
+        "desc": "移除 cloudflared Windows 服務。",
+        "btn": "移除"
+      },
+      "accessLogin": {
+        "title": "Access 登入",
+        "desc": "登入該主機名嘅 Cloudflare Access 應用。",
+        "btn": "登入"
+      },
+      "accessCurl": {
+        "title": "Access curl",
+        "desc": "向受保護網址發出已驗證請求。",
+        "btn": "執行"
+      },
+      "accessTcp": {
+        "title": "Access TCP 綁定",
+        "desc": "將受保護 TCP 服務（例如 SSH）綁到本機連接埠。會一直開住。",
+        "btn": "綁定"
+      },
+      "accessSsh": {
+        "title": "Access SSH 設定",
+        "desc": "印出受保護主機嘅 SSH ProxyCommand 設定。",
+        "btn": "顯示"
+      },
+      "doh": {
+        "title": "DNS over HTTPS 代理",
+        "desc": "喺連接埠 5053 執行本機 DNS-over-HTTPS 代理 → https://1.1.1.1/dns-query。會一直開住。",
+        "btn": "開始"
+      },
+      "warpVersion": {
+        "title": "WARP 版本",
+        "desc": "顯示已安裝嘅 WARP 用戶端版本。",
+        "btn": "查睇"
+      },
+      "warpRegister": {
+        "title": "WARP 註冊",
+        "desc": "將呢部裝置註冊到 WARP。",
+        "btn": "註冊"
+      },
+      "warpConnect": {
+        "title": "WARP 連線",
+        "desc": "連線 WARP tunnel。",
+        "btn": "連線"
+      },
+      "warpDisconnect": {
+        "title": "WARP 斷線",
+        "desc": "斷開 WARP tunnel。",
+        "btn": "斷線"
+      },
+      "warpStatus": {
+        "title": "WARP 狀態",
+        "desc": "顯示 WARP 連線狀態。",
+        "btn": "狀態"
+      },
+      "warpSettings": {
+        "title": "WARP 設定",
+        "desc": "顯示目前 WARP 設定。",
+        "btn": "顯示"
+      },
+      "warpModeWarp": {
+        "title": "WARP 模式：WARP",
+        "desc": "將用戶端模式設為完整 WARP（加密通道）。",
+        "btn": "設定"
+      },
+      "warpModeDoh": {
+        "title": "WARP 模式：DoH",
+        "desc": "將用戶端模式設為只用 DNS（1.1.1.1 over HTTPS）。",
+        "btn": "設定"
+      },
+      "warpAccount": {
+        "title": "WARP 帳戶",
+        "desc": "顯示 WARP 帳戶／註冊詳情。",
+        "btn": "顯示"
+      }
+    }
+  },
+  filezilla: {
+    "subtitle": "原生 FileZilla 式 FTP／FTPS／SFTP：睇你加密憑證嘅已儲存站台、即時本機瀏覽、同埋可達性偵測 — 全部由即時系統驅動。",
+    "quickconnect": "快速連線",
+    "host": "主機 · host",
+    "port": "連接埠",
+    "user": "使用者 · user",
+    "testConnection": "測試連線",
+    "qcNoHost": "請先輸入主機。",
+    "qcChecking": "檢查緊…",
+    "qcReachable": "可連到 · {{host}}:{{port}} 接受咗 TCP 連線。",
+    "qcUnreachable": "連唔到 · {{host}}:{{port}} 唔接受 TCP 連線。",
+    "qcFailed": "檢查失敗",
+    "siteManager": "站台管理",
+    "siteCount": "{{sites}} 個已儲存站台",
+    "trustedCount": "{{trusted}} 個已信任",
+    "storeNote": "由 %LOCALAPPDATA%\\WinForge\\ftp-sites.json 讀取。密碼同金鑰密語會維持 DPAPI 加密儲存，唔會喺呢度顯示。",
+    "noSites": "仲未有已儲存站台。喺 WinForge 桌面客戶端嘅站台管理度加站台。",
+    "colName": "名稱",
+    "colProtocol": "協定",
+    "colEndpoint": "主機：連接埠",
+    "colUser": "使用者",
+    "colAuth": "驗證",
+    "authPassword": "密碼",
+    "authKey": "私鑰檔",
+    "colTrust": "主機金鑰",
+    "trusted": "已信任",
+    "untrusted": "未信任",
+    "colReach": "可達性",
+    "testReach": "測試",
+    "reachable": "可連到",
+    "unreachable": "連唔到",
+    "localPane": "本機",
+    "up": "上層",
+    "go": "前往",
+    "pathPlaceholder": "本機路徑…",
+    "newFolder": "新資料夾",
+    "newFolderPrompt": "新資料夾名稱：",
+    "newFolderConfirm": "喺 {{dir}} 建立資料夾「{{name}}」？",
+    "newFolderOk": "已建立資料夾「{{name}}」。",
+    "newFolderFail": "建立失敗",
+    "colSize": "大小",
+    "colModified": "修改時間",
+    "itemCount": "{{items}} 個項目",
+    "emptyFolder": "呢個資料夾係空嘅。",
+    "protocolsTitle": "支援嘅協定",
+    "protocolsBody": "FTP（純，連接埠 21）、FTPS（FTP over 明示 TLS，連接埠 21）同 SFTP（SSH，連接埠 22）。桌面客戶端三者都支援可續傳：FTP 用 REST，SFTP 用位元組偏移 append。",
+    "securityBody": "已儲存站台嘅密碼同金鑰密語會用 Windows DPAPI（目前使用者範圍）加密儲存。未知嘅 SFTP 主機金鑰／FTPS 憑證會喺首次連線時提示信任（TOFU）。"
+  },
+  fileserver: {
+    "blurb": "用 Docker 行一個伺服器，將你嘅資料夾經 SFTP 或 FTP／FTPS 對外分享。每個分享用自己自動揀嘅連接埠，可以同時開幾個，並由另一部機連入。",
+    "desktopOnly": "呢個模組要喺你部電腦上面驅動 Docker，只喺 WinForge 桌面程式先用得。",
+    "dockerDown": "連唔到 Docker 引擎。請啟動 Docker Desktop（或引擎）先可以分享。你仍然可以編輯定義。",
+    "securityTitle": "分享之前",
+    "securityBody": "繫結掛載會畀容器讀寫你揀嘅資料夾 — 唔好揀磁碟根目錄。純 FTP 冇加密，建議用 SFTP。開連接埠可能要加 Windows 防火牆規則。除非有意對外，否則只限區域網。",
+    "newTitle": "分享一個資料夾",
+    "newDesc": "揀資料夾、通訊協定同帳戶密碼，然後新增分享並啟動容器。",
+    "nameLabel": "分享名稱",
+    "namePlaceholder": "我嘅檔案",
+    "folderLabel": "資料夾",
+    "protoLabel": "通訊協定",
+    "protoSftp": "SFTP（atmoz/sftp）",
+    "protoFtp": "FTP／FTPS（alpine-ftp-server）",
+    "loginLabel": "登入",
+    "userPlaceholder": "使用者名稱",
+    "pwPlaceholder": "密碼",
+    "portLabel": "主機連接埠",
+    "autoPort": "自動揀一個空連接埠",
+    "addShare": "新增分享",
+    "needFolder": "請先揀資料夾。",
+    "needPassword": "請設定密碼。",
+    "defaultName": "分享",
+    "added": "已新增分享「{{name}}」。輸入密碼並撳啟動嚟分享。",
+    "sharesTitle": "已分享",
+    "empty": "未有分享。",
+    "count": "{{running}} 個運行中 · 共 {{total}} 個",
+    "stRunning": "運行中",
+    "stStopped": "已停止",
+    "reenterPw": "重新輸入密碼嚟啟動",
+    "enterPwToStart": "請輸入呢個分享嘅密碼先可以啟動。",
+    "start": "啟動",
+    "stop": "停止",
+    "copy": "複製連線",
+    "remove": "移除",
+    "confirmRemove": "停止並移除「{{name}}」？你資料夾入面嘅內容唔會受影響。",
+    "started": "「{{name}}」已啟動：{{conn}}",
+    "stopped": "分享「{{name}}」已停止。",
+    "removed": "分享「{{name}}」已移除。",
+    "copied": "已複製：{{conn}}",
+    "dockerFailed": "docker 指令執行失敗",
+    "outputTitle": "輸出",
+    "outputHint": "容器輸出會喺呢度顯示。",
+    "clear": "清除"
+  },
+  bitwarden: {
+    "blurb": "你自寄存 Bitwarden 保險庫嘅原生即時檢視。列出呢部機上行緊嘅 Vaultwarden 伺服器（透過 Docker），並顯示 Bitwarden CLI 嘅登入同鎖定狀態。唯讀 —— 從不讀取或記錄金鑰。",
+    "safeNote": "唯讀檢視。啟動／停止／重啟只作用喺容器程序上，絕不刪除任何資料卷；每個動作都要經確認先執行。",
+    "filter": "篩選伺服器",
+    "summary": "Docker {{version}} · {{running}}/{{servers}} 個伺服器行緊",
+    "serversTitle": "自寄存伺服器（用 Docker 起 Vaultwarden）",
+    "serversBlurb": "喺本機行你自己嘅 Bitwarden 相容伺服器。每個實例有自己嘅資料卷同主機埠，可以同時行幾個。需要 Docker 引擎行緊。",
+    "engineDown": "連唔到 Docker 引擎。啟動 Docker Desktop（或 Docker 引擎）先可以列出同管理自寄存 Vaultwarden 伺服器。",
+    "noServers": "搵唔到 Vaultwarden 或 Bitwarden 伺服器。用 Docker 建立一個，然後重新整理。",
+    "noPort": "無發佈埠",
+    "open": "喺瀏覽器打開",
+    "probe": "檢查",
+    "probing": "檢查緊…",
+    "reachable": "可連線",
+    "unreachable": "連唔到",
+    "start": "啟動",
+    "stop": "停止",
+    "restart": "重啟",
+    "actionFailed": "更新 {{name}} 失敗",
+    "col": {
+      "state": "狀態",
+      "name": "名稱",
+      "url": "本機網址",
+      "image": "映像",
+      "status": "狀況"
+    },
+    "state": {
+      "running": "行緊",
+      "stopped": "已停止"
+    },
+    "confirm": {
+      "stop": "停止容器「{{name}}」？佢嘅資料卷唔會受影響。",
+      "restart": "重啟容器「{{name}}」？"
+    },
+    "did": {
+      "start": "已啟動 {{name}}。",
+      "stop": "已停止 {{name}}。",
+      "restart": "已重啟 {{name}}。"
+    },
+    "cliTitle": "Bitwarden CLI 保險庫狀態",
+    "cliBlurb": "讀取 Bitwarden CLI（bw status），顯示你登入緊邊個伺服器，以及保險庫係咪已解鎖。從不讀取主密碼或工作階段金鑰。",
+    "cli": {
+      "unauthenticated": "已登出",
+      "locked": "已鎖定",
+      "unlocked": "已解鎖",
+      "unknown": "未知",
+      "server": "伺服器",
+      "official": "官方 Bitwarden（bitwarden.com）",
+      "account": "帳戶",
+      "lastSync": "上次同步",
+      "notInstalled": "未安裝 Bitwarden CLI（bw）或佢無回報狀態。安裝之後就可以喺呢度睇到保險庫嘅登入同鎖定狀態。"
+    }
+  },
+  keepass: {
+    "blurb": "原生本機密碼保險庫助手。WinForge 會掃描你部機上真實嘅 KeePass .kdbx 資料庫（讀取每個檔嘅 KDBX 簽名同版本），顯示邊個 KeePass 工具開得到，仲內建同桌面版一樣嘅強密碼產生器。唔會啟動、解密或上載任何嘢 — 呢度唔使輸入主密碼。",
+    "generatorTitle": "密碼產生器",
+    "regenerate": "重新產生",
+    "copy": "複製",
+    "copyFailed": "複製失敗。",
+    "copiedClears": "已複製（約 12 秒後清除）",
+    "clipCleared": "剪貼簿已清除。",
+    "length": "長度",
+    "entropy": "{{bits}} 位元",
+    "strength": {
+      "weak": "弱",
+      "fair": "一般",
+      "strong": "強",
+      "strongVery": "非常強"
+    },
+    "upper": "大寫字母 (A-Z)",
+    "lower": "細寫字母 (a-z)",
+    "digits": "數字 (0-9)",
+    "symbols": "符號 (!@#…)",
+    "notInstalled": "未安裝",
+    "vaultsTitle": "搵到嘅 KeePass 資料庫 (.kdbx)",
+    "filter": "用名或資料夾篩選",
+    "vaultCount": "{{num}} 個保險庫",
+    "scanNote": "唯讀掃描你嘅個人資料夾、文件、桌面、下載同 OneDrive 入面嘅 .kdbx 檔。版本係由 KDBX 檔標頭讀出；保險庫內容絕不會解密。",
+    "noVaults": "喺掃描嘅位置搵唔到 .kdbx 資料庫。",
+    "colName": "資料庫",
+    "colVersion": "格式",
+    "notKdbx": "唔係 KDBX",
+    "colSize": "大小",
+    "colModified": "修改時間",
+    "copyPath": "複製路徑",
+    "pathCopied": "已複製路徑。",
+    "vault": "保險庫"
+  },
+  decompiler: {
+    "blurb": "開一個受控 .dll 或 .exe，好似 ILSpy 咁瀏覽 —— 命名空間、型別同成員 —— 跟住睇任何型別嘅真實成員簽名。可以睇組件後設資料、參考組件同資源，仲可以按名搜尋。全部喺 app 內用原生 .NET 反射運行，唔會啟動任何外部工具。",
+    "pathPlaceholder": "受控 .NET 組件路徑（.dll ／ .exe）",
+    "open": "開組件",
+    "loading": "載入緊…",
+    "presets": "快速開：",
+    "presetFwXml": "System.Xml",
+    "presetFwData": "System.Data",
+    "presetFwCore": "System.dll",
+    "webNote": "即時反射喺桌面 app 先行到。喺普通瀏覽器後端唔會運作 —— 開 WinForge 先可以讀組件。",
+    "loadFailed": "載入組件失敗",
+    "notManaged": "唔係受控 .NET 組件，或者讀唔到。",
+    "searchPlaceholder": "搜尋型別／成員",
+    "noSelection": "未選取",
+    "emptyHint": "喺左邊揀一個型別就會睇到佢嘅成員。",
+    "membersNote": "成員簽名用原生 .NET 反射（ReflectionOnlyLoad）攞。",
+    "noMembers": "冇宣告嘅成員。",
+    "memberCount": "{{members}} 個成員",
+    "copy": "複製",
+    "copied": "已複製",
+    "refsResTitle": "參考組件同資源",
+    "none": "（無）",
+    "mName": "名稱",
+    "mVersion": "版本",
+    "mArch": "架構",
+    "mPkt": "公開金鑰權杖",
+    "mKind": "種類",
+    "mFull": "完整名稱",
+    "mTypes": "型別",
+    "mRefs": "參考組件",
+    "mRes": "資源",
+    "exe": "可執行檔 (.exe)",
+    "dll": "程式庫 (.dll)",
+    "footer": "受控反射引擎：原生 System.Reflection（ReflectionOnlyLoad）。完全喺程序內運行、唯讀，唔會啟動任何外部工具。"
+  },
+  advancedpaste: {
+    "blurb": "一撳就轉換文字，再複製結果。貼入剪貼簿內容，揀個動作 — 全部本機運行。",
+    "pasteIn": "由剪貼簿貼入",
+    "filter": "篩選動作…",
+    "inputLabel": "輸入",
+    "inputPh": "喺呢度打字或貼上文字…",
+    "outputLabel": "結果",
+    "outputPh": "揀個動作轉換輸入。",
+    "copy": "複製",
+    "copied": "已複製",
+    "actionsLabel": "{{total}} 個動作",
+    "act_plaintext": "純文字",
+    "desc_plaintext": "去格式，保留原文。",
+    "act_plainfromhtml": "由 HTML 抽文字",
+    "desc_plainfromhtml": "由 HTML 標記抽出可讀文字。",
+    "act_json": "美化 JSON",
+    "desc_json": "用縮排重新格式化 JSON（純文字則轉做 JSON 字串）。",
+    "act_uppercase": "全大階",
+    "desc_uppercase": "轉做全大階。",
+    "act_lowercase": "全細階",
+    "desc_lowercase": "轉做全細階。",
+    "act_titlecase": "首字母大階",
+    "desc_titlecase": "每個字第一個字母大階。",
+    "act_trim": "去除行首尾空白",
+    "desc_trim": "去除每行首尾嘅空白。",
+    "act_removeblank": "刪空行",
+    "desc_removeblank": "刪除空行。",
+    "act_sortlines": "排序行",
+    "desc_sortlines": "將行按字母排序。",
+    "act_uniquelines": "去重複行",
+    "desc_uniquelines": "刪除重複嘅行。",
+    "act_transposecsv": "CSV 轉置",
+    "desc_transposecsv": "將 CSV 嘅行同列對調。",
+    "act_urlencode": "URL 編碼",
+    "desc_urlencode": "做百分比編碼用喺 URL。",
+    "act_urldecode": "URL 解碼",
+    "desc_urldecode": "解碼百分比編碼文字。",
+    "act_base64encode": "Base64 編碼",
+    "desc_base64encode": "將文字編做 Base64。",
+    "act_base64decode": "Base64 解碼",
+    "desc_base64decode": "將 Base64 解返做文字。",
+    "act_htmlencode": "HTML 編碼",
+    "desc_htmlencode": "轉義 &、<、>、引號做 HTML。",
+    "act_htmldecode": "HTML 解碼",
+    "desc_htmldecode": "將 HTML 實體解返做文字。"
+  },
   diagram: {
     "hint": "拖曳形狀嚟移動。撳一下揀住，再撳「連接」畫箭咀去另一個形狀。雙擊改名。存做 JSON 或者匯出 PNG — 全部留喺你部機。",
     "rect": "矩形",

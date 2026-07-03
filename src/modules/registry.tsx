@@ -153,6 +153,13 @@ import { DockerModule } from './DockerModule';
 import { DockerSshModule } from './DockerSshModule';
 import { AwsCliModule } from './AwsCliModule';
 import { DiagramEditorModule } from './DiagramEditorModule';
+import { AdvancedPasteModule } from './AdvancedPasteModule';
+import { CloudflareModule } from './CloudflareModule';
+import { FileZillaModule } from './FileZillaModule';
+import { FileServerModule } from './FileServerModule';
+import { BitwardenModule } from './BitwardenModule';
+import { KeePassModule } from './KeePassModule';
+import { DecompilerModule } from './DecompilerModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -322,6 +329,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.dockerssh': DockerSshModule,
   'module.aws': AwsCliModule,
   'module.diagram': DiagramEditorModule,
+  'module.advancedpaste': AdvancedPasteModule,
+  'module.cloudflare': CloudflareModule,
+  'module.filezilla': FileZillaModule,
+  'module.fileserver': FileServerModule,
+  'module.bitwarden': BitwardenModule,
+  'module.keepass': KeePassModule,
+  'module.decompiler': DecompilerModule,
   ...moduleRegistryB,
 };
 
