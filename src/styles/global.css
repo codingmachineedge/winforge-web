@@ -365,6 +365,31 @@ body {
 .api-resp {
   margin-top: 4px;
 }
+.timer-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+}
+.timer-display {
+  font-family: var(--mono, Consolas, monospace);
+  font-size: 44px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.timer-laps {
+  margin: 0;
+  padding-left: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: var(--mono, Consolas, monospace);
+  font-size: 13px;
+}
+.timer-laps li {
+  padding: 2px 0;
+}
 
 /* ---- Detail ---- */
 .detail {

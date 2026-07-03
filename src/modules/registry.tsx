@@ -41,6 +41,8 @@ import { CssFormatModule } from './CssFormatModule';
 import { ApiClientModule } from './ApiClientModule';
 import { CurlGenModule } from './CurlGenModule';
 import { MdTableModule } from './MdTableModule';
+import { TimerModule } from './TimerModule';
+import { moduleRegistryB } from './registryB';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -95,6 +97,8 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.apiclient': ApiClientModule,
   'module.curlgen': CurlGenModule,
   'module.mdtable': MdTableModule,
+  'module.timer': TimerModule,
+  ...moduleRegistryB,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
