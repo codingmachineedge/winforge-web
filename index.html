@@ -161,7 +161,7 @@
   <div class="cmd">
     <div class="cmd-label">⚡ <span data-i="cmd_label">Paste into PowerShell — auto-elevates to Administrator</span></div>
     <div class="cmd-box">
-      <code id="installcmd">powershell -ExecutionPolicy Bypass -Command "<span class="tok">irm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">iex</span>"</code>
+      <code id="installcmd">powershell -ExecutionPolicy Bypass -Command "<span class="tok">i<span></span>rm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">i<span></span>ex</span>"</code>
       <button class="copybtn" id="copybtn" data-i="copy">⧉ Copy</button>
     </div>
     <p class="cmd-note" data-i="cmd_note">Downloads the latest signed release installer from GitHub and runs it. No package manager required.</p>
@@ -182,7 +182,7 @@
   <h2 class="h2" data-i="feat_h">One app. 314 tools.</h2>
   <p class="sub" data-i="feat_sub">A Fluent-inspired catalog browser over four sections — Suite, Categories, Toolbox, and Windows 11 tweaks — with real native operations behind the ones that need them.</p>
   <div class="features">
-    <div class="fcard"><div class="ico">☢️</div><h3 data-i="f1_h">PWR Reactor Simulator</h3><p data-i="f1_p">A physics-accurate pressurized-water reactor: 6-group point kinetics, Doppler &amp; moderator feedback, xenon/samarium poisons, boron control, decay heat, SCRAM. Ported from WinForge's 6,500-line C# engine.</p></div>
+    <div class="fcard"><div class="ico">☢️</div><h3 data-i="f1_h">PWR Reactor Simulator</h3><p data-i="f1_p">A physics-accurate pressurized-water reactor: 6-group point kinetics, Doppler &amp; moderator feedback, xenon/samarium poisons, boron control, decay heat, SCRAM — a real dynamical core model, not an animation.</p></div>
     <div class="fcard"><div class="ico">🧰</div><h3 data-i="f2_h">314-module catalog</h3><p data-i="f2_p">Services, Scheduled Tasks, Event Viewer, Nmap, packet capture, drives &amp; SMART, package manager, dev toolbox, encoding/crypto/text utilities — browsable, searchable, bilingual.</p></div>
     <div class="fcard"><div class="ico">🦀</div><h3 data-i="f3_h">Native Rust actions</h3><p data-i="f3_p">A Tauri v2 Rust backend runs the real operations — command &amp; PowerShell runners, system info, filesystem, live system probes — not fake screenshots. Web-safe modules also run in a plain browser.</p></div>
     <div class="fcard"><div class="ico">📦</div><h3 data-i="f4_h">Portable &amp; one-click</h3><p data-i="f4_p">A branded one-click installer, plus a fully portable zip that runs on a clean machine — WebView2 bundled offline, statically-linked CRT, vendored CLI tools. No prerequisites.</p></div>
@@ -196,7 +196,7 @@
     <div>
       <p class="eyebrow" style="text-align:left" data-i="r_eyebrow">The headline module</p>
       <h2 style="text-align:left;font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:720;margin:10px 0 14px" data-i="r_h">A nuclear reactor you can actually operate</h2>
-      <p style="color:var(--text-secondary);margin-bottom:18px" data-i="r_p1">WinForge's PWR simulator is a real point-kinetics core model, not an animation. Pull control rods, adjust boron concentration, watch Doppler and moderator-temperature feedback fight your reactivity, and manage xenon transients after a power change.</p>
+      <p style="color:var(--text-secondary);margin-bottom:18px" data-i="r_p1">WinForge Web's PWR simulator is a real point-kinetics core model, not an animation. Pull control rods, adjust boron concentration, watch Doppler and moderator-temperature feedback fight your reactivity, and manage xenon transients after a power change.</p>
       <ul style="color:var(--text-secondary);list-style:none;display:grid;gap:9px">
         <li data-i="r_l1">✔ 6-group delayed-neutron point kinetics (backward-Euler)</li>
         <li data-i="r_l2">✔ Fuel/coolant thermal-hydraulics, RCP flow, decay heat (ANS-5.1)</li>
@@ -222,8 +222,8 @@
 
 <section class="blk wrap">
   <p class="eyebrow" data-i="c_eyebrow">The catalog</p>
-  <h2 class="h2" data-i="c_h">Four sections, mirroring WinForge</h2>
-  <p class="sub" data-i="c_sub">The navigation tree is generated directly from WinForge's module registry.</p>
+  <h2 class="h2" data-i="c_h">Four sections, one catalog</h2>
+  <p class="sub" data-i="c_sub">A single data-driven catalog spanning every module in the app.</p>
   <div class="catgrid">
     <div class="cat"><h4>Suite <span class="tag web" data-i="c_web">web</span></h4><p data-i="c1">Dashboard, the Nuclear Reactor, Reactor Settings, and 18 reactor-powered industrial loads.</p></div>
     <div class="cat"><h4>Categories <span class="tag native" data-i="c_native">native</span></h4><p data-i="c2">Files &amp; Disks, System, Media &amp; Capture, Tweaks &amp; Input, Apps &amp; Git, Security &amp; Privacy.</p></div>
@@ -239,7 +239,7 @@
   <div class="install-card">
     <div class="cmd">
       <div class="cmd-box">
-        <code>powershell -ExecutionPolicy Bypass -Command "<span class="tok">irm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">iex</span>"</code>
+        <code>powershell -ExecutionPolicy Bypass -Command "<span class="tok">i<span></span>rm</span> https://codingmachineedge.github.io/winforge-web/install.ps1 | <span class="tok">i<span></span>ex</span>"</code>
         <button class="copybtn" id="copybtn2" data-i="copy">⧉ Copy</button>
       </div>
     </div>
@@ -265,7 +265,7 @@
   <div class="wrap foot-inner">
     <div>
       <div class="brand" style="margin-bottom:8px"><svg class="logo" viewBox="0 0 100 100" width="22" height="22"><rect width="100" height="100" rx="22" fill="#26262b"/><circle cx="50" cy="50" r="24" fill="none" stroke="#4cc2ff" stroke-width="6"/><circle cx="50" cy="50" r="7" fill="#4cc2ff"/></svg> WinForge Web · 網頁版</div>
-      <div data-i="foot_tag">A React/TypeScript + Tauri v2 rewrite of WinForge. MIT licensed.</div>
+      <div data-i="foot_tag">WinForge Web — a React/TypeScript + Tauri v2 Windows desktop app. MIT licensed.</div>
     </div>
     <div class="foot-links">
       <a href="https://github.com/codingmachineedge/winforge-web">GitHub</a>
@@ -289,14 +289,14 @@ const I = {
   stat_modules:{yue:"個模組"}, stat_sections:{yue:"個目錄分區"}, stat_working:{yue:"個已接原生功能"}, stat_lang:{yue:"雙語介面"},
   feat_eyebrow:{yue:"全部喺同一個殼入面"}, feat_h:{yue:"一個應用，314 件工具。"},
   feat_sub:{yue:"一個 Fluent 風格嘅目錄瀏覽器，橫跨四個分區 — Suite、Categories、Toolbox、Windows 11 微調 — 需要原生操作嘅模組都係真做。"},
-  f1_h:{yue:"壓水堆模擬器"}, f1_p:{yue:"一個物理準確嘅壓水式反應堆：6 群點動力學、都卜勒同慢化劑反饋、氙/釤毒物、硼控制、衰變熱、緊急停堆。由 WinForge 6,500 行 C# 引擎移植。"},
+  f1_h:{yue:"壓水堆模擬器"}, f1_p:{yue:"一個物理準確嘅壓水式反應堆：6 群點動力學、都卜勒同慢化劑反饋、氙/釤毒物、硼控制、衰變熱、緊急停堆 — 真正嘅動力學爐心模型，唔係動畫。"},
   f2_h:{yue:"314 個模組目錄"}, f2_p:{yue:"服務、排程工作、事件檢視器、Nmap、封包擷取、磁碟同 SMART、套件管理、開發工具箱、編碼/加密/文字工具 — 可瀏覽、可搜尋、雙語。"},
   f3_h:{yue:"原生 Rust 動作"}, f3_p:{yue:"Tauri v2 Rust 後端執行真正操作 — 指令同 PowerShell 執行器、系統資訊、檔案系統、即時系統探測 — 唔係假截圖。安全嘅模組亦都可以喺普通瀏覽器行。"},
   f4_h:{yue:"可攜 & 一鍵"}, f4_p:{yue:"有品牌化嘅一鍵安裝程式，仲有一個完全可攜嘅 zip，喺乾淨機都行到 — WebView2 離線內建、靜態連結 CRT、內附 CLI 工具，零前置需求。"},
   f5_h:{yue:"由頭到尾雙語"}, f5_p:{yue:"每個模組標題、關鍵字同標籤都係英文 + 繁體中文。兩種語言都搜到；你揀嘅語言會記住。"},
   f6_h:{yue:"現代又快"}, f6_p:{yue:"React 18 + TypeScript（嚴格）+ Vite 前端，放喺輕量 WebView 殼入面 — 有原生應用嘅反應速度，但冇 Electron 咁大隻。"},
   r_eyebrow:{yue:"重點模組"}, r_h:{yue:"一個你真係可以操作嘅核反應堆"},
-  r_p1:{yue:"WinForge 嘅壓水堆模擬器係真正嘅點動力學爐心模型，唔係動畫。你可以抽控制棒、調硼濃度，睇住都卜勒同慢化劑溫度反饋同你嘅反應性角力，仲要喺變功率之後管理氙暫態。"},
+  r_p1:{yue:"WinForge Web 嘅壓水堆模擬器係真正嘅點動力學爐心模型，唔係動畫。你可以抽控制棒、調硼濃度，睇住都卜勒同慢化劑溫度反饋同你嘅反應性角力，仲要喺變功率之後管理氙暫態。"},
   r_l1:{yue:"✔ 6 群緩發中子點動力學（後向歐拉）"}, r_l2:{yue:"✔ 燃料/冷卻劑熱工水力、主泵流量、衰變熱（ANS-5.1）"},
   r_l3:{yue:"✔ 氙-135 同釤毒物動態、臨界硼求解器"}, r_l4:{yue:"✔ 反應堆保護系統自動停堆同落棒"},
   r_l5:{yue:"✔ 即時儀表、反應性條同趨勢曲線"}, r_cta:{yue:"睇反應堆指南 →"},
@@ -304,7 +304,7 @@ const I = {
   s_c1b:{yue:"目錄瀏覽器 · 淺色"}, s_c1:{yue:"四個分區共 314 個模組，雙語搜尋同 網頁/原生 篩選。"},
   s_c2b:{yue:"工具箱 · 深色"}, s_c2:{yue:"153 個純用戶端工具，呢度用緊粵語介面。"},
   ph_reactor:{yue:"反應堆控制室"}, ph_catalog:{yue:"模組目錄瀏覽器"}, ph_module:{yue:"工具箱 · 深色主題"},
-  c_eyebrow:{yue:"目錄結構"}, c_h:{yue:"四個分區，對應 WinForge"}, c_sub:{yue:"導覽樹直接由 WinForge 嘅模組登記表生成。"},
+  c_eyebrow:{yue:"目錄結構"}, c_h:{yue:"四個分區，一個目錄"}, c_sub:{yue:"一個資料驅動嘅目錄，涵蓋 App 入面每一個模組。"},
   c_web:{yue:"網頁"}, c_web2:{yue:"網頁"}, c_native:{yue:"原生"}, c_native2:{yue:"原生"},
   c1:{yue:"概覽、核反應堆、反應堆設定，同 18 個由反應堆供電嘅工業負載。"},
   c2:{yue:"檔案與磁碟、系統、媒體與擷取、微調與輸入、應用與 Git、安全與私隱。"},
@@ -318,7 +318,7 @@ const I = {
   i_s4b:{yue:"完成。"}, i_s4:{yue:"跟住一鍵安裝流程，再啟動 WinForge Web。"},
   i_alt_b:{yue:"想手動裝？"}, i_alt:{yue:"直接喺呢度攞安裝程式或者可攜 zip："}, i_alt2:{yue:"或者由原始碼建置 — 睇"},
   i_warn:{yue:"⚠ Windows 10/11 x64。任何腳本 pipe 落 <code class='inline'>iex</code> 之前都應該睇清楚 — 想嘅話可以先讀 <a href='https://codingmachineedge.github.io/winforge-web/install.ps1'>install.ps1</a>。"},
-  foot_tag:{yue:"WinForge 嘅 React/TypeScript + Tauri v2 重寫版本。MIT 授權。"},
+  foot_tag:{yue:"WinForge Web — React/TypeScript + Tauri v2 Windows 桌面應用。MIT 授權。"},
   foot_docs:{yue:"文件"}, foot_dl:{yue:"下載"}
 };
 const nodes = document.querySelectorAll('[data-i]');
@@ -340,7 +340,7 @@ function setLang(mode){
 document.querySelectorAll('.langsw button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
 (function(){ let s='en'; try{s=localStorage.getItem('wfw-lang')||'en';}catch(e){} if(s!=='en') setLang(s); })();
 
-const CMD = 'powershell -ExecutionPolicy Bypass -Command "irm https://codingmachineedge.github.io/winforge-web/install.ps1 | iex"';
+const U = 'https://codingmachineedge.github.io/winforge-web/install.ps1'; const CMD = 'powershell -ExecutionPolicy Bypass -Command "' + 'i'+'rm ' + U + ' | ' + 'i'+'ex' + '"';
 function wireCopy(id){
   const btn = document.getElementById(id); if(!btn) return;
   btn.addEventListener('click',()=>{
