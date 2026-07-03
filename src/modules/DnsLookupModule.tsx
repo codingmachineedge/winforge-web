@@ -2,14 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pick } from '../i18n';
 
-// Port of WinForge DnsLookupService. The C# original resolves A/AAAA/PTR through
-// System.Net.Dns and MX/TXT/NS/CNAME through Google's public DNS-over-HTTPS JSON
-// API (dns.google/resolve). In the browser we route *every* type through the same
-// DoH endpoint — it is a public, CORS-enabled, pure client-side fetch (no OS/DNS
-// syscalls, no Tauri). PTR queries build the reverse in-addr.arpa/ip6.arpa name.
-
-const RECORD_TYPES = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'PTR'] as const;
-type RecordType = (typeof RECORD_TYPES)[number];
+const TYPES = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'PTR'] as const;
+type RecordType = (typeof TYPES)[number];
 
 interface DnsAnswer {
   value: string;
@@ -17,7 +11,15 @@ interface DnsAnswer {
   ttl: string;
 }
 
-// Numeric DNS record types -> friendly names for display (matches C# TypeName).
+interface DnsResult {
+  answers: DnsAnswer[];
+  elapsedMs: number;
+  ok: boolean;
+  statusEn: string;
+  statusZh: string;
+}
+
+// Numeric DNS record types -> friendly names for display.
 function typeName(t: number): string {
   switch (t) {
     case 1:
@@ -41,115 +43,62 @@ function typeName(t: number): string {
   }
 }
 
-const IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-
-function isIpv4(s: string): boolean {
-  const m = IPV4_RE.exec(s);
-  if (!m) return false;
-  for (let i = 1; i <= 4; i++) {
-    const n = Number(m[i]!);
-    if (n < 0 || n > 255) return false;
-  }
-  return true;
-}
-
-// Expand an IPv6 address to 32 hex nibbles, or null if not a valid IPv6 literal.
-function ipv6Nibbles(s: string): string[] | null {
-  if (s.indexOf(':') < 0) return null;
-  const parts = s.split('::');
-  if (parts.length > 2) return null;
-
-  const parseGroups = (seg: string): string[] | null => {
-    if (seg.length === 0) return [];
-    const groups = seg.split(':');
-    for (const g of groups) {
-      if (g.length === 0 || g.length > 4 || !/^[0-9a-fA-F]+$/.test(g)) return null;
-    }
-    return groups;
-  };
-
-  const head = parseGroups(parts[0]!);
-  if (head === null) return null;
-  let full: string[];
-  if (parts.length === 2) {
-    const tail = parseGroups(parts[1]!);
-    if (tail === null) return null;
-    const missing = 8 - head.length - tail.length;
-    if (missing < 1) return null;
-    full = [...head, ...new Array<string>(missing).fill('0'), ...tail];
-  } else {
-    if (head.length !== 8) return null;
-    full = head;
-  }
-  if (full.length !== 8) return null;
-
-  const nibbles: string[] = [];
-  for (const g of full) {
-    const padded = g.toLowerCase().padStart(4, '0');
-    for (let i = 0; i < 4; i++) nibbles.push(padded.charAt(i));
-  }
-  return nibbles;
-}
-
-// Build the reverse-DNS query name for a PTR lookup, or null if not an IP.
+// Build the reverse-DNS name (in-addr.arpa / ip6.arpa) for a PTR query.
 function reverseName(ip: string): string | null {
-  const v4 = IPV4_RE.exec(ip);
-  if (v4 && isIpv4(ip)) {
-    return `${v4[4]}.${v4[3]}.${v4[2]}.${v4[1]}.in-addr.arpa`;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+    const parts = ip.split('.');
+    if (parts.every((p) => Number(p) <= 255)) return parts.slice().reverse().join('.') + '.in-addr.arpa';
+    return null;
   }
-  const nib = ipv6Nibbles(ip);
-  if (nib) {
-    return nib.reverse().join('.') + '.ip6.arpa';
+  if (ip.includes(':')) {
+    // Expand an IPv6 address to full 32 nibbles.
+    const half = ip.split('::');
+    const expand = (seg: string) => (seg ? seg.split(':') : []);
+    let groups: string[];
+    if (half.length === 2) {
+      const left = expand(half[0]!);
+      const right = expand(half[1]!);
+      const fill = 8 - left.length - right.length;
+      if (fill < 0) return null;
+      groups = [...left, ...Array<string>(fill).fill('0'), ...right];
+    } else if (half.length === 1) {
+      groups = expand(half[0]!);
+    } else {
+      return null;
+    }
+    if (groups.length !== 8) return null;
+    let nibbles = '';
+    for (const g of groups) {
+      if (!/^[0-9a-fA-F]{1,4}$/.test(g)) return null;
+      nibbles += g.padStart(4, '0').toLowerCase();
+    }
+    return nibbles.split('').reverse().join('.') + '.ip6.arpa';
   }
   return null;
 }
 
-interface LookupOutcome {
-  answers: DnsAnswer[];
-  ok: boolean;
-  statusEn: string;
-  statusZh: string;
-  elapsedMs: number;
-}
-
-async function lookup(rawName: string, rawType: string): Promise<LookupOutcome> {
-  const start =
-    typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
-  const answers: DnsAnswer[] = [];
-  let ok = false;
-  let statusEn = '';
-  let statusZh = '';
-
+async function lookup(rawName: string, type: RecordType): Promise<DnsResult> {
+  const result: DnsResult = { answers: [], elapsedMs: 0, ok: false, statusEn: '', statusZh: '' };
+  const started = performance.now();
   const name = (rawName || '').trim();
-  const type = (rawType || 'A').trim().toUpperCase();
-
-  const finish = (): LookupOutcome => {
-    const now =
-      typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
-    let en = statusEn;
-    let zh = statusZh;
-    if (ok && answers.length === 0 && !en && !zh) {
-      en = `No ${type} records for "${name}".`;
-      zh = `「${name}」冇 ${type} 記錄。`;
-    }
-    return { answers, ok, statusEn: en, statusZh: zh, elapsedMs: Math.round(now - start) };
-  };
 
   if (!name) {
-    statusEn = 'Enter a host name or IP address.';
-    statusZh = '請輸入主機名或者 IP 位址。';
-    return finish();
+    result.statusEn = 'Enter a host name or IP address.';
+    result.statusZh = '請輸入主機名或者 IP 位址。';
+    result.elapsedMs = Math.round(performance.now() - started);
+    return result;
   }
 
-  // Determine the actual query name (PTR needs the reverse zone name).
+  // PTR queries need an IP address, converted to a reverse-lookup name.
   let queryName = name;
-  let queryType = type;
+  const queryType: string = type;
   if (type === 'PTR') {
     const rev = reverseName(name);
-    if (rev === null) {
-      statusEn = 'PTR (reverse) lookup needs an IP address (e.g. 8.8.8.8).';
-      statusZh = 'PTR（反向）查詢需要一個 IP 位址（例如 8.8.8.8）。';
-      return finish();
+    if (!rev) {
+      result.statusEn = 'PTR (reverse) lookup needs an IP address (e.g. 8.8.8.8).';
+      result.statusZh = 'PTR（反向）查詢需要一個 IP 位址（例如 8.8.8.8）。';
+      result.elapsedMs = Math.round(performance.now() - started);
+      return result;
     }
     queryName = rev;
   }
@@ -158,56 +107,56 @@ async function lookup(rawName: string, rawType: string): Promise<LookupOutcome> 
     const url = `https://dns.google/resolve?name=${encodeURIComponent(queryName)}&type=${encodeURIComponent(queryType)}`;
     const resp = await fetch(url, { headers: { Accept: 'application/dns-json' } });
     if (!resp.ok) {
-      statusEn = 'Network error reaching the DNS-over-HTTPS resolver.';
-      statusZh = '連接 DNS-over-HTTPS 解析器時發生網絡錯誤。';
-      return finish();
+      result.statusEn = 'Network error reaching the DNS-over-HTTPS resolver.';
+      result.statusZh = '連接 DNS-over-HTTPS 解析器時發生網絡錯誤。';
+      result.elapsedMs = Math.round(performance.now() - started);
+      return result;
     }
-    const root: unknown = await resp.json();
-    const obj = (root && typeof root === 'object' ? (root as Record<string, unknown>) : {});
+    const doc = (await resp.json()) as { Status?: number; Answer?: Array<{ data?: string; type?: number; TTL?: number }> };
 
-    const status = typeof obj.Status === 'number' ? obj.Status : -1;
+    // Status 3 = NXDOMAIN.
+    const status = typeof doc.Status === 'number' ? doc.Status : -1;
     if (status === 3) {
-      statusEn = `"${name}" does not exist (NXDOMAIN).`;
-      statusZh = `「${name}」唔存在（NXDOMAIN）。`;
-      return finish();
+      result.statusEn = `"${name}" does not exist (NXDOMAIN).`;
+      result.statusZh = `「${name}」唔存在（NXDOMAIN）。`;
+      result.elapsedMs = Math.round(performance.now() - started);
+      return result;
     }
 
-    ok = true;
-    const rawAnswer = obj.Answer;
-    if (Array.isArray(rawAnswer)) {
-      for (const item of rawAnswer) {
-        if (!item || typeof item !== 'object') continue;
-        const ans = item as Record<string, unknown>;
+    result.ok = true;
+    if (Array.isArray(doc.Answer)) {
+      for (const ans of doc.Answer) {
         const data = typeof ans.data === 'string' ? ans.data : '';
-        if (data.length === 0) continue;
-        const tNum = typeof ans.type === 'number' ? ans.type : 0;
+        if (!data) continue;
+        const nt = typeof ans.type === 'number' ? ans.type : 0;
         const ttl = typeof ans.TTL === 'number' ? String(ans.TTL) : '—';
-        answers.push({ value: data, type: typeName(tNum), ttl });
+        result.answers.push({ value: data, type: typeName(nt), ttl });
       }
     }
-    return finish();
   } catch {
-    ok = false;
-    statusEn = 'Network error reaching the DNS-over-HTTPS resolver.';
-    statusZh = '連接 DNS-over-HTTPS 解析器時發生網絡錯誤。';
-    return finish();
+    result.statusEn = 'Network error reaching the DNS-over-HTTPS resolver.';
+    result.statusZh = '連接 DNS-over-HTTPS 解析器時發生網絡錯誤。';
+    result.elapsedMs = Math.round(performance.now() - started);
+    return result;
   }
+
+  result.elapsedMs = Math.round(performance.now() - started);
+  if (result.ok && result.answers.length === 0) {
+    result.statusEn = `No ${type} records for "${name}".`;
+    result.statusZh = `「${name}」冇 ${type} 記錄。`;
+  }
+  return result;
 }
 
 export function DnsLookupModule() {
   const { t, i18n } = useTranslation();
-
   const [name, setName] = useState('');
   const [type, setType] = useState<RecordType>('A');
   const [answers, setAnswers] = useState<DnsAnswer[]>([]);
-  const [status, setStatus] = useState(pick(
-    'Enter a host and pick a record type.',
-    '輸入主機並揀一個記錄類型。',
-    i18n.language,
-  ));
+  const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const doLookup = async () => {
+  const run = async () => {
     setBusy(true);
     setAnswers([]);
     setStatus(t('dnslookup.looking', { type, name: name.trim() }));
@@ -216,7 +165,7 @@ export function DnsLookupModule() {
     if (result.statusEn || result.statusZh) {
       setStatus(pick(result.statusEn, result.statusZh, i18n.language));
     } else {
-      setStatus(t('dnslookup.answersCount', { count: result.answers.length, ms: result.elapsedMs }));
+      setStatus(t('dnslookup.answersCount', { n: result.answers.length, ms: result.elapsedMs }));
     }
     setBusy(false);
   };
@@ -227,50 +176,52 @@ export function DnsLookupModule() {
         {t('dnslookup.blurb')}
       </p>
 
-      <div className="mod-toolbar" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <span style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
-          <span className="count-note" style={{ margin: 0 }}>{t('dnslookup.nameLabel')}</span>
-          <input
-            className="mod-search"
-            placeholder="example.com"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !busy) void doLookup();
-            }}
-          />
-        </span>
-        <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <span className="count-note" style={{ margin: 0 }}>{t('dnslookup.typeLabel')}</span>
-          <select className="mod-select" value={type} onChange={(e) => setType(e.target.value as RecordType)}>
-            {RECORD_TYPES.map((rt) => (
-              <option key={rt} value={rt}>{rt}</option>
-            ))}
-          </select>
-        </span>
-        <button className="mini primary" disabled={busy} onClick={() => void doLookup()}>
-          {t('dnslookup.lookUp')}
+      <div className="mod-toolbar">
+        <input
+          className="mod-search"
+          style={{ flex: 1, minWidth: 180 }}
+          placeholder="example.com"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !busy) void run();
+          }}
+          aria-label={t('dnslookup.nameLabel')}
+        />
+        <select className="mod-select" value={type} onChange={(e) => setType(e.target.value as RecordType)} aria-label={t('dnslookup.typeLabel')}>
+          {TYPES.map((ty) => (
+            <option key={ty} value={ty}>
+              {ty}
+            </option>
+          ))}
+        </select>
+        <button className="mini primary" disabled={busy} onClick={() => void run()}>
+          {t('dnslookup.lookup')}
         </button>
       </div>
 
-      <p className="count-note" style={{ marginTop: 10 }}>{status}</p>
+      {status && (
+        <p className="count-note" style={{ marginTop: 4 }}>
+          {status}
+        </p>
+      )}
 
       {answers.length > 0 && (
-        <div className="dt-wrap" style={{ maxHeight: 360, marginTop: 4 }}>
+        <div className="dt-wrap" style={{ maxHeight: 360, marginTop: 8 }}>
           <table className="dt">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left' }}>{t('dnslookup.colValue')}</th>
-                <th style={{ textAlign: 'left' }}>{t('dnslookup.colType')}</th>
-                <th style={{ textAlign: 'left' }}>{t('dnslookup.colTtl')}</th>
+                <th>{t('dnslookup.colValue')}</th>
+                <th style={{ width: 80 }}>{t('dnslookup.colType')}</th>
+                <th style={{ width: 90 }}>{t('dnslookup.colTtl')}</th>
               </tr>
             </thead>
             <tbody>
               {answers.map((a, i) => (
                 <tr key={`${a.type}-${i}-${a.value}`}>
                   <td style={{ fontFamily: 'Consolas, monospace', wordBreak: 'break-all' }}>{a.value}</td>
-                  <td style={{ fontFamily: 'monospace' }}>{a.type}</td>
-                  <td style={{ fontFamily: 'monospace', opacity: 0.7 }}>{a.ttl}</td>
+                  <td>{a.type}</td>
+                  <td className="env-val">{a.ttl}</td>
                 </tr>
               ))}
             </tbody>
@@ -278,7 +229,9 @@ export function DnsLookupModule() {
         </div>
       )}
 
-      <p className="count-note" style={{ marginTop: 12 }}>{t('dnslookup.resolverNote')}</p>
+      <p className="count-note" style={{ marginTop: 12 }}>
+        {t('dnslookup.resolverNote')}
+      </p>
     </div>
   );
 }

@@ -109,6 +109,12 @@ import { HarAnalyzerModule } from './HarAnalyzerModule';
 import { CountdownEventModule } from './CountdownEventModule';
 import { ExpenseSplitModule } from './ExpenseSplitModule';
 import { HabitTrackerModule } from './HabitTrackerModule';
+import { HtmlPreviewModule } from './HtmlPreviewModule';
+import { MacToolsModule } from './MacToolsModule';
+import { FileSplitModule } from './FileSplitModule';
+import { ClipInspectModule } from './ClipInspectModule';
+import { DnsLookupModule } from './DnsLookupModule';
+import { IpInfoModule } from './IpInfoModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -234,6 +240,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.countdownevent': CountdownEventModule,
   'module.expensesplit': ExpenseSplitModule,
   'module.habittracker': HabitTrackerModule,
+  'module.htmlpreview': HtmlPreviewModule,
+  'module.mactools': MacToolsModule,
+  'module.filesplit': FileSplitModule,
+  'module.clipinspect': ClipInspectModule,
+  'module.dnslookup': DnsLookupModule,
+  'module.ipinfo': IpInfoModule,
   ...moduleRegistryB,
 };
 

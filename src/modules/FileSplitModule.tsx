@@ -269,7 +269,7 @@ export function FileSplitModule() {
           <span className="count-note" style={{ margin: 0 }}>
             {parts.length === 0
               ? t('filesplit.noParts')
-              : t('filesplit.partsChosen', { count: parts.length })}
+              : t('filesplit.partsChosen', { n: parts.length })}
           </span>
         </div>
 

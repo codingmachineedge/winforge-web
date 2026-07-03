@@ -1,21 +1,16 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// Port of WinForge ClipInspectService / ClipInspectModule — reads the clipboard on
-// demand and reports the formats it exposes, which standard types are present, and a
-// preview of any text. Read-only: never writes the clipboard. In the browser the
-// StandardDataFormats map onto MIME types exposed by ClipboardItem.types.
-
-type Pick = (en: string, zh: string) => string;
-
-interface FormatRow {
-  name: string;
-}
+// 剪貼簿格式檢查器 · Clipboard format inspector.
+// Web port of WinForge's ClipInspectModule: reads the clipboard on demand via the
+// async Clipboard API, lists every MIME type it exposes, flags which standard
+// formats are present, and previews any text. Read-only: only reads when the user
+// presses a button, never writes the clipboard, never throws.
 
 interface InspectResult {
   ok: boolean;
   error?: string;
-  formats: FormatRow[];
+  formats: string[];
   hasText: boolean;
   hasHtml: boolean;
   hasRtf: boolean;
@@ -28,13 +23,7 @@ interface InspectResult {
   storageItemCount: number;
 }
 
-// Match a StandardDataFormat against the MIME types the browser exposes.
-function typesContain(types: readonly string[], needles: string[]): boolean {
-  return types.some((tp) => {
-    const low = tp.toLowerCase();
-    return needles.some((n) => low === n || low.startsWith(n));
-  });
-}
+const IMAGE_RE = /^image\//i;
 
 async function readClipboard(): Promise<InspectResult> {
   const empty: InspectResult = {
@@ -63,215 +52,244 @@ async function readClipboard(): Promise<InspectResult> {
     return { ...empty, error: e instanceof Error ? e.message : String(e) };
   }
 
-  // Gather every MIME type across all items — this is the browser equivalent of
-  // DataPackageView.AvailableFormats.
-  const types: string[] = [];
-  const seen = new Set<string>();
+  // Gather every advertised MIME type across all clipboard items.
+  const formatSet = new Set<string>();
   for (const item of items) {
-    for (const tp of item.types) {
-      if (!seen.has(tp)) {
-        seen.add(tp);
-        types.push(tp);
+    for (const type of item.types) formatSet.add(type);
+  }
+  const formats = Array.from(formatSet).sort();
+
+  const has = (type: string) => formatSet.has(type);
+  const hasText = has('text/plain');
+  const hasHtml = has('text/html');
+  const hasRtf = has('text/rtf') || has('application/rtf');
+  const hasBitmap = formats.some((f) => IMAGE_RE.test(f));
+  // The web sandbox exposes no file/link standard formats through the async
+  // Clipboard API; keep the rows for feature parity — they show as absent.
+  const hasStorageItems = has('Files') || has('text/uri-list');
+  const hasWebLink = false;
+  const hasApplicationLink = false;
+
+  // Read the first item that carries a given blob type.
+  const blobOf = async (type: string): Promise<Blob | null> => {
+    for (const item of items) {
+      if (item.types.includes(type)) {
+        try {
+          return await item.getType(type);
+        } catch {
+          /* getType can throw despite the flag */
+        }
       }
     }
-  }
-
-  const hasText = typesContain(types, ['text/plain']);
-  const hasHtml = typesContain(types, ['text/html']);
-  const hasRtf = typesContain(types, ['text/rtf', 'application/rtf']);
-  const hasBitmap = typesContain(types, ['image/']);
-  const hasWebLink = typesContain(types, ['text/uri-list']);
-  // The browser Clipboard API cannot expose file/folder handles or application
-  // links the way WinForge's StandardDataFormats do, so these are always absent.
-  const hasStorage = false;
-  const hasAppLink = false;
+    return null;
+  };
 
   let textPreview: string | undefined;
   if (hasText) {
-    try {
-      let text = await clip.readText();
-      if (text != null) {
-        text = text.replace(/\r\n/g, ' ').replace(/\r/g, ' ').replace(/\n/g, ' ');
-        textPreview = text.length > 400 ? text.substring(0, 400) + '…' : text;
+    const blob = await blobOf('text/plain');
+    if (blob) {
+      try {
+        let text = await blob.text();
+        text = text.replace(/\r\n/g, ' ').replace(/[\r\n]/g, ' ');
+        textPreview = text.length > 400 ? text.slice(0, 400) + '…' : text;
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* text read can throw despite the flag */
     }
   }
 
-  let htmlLen = 0;
+  let htmlLength = 0;
   if (hasHtml) {
-    try {
-      for (const item of items) {
-        if (item.types.includes('text/html')) {
-          const blob = await item.getType('text/html');
-          const html = await blob.text();
-          htmlLen = html.length;
-          break;
-        }
+    const blob = await blobOf('text/html');
+    if (blob) {
+      try {
+        htmlLength = (await blob.text()).length;
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
+    }
+  }
+
+  let storageItemCount = 0;
+  if (hasStorageItems) {
+    const blob = await blobOf('text/uri-list');
+    if (blob) {
+      try {
+        const list = (await blob.text())
+          .split(/\r?\n/)
+          .filter((l) => l.trim().length > 0 && !l.startsWith('#'));
+        storageItemCount = list.length;
+      } catch {
+        /* ignore */
+      }
     }
   }
 
   return {
     ok: true,
-    formats: types.map((n) => ({ name: n })),
+    formats,
     hasText,
     hasHtml,
     hasRtf,
     hasBitmap,
-    hasStorageItems: hasStorage,
+    hasStorageItems,
     hasWebLink,
-    hasApplicationLink: hasAppLink,
+    hasApplicationLink,
     textPreview,
-    htmlLength: htmlLen,
-    storageItemCount: 0,
+    htmlLength,
+    storageItemCount,
   };
 }
 
-interface StdLine {
-  present: boolean;
-  label: string;
-}
-
-function buildStandard(r: InspectResult, pick: Pick): StdLine[] {
-  const lines: StdLine[] = [];
-  lines.push({ present: r.hasText, label: pick('Text', '文字') });
-  lines.push({
-    present: r.hasHtml,
-    label: r.hasHtml
-      ? pick(`HTML (${r.htmlLength} chars)`, `HTML（${r.htmlLength} 字元）`)
-      : 'HTML',
-  });
-  lines.push({ present: r.hasRtf, label: pick('Rich text (RTF)', '格式化文字（RTF）') });
-  lines.push({ present: r.hasBitmap, label: pick('Bitmap image', '點陣圖影像') });
-  lines.push({
-    present: r.hasStorageItems,
-    label: r.hasStorageItems
-      ? pick(`Files / folders (${r.storageItemCount})`, `檔案／資料夾（${r.storageItemCount}）`)
-      : pick('Files / folders', '檔案／資料夾'),
-  });
-  lines.push({ present: r.hasWebLink, label: pick('Web link', '網頁連結') });
-  lines.push({ present: r.hasApplicationLink, label: pick('Application link', '應用程式連結') });
-  return lines;
-}
-
 export function ClipInspectModule() {
-  const { t, i18n } = useTranslation();
-  const isZh = (i18n.language || '').toLowerCase().startsWith('zh');
-  const pick: Pick = (en, zh) => (isZh ? zh : en);
-
+  const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<InspectResult | null>(null);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<string>(t('clipinspect.pressToRead'));
 
-  const read = async () => {
+  const doRead = async () => {
     if (busy) return;
     setBusy(true);
     setStatus(t('clipinspect.reading'));
     try {
       const r = await readClipboard();
-      setResult(r);
       if (!r.ok) {
-        setStatus(
-          r.error === 'unsupported'
-            ? t('clipinspect.unsupported')
-            : t('clipinspect.readError', { error: r.error ?? '' }),
-        );
-      } else if (r.formats.length === 0) {
+        setResult(null);
+        const err = r.error === 'unsupported' ? t('clipinspect.unsupported') : r.error ?? '';
+        setStatus(t('clipinspect.readError', { err }));
+        return;
+      }
+      setResult(r);
+      if (r.formats.length === 0) {
         setStatus(t('clipinspect.empty'));
       } else {
-        setStatus(t('clipinspect.readCount', { count: r.formats.length }));
+        setStatus(t('clipinspect.readN', { n: r.formats.length }));
       }
     } catch (e) {
       setResult(null);
-      setStatus(t('clipinspect.readError', { error: e instanceof Error ? e.message : String(e) }));
+      setStatus(t('clipinspect.readError', { err: e instanceof Error ? e.message : String(e) }));
     } finally {
       setBusy(false);
     }
   };
 
-  const showResult = result && result.ok;
-  const std = showResult ? buildStandard(result, pick) : [];
-  const previewText =
-    showResult
-      ? result.textPreview && result.textPreview.length > 0
-        ? result.textPreview
-        : pick('(no text on the clipboard)', '（剪貼簿冇文字）')
-      : '';
+  const stdRows: { present: boolean; label: string }[] = result
+    ? [
+        { present: result.hasText, label: t('clipinspect.stdText') },
+        {
+          present: result.hasHtml,
+          label: result.hasHtml
+            ? t('clipinspect.stdHtmlLen', { n: result.htmlLength })
+            : t('clipinspect.stdHtml'),
+        },
+        { present: result.hasRtf, label: t('clipinspect.stdRtf') },
+        { present: result.hasBitmap, label: t('clipinspect.stdBitmap') },
+        {
+          present: result.hasStorageItems,
+          label: result.hasStorageItems
+            ? t('clipinspect.stdFilesN', { n: result.storageItemCount })
+            : t('clipinspect.stdFiles'),
+        },
+        { present: result.hasWebLink, label: t('clipinspect.stdWebLink') },
+        { present: result.hasApplicationLink, label: t('clipinspect.stdAppLink') },
+      ]
+    : [];
 
   return (
     <div className="mod">
-      <p className="count-note" style={{ marginTop: 0 }}>
+      <p className="count-note" style={{ marginTop: 0, fontSize: 12.5 }}>
         {t('clipinspect.blurb')}
       </p>
 
       <div className="mod-toolbar">
-        <button className="mini primary" disabled={busy} onClick={read}>
+        <button className="mini primary" disabled={busy} onClick={() => void doRead()}>
           {t('clipinspect.read')}
         </button>
-        <button className="mini" disabled={busy || !result} onClick={read}>
+        <button className="mini" disabled={busy} onClick={() => void doRead()}>
           {t('clipinspect.refresh')}
         </button>
       </div>
 
-      <p className="count-note" style={{ marginTop: 6 }}>
-        {status || t('clipinspect.pressToRead')}
+      <p className="count-note" style={{ marginTop: 8 }}>
+        {status}
       </p>
 
-      {showResult && (
+      {result && (
         <>
-          <section style={{ marginTop: 16 }}>
-            <h3 className="group-title" style={{ margin: '0 0 8px', fontSize: 14 }}>
-              {t('clipinspect.standardFormats')}
+          <div
+            style={{
+              marginTop: 12,
+              padding: '14px 16px',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+            }}
+          >
+            <h3 className="group-title" style={{ fontSize: 15, margin: '0 0 10px' }}>
+              {t('clipinspect.standardTitle')}
             </h3>
-            <dl className="kv">
-              {std.map((line, i) => (
+            <div className="kv-list">
+              {stdRows.map((row, i) => (
                 <div className="kv-row" key={i}>
-                  <dt style={{ fontFamily: 'monospace' }}>{line.present ? '✔' : '—'}</dt>
-                  <dd style={{ opacity: line.present ? 1 : 0.55 }}>{line.label}</dd>
+                  <span
+                    style={{
+                      width: 18,
+                      textAlign: 'center',
+                      color: row.present ? 'var(--ok, #3fb950)' : 'var(--text-muted)',
+                    }}
+                  >
+                    {row.present ? '✔' : '—'}
+                  </span>
+                  <span style={{ color: row.present ? 'inherit' : 'var(--text-muted)' }}>
+                    {row.label}
+                  </span>
                 </div>
               ))}
-            </dl>
-          </section>
+            </div>
 
-          <section style={{ marginTop: 16 }}>
-            <h3 className="group-title" style={{ margin: '0 0 8px', fontSize: 14 }}>
-              {t('clipinspect.allFormats')}
+            <h3 className="group-title" style={{ fontSize: 13, margin: '12px 0 6px' }}>
+              {t('clipinspect.previewTitle')}
+            </h3>
+            <p
+              className="count-note"
+              style={{ marginTop: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+            >
+              {result.textPreview && result.textPreview.length > 0
+                ? result.textPreview
+                : t('clipinspect.noText')}
+            </p>
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              padding: '14px 16px',
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+            }}
+          >
+            <h3 className="group-title" style={{ fontSize: 15, margin: '0 0 8px' }}>
+              {t('clipinspect.formatsTitle')}
             </h3>
             {result.formats.length === 0 ? (
               <p className="count-note" style={{ marginTop: 0 }}>
                 {t('clipinspect.noFormats')}
               </p>
             ) : (
-              <div className="dt-wrap" style={{ maxHeight: 260 }}>
+              <div className="dt-wrap" style={{ maxHeight: 320 }}>
                 <table className="dt">
                   <tbody>
-                    {result.formats.map((f, i) => (
-                      <tr key={i}>
-                        <td style={{ fontFamily: 'monospace' }}>{f.name}</td>
+                    {result.formats.map((f) => (
+                      <tr key={f}>
+                        <td>
+                          <code>{f}</code>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </section>
-
-          <section style={{ marginTop: 16 }}>
-            <h3 className="group-title" style={{ margin: '0 0 8px', fontSize: 14 }}>
-              {t('clipinspect.textPreview')}
-            </h3>
-            <textarea
-              className="hosts-edit"
-              spellCheck={false}
-              readOnly
-              value={previewText}
-              style={{ minHeight: 100 }}
-            />
-          </section>
+          </div>
         </>
       )}
     </div>
