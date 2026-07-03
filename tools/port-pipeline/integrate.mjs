@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 
 const ROOT = 'C:/Users/cntow/Documents/GitHub/winforge-web';
-const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub-winforge-web-docs/e4efcd44-6660-4ec5-ad58-2e6d614b67a3/tasks/wn6aql3em.output';
+const OUT = 'C:/Users/cntow/AppData/Local/Temp/claude/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/tasks/wf88938ol.output';
 
 // Run journal dir — fallback if the aggregated OUT file lags behind the agents.
-const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub-winforge-web-docs/e4efcd44-6660-4ec5-ad58-2e6d614b67a3/subagents/workflows/wf_a293b337-a4f';
+const RUNDIR = 'C:/Users/cntow/.claude/projects/C--Users-cntow-Documents-GitHub/c2b83142-f654-4d01-9547-2079367bab14/subagents/workflows/wf_23e45e4c-bc1';
 
 function fromJournals(dir) {
   const out = [];
@@ -107,15 +107,20 @@ if (problems.length) {
 }
 console.log('Validation OK for', modules.length, 'modules:', modules.map((m) => m.namespace).join(', '));
 
+// CRLF-tolerant insertion that FAILS if the anchor is missing — a silent
+// no-op here once shipped modules with unresolved i18n keys.
+function insertAfterAnchor(file, anchorRe, block) {
+  const src = fs.readFileSync(file, 'utf8');
+  const out = src.replace(anchorRe, (m) => m + block + '\n');
+  if (out === src) throw new Error(`i18n anchor ${anchorRe} not found in ${file}`);
+  fs.writeFileSync(file, out);
+}
+
 // --- patch en.ts ---
-let en = fs.readFileSync(`${ROOT}/src/i18n/en.ts`, 'utf8');
-en = en.replace('export const en = {\n', 'export const en = {\n' + enBlocks.join('\n') + '\n');
-fs.writeFileSync(`${ROOT}/src/i18n/en.ts`, en);
+insertAfterAnchor(`${ROOT}/src/i18n/en.ts`, /export const en = \{\r?\n/, enBlocks.join('\n'));
 
 // --- patch zh-Hant.ts ---
-let zh = fs.readFileSync(`${ROOT}/src/i18n/zh-Hant.ts`, 'utf8');
-zh = zh.replace('export const zhHant: Resources = {\n', 'export const zhHant: Resources = {\n' + zhBlocks.join('\n') + '\n');
-fs.writeFileSync(`${ROOT}/src/i18n/zh-Hant.ts`, zh);
+insertAfterAnchor(`${ROOT}/src/i18n/zh-Hant.ts`, /export const zhHant: Resources = \{\r?\n/, zhBlocks.join('\n'));
 
 // --- patch registry.tsx ---
 let reg = fs.readFileSync(`${ROOT}/src/modules/registry.tsx`, 'utf8');
