@@ -97,6 +97,11 @@ import { ColorMixModule } from './ColorMixModule';
 import { ContrastGridModule } from './ContrastGridModule';
 import { GlobTesterModule } from './GlobTesterModule';
 import { DnsRefModule } from './DnsRefModule';
+import { BmiModule } from './BmiModule';
+import { ColorNameModule } from './ColorNameModule';
+import { CalendarMonthModule } from './CalendarMonthModule';
+import { ColorPaletteModule } from './ColorPaletteModule';
+import { ICalendarModule } from './ICalendarModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -208,6 +213,11 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.contrastgrid': ContrastGridModule,
   'module.globtester': GlobTesterModule,
   'module.dnsref': DnsRefModule,
+  'module.bmi': BmiModule,
+  'module.colorname': ColorNameModule,
+  'module.calendarmonth': CalendarMonthModule,
+  'module.colorpalette': ColorPaletteModule,
+  'module.icalendar': ICalendarModule,
   ...moduleRegistryB,
 };
 
