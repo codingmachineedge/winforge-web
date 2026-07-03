@@ -2,6 +2,24 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  palette: {
+    launch: "搜尋工具同功能…",
+    placeholder: "搜尋工具、操作或者功能…",
+    capability: "類型",
+    capAll: "全部",
+    capWeb: "網頁",
+    capNative: "原生",
+    status: "狀態",
+    statusAny: "任何",
+    statusWorking: "可用",
+    statusStub: "待做",
+    inFeatures: "功能",
+    noResults: "冇符合嘅工具 — 試下打功能名，例如「base64」「維吉尼亞」或者「熵」。",
+    count: "{{n}} 個結果",
+    hintNav: "移動",
+    hintOpen: "開啟",
+    hintClose: "關閉",
+  },
   httpheaderref: {
     "blurb": "約 80 個常用 HTTP 標頭嘅離線參考 — 方向、分類、白話解釋同埋例子值。搵嘢或者篩選，再撳一行就複製。",
     "searchPlaceholder": "搵標頭名或者描述…",

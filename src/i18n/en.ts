@@ -1,5 +1,23 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  palette: {
+    launch: "Search tools & features…",
+    placeholder: "Search tools, actions or features…",
+    capability: "Type",
+    capAll: "All",
+    capWeb: "Web",
+    capNative: "Native",
+    status: "State",
+    statusAny: "Any",
+    statusWorking: "Working",
+    statusStub: "Stub",
+    inFeatures: "feature",
+    noResults: "No tools match — try a feature name like “base64”, “vigenère” or “entropy”.",
+    count: "{{n}} result(s)",
+    hintNav: "navigate",
+    hintOpen: "open",
+    hintClose: "close",
+  },
   httpheaderref: {
     "blurb": "An offline reference of ~80 common HTTP headers — direction, category, a plain-language note and an example value. Search or filter, then click a row to copy it.",
     "searchPlaceholder": "Search name or description…",

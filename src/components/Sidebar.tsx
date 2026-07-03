@@ -8,11 +8,11 @@ interface Props {
   view: View;
   query: string;
   lang: string;
-  onQuery: (q: string) => void;
   onNavigate: (v: View) => void;
+  onOpenPalette: (seed?: string) => void;
 }
 
-export function Sidebar({ view, query, lang, onQuery, onNavigate }: Props) {
+export function Sidebar({ view, query, lang, onNavigate, onOpenPalette }: Props) {
   const { t } = useTranslation();
   const activeSection = view.kind === 'catalog' ? view.sectionId : undefined;
 
@@ -26,14 +26,11 @@ export function Sidebar({ view, query, lang, onQuery, onNavigate }: Props) {
             <small>{t('app.subtitle')}</small>
           </span>
         </div>
-        <input
-          className="search"
-          type="search"
-          value={query}
-          placeholder={t('nav.search')}
-          onChange={(e) => onQuery(e.target.value)}
-          aria-label={t('nav.search')}
-        />
+        <button className="search-launch" onClick={() => onOpenPalette(query)} aria-label={t('palette.placeholder')}>
+          <span className="glyph">⌕</span>
+          <span className="search-launch-text">{query.trim() || t('palette.launch')}</span>
+          <kbd className="search-kbd">Ctrl K</kbd>
+        </button>
       </div>
 
       <nav className="nav">

@@ -1,0 +1,208 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { allModules, type CatalogModule } from '../data/catalog';
+import { featureTextFor, matchedFeature, sectionByTag } from '../data/featureIndex';
+import { moduleStatus, type ModuleStatus } from '../modules/status';
+import { pick, sub } from '../i18n';
+
+type Capability = 'all' | 'web' | 'native';
+type StatusFilter = 'any' | 'working' | 'stub';
+
+interface Props {
+  open: boolean;
+  lang: string;
+  initialQuery?: string;
+  onClose: () => void;
+  onOpenModule: (tag: string) => void;
+}
+
+interface Hit {
+  m: CatalogModule;
+  status: ModuleStatus;
+  score: number;
+  feature: string | null; // feature snippet when matched via features only
+}
+
+const terms = (q: string) => q.toLowerCase().split(/\s+/).filter(Boolean);
+
+function rank(m: CatalogModule, ts: string[]): { score: number; feature: string | null } | null {
+  if (ts.length === 0) return { score: 0, feature: null };
+  const title = `${m.en} ${m.zh}`.toLowerCase();
+  const keys = m.keywords.toLowerCase();
+  const feat = featureTextFor(m.tag);
+  let score = 0;
+  let viaFeatureOnly = true;
+  for (const t of ts) {
+    const inTitle = title.includes(t);
+    const inKeys = keys.includes(t);
+    const inFeat = feat.includes(t);
+    if (!inTitle && !inKeys && !inFeat) return null; // every term must match somewhere
+    if (inTitle) score += 6;
+    else if (inKeys) score += 3;
+    else score += 1;
+    if (inTitle || inKeys) viaFeatureOnly = false;
+    // exact title start bonus
+    if (m.en.toLowerCase().startsWith(t)) score += 4;
+  }
+  return { score, feature: viaFeatureOnly ? matchedFeature(m.tag, ts) : null };
+}
+
+export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenModule }: Props) {
+  const { t } = useTranslation();
+  const [query, setQuery] = useState(initialQuery);
+  const [capability, setCapability] = useState<Capability>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('any');
+  const [active, setActive] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setQuery(initialQuery);
+      setActive(0);
+      const id = setTimeout(() => inputRef.current?.focus(), 20);
+      return () => clearTimeout(id);
+    }
+    return undefined;
+  }, [open, initialQuery]);
+
+  const ts = useMemo(() => terms(query), [query]);
+
+  const hits: Hit[] = useMemo(() => {
+    const out: Hit[] = [];
+    for (const m of allModules) {
+      if (capability !== 'all' && (capability === 'native') !== m.native) continue;
+      const status = moduleStatus(m.tag);
+      if (statusFilter === 'working' && status === 'stub') continue;
+      if (statusFilter === 'stub' && status !== 'stub') continue;
+      const r = rank(m, ts);
+      if (!r) continue;
+      out.push({ m, status, score: r.score, feature: r.feature });
+    }
+    out.sort((a, b) => b.score - a.score || a.m.en.localeCompare(b.m.en));
+    return out.slice(0, 60);
+  }, [ts, capability, statusFilter]);
+
+  // clamp active index whenever the list changes
+  useEffect(() => {
+    setActive((a) => Math.max(0, Math.min(a, hits.length - 1)));
+  }, [hits.length]);
+
+  // keep the active row scrolled into view
+  useEffect(() => {
+    const el = listRef.current?.querySelector<HTMLElement>(`[data-idx="${active}"]`);
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
+
+  if (!open) return null;
+
+  const choose = (tag: string) => {
+    onOpenModule(tag);
+    onClose();
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); setActive((a) => Math.min(a + 1, hits.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((a) => Math.max(a - 1, 0)); }
+    else if (e.key === 'Enter') { e.preventDefault(); const h = hits[active]; if (h) choose(h.m.tag); }
+  };
+
+  const capOpts: { k: Capability; label: string }[] = [
+    { k: 'all', label: t('palette.capAll') },
+    { k: 'web', label: t('palette.capWeb') },
+    { k: 'native', label: t('palette.capNative') },
+  ];
+  const statusOpts: { k: StatusFilter; label: string }[] = [
+    { k: 'any', label: t('palette.statusAny') },
+    { k: 'working', label: t('palette.statusWorking') },
+    { k: 'stub', label: t('palette.statusStub') },
+  ];
+
+  return (
+    <div className="cp-backdrop" onMouseDown={onClose}>
+      <div className="cp-panel" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKey} role="dialog" aria-modal="true">
+        <div className="cp-searchrow">
+          <span className="cp-search-icon glyph">⌕</span>
+          <input
+            ref={inputRef}
+            className="cp-input"
+            value={query}
+            placeholder={t('palette.placeholder')}
+            onChange={(e) => { setQuery(e.target.value); setActive(0); }}
+            aria-label={t('palette.placeholder')}
+          />
+          <kbd className="cp-esc">Esc</kbd>
+        </div>
+
+        <div className="cp-controls">
+          <div className="cp-toggle-group" role="group" aria-label={t('palette.capability')}>
+            <span className="cp-toggle-label">{t('palette.capability')}</span>
+            {capOpts.map((o) => (
+              <button key={o.k} className={`cp-chip${capability === o.k ? ' on' : ''}`} onClick={() => setCapability(o.k)}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <div className="cp-toggle-group" role="group" aria-label={t('palette.status')}>
+            <span className="cp-toggle-label">{t('palette.status')}</span>
+            {statusOpts.map((o) => (
+              <button key={o.k} className={`cp-chip${statusFilter === o.k ? ' on' : ''}`} onClick={() => setStatusFilter(o.k)}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="cp-results" ref={listRef}>
+          {hits.length === 0 ? (
+            <div className="cp-empty">{t('palette.noResults')}</div>
+          ) : (
+            hits.map((h, i) => {
+              const title = pick(h.m.en, h.m.zh, lang);
+              const subtitle = sub(h.m.en, h.m.zh, lang);
+              const section = sectionByTag.get(h.m.tag);
+              return (
+                <button
+                  key={h.m.tag}
+                  data-idx={i}
+                  className={`cp-row${i === active ? ' active' : ''}`}
+                  onMouseEnter={() => setActive(i)}
+                  onClick={() => choose(h.m.tag)}
+                >
+                  <span className="cp-glyph glyph">{h.m.glyph || '▢'}</span>
+                  <span className="cp-main">
+                    <span className="cp-title">
+                      {title}
+                      {subtitle && subtitle !== title && <span className="cp-sub">{subtitle}</span>}
+                    </span>
+                    {h.feature ? (
+                      <span className="cp-feature">
+                        <span className="cp-feature-tag">{t('palette.inFeatures')}</span> {h.feature}
+                      </span>
+                    ) : (
+                      section && <span className="cp-section">{pick(section.en, section.zh, lang)}</span>
+                    )}
+                  </span>
+                  <span className="cp-badges">
+                    <span className={`status-pill ${h.status}`}>{t(`status.${h.status}`)}</span>
+                    <span className={`tag-pill ${h.m.native ? 'native' : 'web'}`}>
+                      {h.m.native ? t('catalog.native') : t('catalog.web')}
+                    </span>
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        <div className="cp-foot">
+          <span>{t('palette.count', { n: hits.length })}</span>
+          <span className="cp-hints">
+            <kbd>↑</kbd><kbd>↓</kbd> {t('palette.hintNav')} · <kbd>↵</kbd> {t('palette.hintOpen')} · <kbd>Esc</kbd> {t('palette.hintClose')}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
