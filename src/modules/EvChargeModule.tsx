@@ -265,7 +265,7 @@ export function EvChargeModule() {
 
   const [state, dispatch] = useReducer(reducer, undefined, initState);
 
-  // Stand-in for the flagship reactor (the desktop app reads a live snapshot from
+  // Stand-in for the flagship reactor (WinForge's backend reads a live snapshot from
   // ReactorStatusApiService). Here the player drives the available output directly.
   const [reactorOn, setReactorOn] = useState(true);
   const [availableMW, setAvailableMW] = useState(950);

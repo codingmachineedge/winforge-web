@@ -80,8 +80,9 @@ function findOperator(inner: string): number {
   return -1;
 }
 
-// Resolve a name from the map (env fallback is not available in the browser, so the
-// checkbox is a semantic no-op here — a value must be non-empty to count as resolved).
+// Resolve a name from the map. When WinForge's background service is present it can
+// supply live process-environment values; in a pure preview only the supplied map is
+// used, so the checkbox is a semantic no-op — a value must be non-empty to count as resolved.
 function tryGet(map: Map<string, string>, name: string): string | null {
   const v = map.get(name);
   if (v != null && v.length > 0) return v;

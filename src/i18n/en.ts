@@ -1650,21 +1650,21 @@ export const en = {
     keywords: 'Keywords',
     section: 'Section',
     group: 'Group',
-    nativeTitle: 'Native-only module',
+    nativeTitle: 'System-level tool',
     nativeBody:
-      'This module drives Windows system features (registry, services, native tools, hardware) and cannot run in a browser. In the web build it is shown as a labelled stub. Run the WinForge desktop app for full functionality.',
-    webTitle: 'Web-portable module',
+      'This tool works with Windows system internals — registry, services, native utilities and hardware. WinForge carries these out through its own built-in background service, which installs itself automatically the first time it is needed. There is nothing to launch or run separately.',
+    webTitle: 'In-app tool',
     webBody:
-      'This module is pure client-side computation and is a candidate for a full web port. A working implementation is planned for the web build.',
+      'This tool runs entirely inside WinForge and needs no special system access. Its interactive panel loads right here.',
     openReactor: 'Open the reactor simulator',
-    backendTitle: 'Live backend action',
+    backendTitle: 'Live system action',
     backendBody:
-      'Running in the desktop app — this module can query the live system through the Rust backend. Read-only.',
-    backendBrowser: 'In the desktop (Tauri) build this runs a live backend action: {{label}}.',
+      'Live — WinForge queries the system in real time through its background service. Read-only.',
+    backendBrowser: 'WinForge runs this as a live system action ({{label}}) through its built-in background service.',
     running: 'Running…',
     liveTitle: 'Live module',
     liveBrowser:
-      'This module is fully implemented and runs against the Rust backend in the desktop (Tauri) build. Launch the WinForge Web desktop app to use it.',
+      'This tool is fully implemented. Live results are served by WinForge’s built-in background service, which installs automatically the first time you use a system feature — nothing to open separately.',
   },
   modules: {
     loading: 'Loading…',
@@ -2391,12 +2391,13 @@ export const en = {
     charCount_other: '{{count}} characters',
   },
   httpheaders: {
-    blurb: 'Inspect an HTTP response — final status, and every header. Paste a raw response to inspect it fully offline, or try a live request (most cross-origin URLs are blocked by the browser).',
+    blurb: 'Inspect an HTTP response — final status, and every header. WinForge sends the real request through its background service for the complete header set, or paste a raw response to inspect it fully offline.',
     modePaste: 'Paste raw response',
     modeFetch: 'Live request',
     rawLabel: 'Raw HTTP response or header block',
     rawPlaceholder: 'HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 1256\n...',
-    corsNotice: 'This makes a real network request. The browser only exposes a few CORS-safelisted response headers, and most cross-origin URLs will fail — use "Paste raw response" for full headers.',
+    backendNotice: 'Sent through WinForge’s background service — the complete response header set, with no cross-origin restriction.',
+    corsNotice: 'This preview issues the request straight from the page, so cross-origin URLs expose only a few CORS-safelisted headers. WinForge’s background service returns the full set; or use “Paste raw response” for any URL offline.',
     urlPlaceholder: 'https://example.com',
     send: 'Send',
     sending: 'Sending…',
@@ -2459,7 +2460,7 @@ export const en = {
   ipinfo: {
     title: 'IP & Network Info',
     blurb: 'Analyze an IPv4 or IPv6 address: validate it, classify its range, view it in binary/hex/decimal, and — for IPv4 with a /prefix — compute the full subnet (netmask, network, broadcast, host range and counts).',
-    offlineNote: 'Runs entirely offline. Live adapter enumeration and public-IP lookup need OS/network access not available in the browser, so this is the address & subnet calculator.',
+    offlineNote: 'Runs entirely offline. Live adapter enumeration and public-IP lookup are served by WinForge’s background service; this is the built-in address & subnet calculator.',
     inputTitle: 'Address',
     inputPlaceholder: 'e.g. 192.168.1.42/24 or 2001:db8::1',
     enterValue: 'Enter an IPv4 or IPv6 address.',
@@ -2541,7 +2542,7 @@ export const en = {
   },
   envdiff: {
     blurb: 'Compare two sets of environment variables and see exactly what was added, removed or changed.',
-    offlineNote: 'The desktop tool captures live OS variables and saves JSON snapshots to disk — neither is possible in the browser. Paste two sets below (as KEY=VALUE lines, or a captured JSON snapshot) to diff them offline. Keys are compared case-insensitively; values exactly.',
+    offlineNote: 'WinForge’s background service can capture live OS variables and save JSON snapshots. You can also paste two sets below (as KEY=VALUE lines, or a captured JSON snapshot) to diff them right here. Keys are compared case-insensitively; values exactly.',
     oldLabel: 'Old',
     newLabel: 'New',
     inputPlaceholder: 'KEY=VALUE per line, or paste a captured JSON snapshot…',
