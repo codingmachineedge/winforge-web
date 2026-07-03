@@ -43,6 +43,14 @@ import { YamlJsonModule } from './YamlJsonModule';
 import { PingModule } from './PingModule';
 import { PortScanModule } from './PortScanModule';
 import { RecycleBinModule } from './RecycleBinModule';
+import { VscodeModule } from './VscodeModule';
+import { VirtualBoxModule } from './VirtualBoxModule';
+import { YtdlpModule } from './YtdlpModule';
+import { VivetoolModule } from './VivetoolModule';
+import { ZoomItModule } from './ZoomItModule';
+import { RustDeskModule } from './RustDeskModule';
+import { WiresharkModule } from './WiresharkModule';
+import { TerminalModule } from './TerminalModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -96,4 +104,12 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.ping': PingModule,
   'module.portscan': PortScanModule,
   'module.recyclebin': RecycleBinModule,
+  'module.vscode': VscodeModule,
+  'module.virtualbox': VirtualBoxModule,
+  'module.ytdlp': YtdlpModule,
+  'module.vivetool': VivetoolModule,
+  'module.zoomit': ZoomItModule,
+  'module.rustdesk': RustDeskModule,
+  'module.wireshark': WiresharkModule,
+  'module.terminal': TerminalModule,
 };
