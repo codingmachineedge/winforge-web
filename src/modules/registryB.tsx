@@ -51,6 +51,14 @@ import { ZoomItModule } from './ZoomItModule';
 import { RustDeskModule } from './RustDeskModule';
 import { WiresharkModule } from './WiresharkModule';
 import { TerminalModule } from './TerminalModule';
+import { PixelEditorModule } from './PixelEditorModule';
+import { PgAdminModule } from './PgAdminModule';
+import { SqliteBrowserModule } from './SqliteBrowserModule';
+import { RainmeterModule } from './RainmeterModule';
+import { WindhawkModule } from './WindhawkModule';
+import { NilesoftShellModule } from './NilesoftShellModule';
+import { PeekModule } from './PeekModule';
+import { QuicktypeModule } from './QuicktypeModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -112,4 +120,12 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.rustdesk': RustDeskModule,
   'module.wireshark': WiresharkModule,
   'module.terminal': TerminalModule,
+  'module.pixeleditor': PixelEditorModule,
+  'module.pgadmin': PgAdminModule,
+  'module.sqlitebrowser': SqliteBrowserModule,
+  'module.rainmeter': RainmeterModule,
+  'module.windhawk': WindhawkModule,
+  'module.nilesoftshell': NilesoftShellModule,
+  'module.peek': PeekModule,
+  'module.quicktype': QuicktypeModule,
 };
