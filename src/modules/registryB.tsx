@@ -59,6 +59,9 @@ import { WindhawkModule } from './WindhawkModule';
 import { NilesoftShellModule } from './NilesoftShellModule';
 import { PeekModule } from './PeekModule';
 import { QuicktypeModule } from './QuicktypeModule';
+import { SettingsHubModule } from './SettingsHubModule';
+import { PdfToolkitModule } from './PdfToolkitModule';
+import { TorrentModule } from './TorrentModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -128,4 +131,7 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.nilesoftshell': NilesoftShellModule,
   'module.peek': PeekModule,
   'module.quicktype': QuicktypeModule,
+  'module.settingshub': SettingsHubModule,
+  'module.pdftoolkit': PdfToolkitModule,
+  'module.torrent': TorrentModule,
 };
