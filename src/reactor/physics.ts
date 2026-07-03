@@ -27,12 +27,35 @@
 // The numbers are engineering approximations tuned for plausibility and playability, matching the
 // C# engine's calibration, not licensing accuracy. All constants carry their C# provenance.
 
+import { Reactimeter } from './reactimeter';
+
 export enum ReactorMode {
   Shutdown = 'Shutdown',
   Startup = 'Startup',
   Run = 'Run',
   Tripped = 'Tripped',
   Meltdown = 'Meltdown',
+}
+
+/**
+ * 技術規範運轉模式 · Tech-Spec OPERATIONAL MODE (Westinghouse MODE 1–6). This is the licensing state
+ * that every LCO applicability keys off ("…in MODE 1 > 50% RTP"). It is DISTINCT from {@link ReactorMode}
+ * (the UI lifecycle) and is DERIVED from Keff, core thermal power, coolant Tavg and the refuelling latch.
+ */
+export enum ReactorTechSpecMode {
+  PowerOperation = 1, // MODE 1 · 功率運轉 — Keff ≥ 0.99 and ≥ 5% RTP
+  Startup = 2, // MODE 2 · 啟動 — Keff ≥ 0.99 and < 5% RTP
+  HotStandby = 3, // MODE 3 · 熱待機 — Keff < 0.99 and Tavg ≥ 176.7 °C
+  HotShutdown = 4, // MODE 4 · 熱停機 — Keff < 0.99 and 93.3 < Tavg < 176.7 °C
+  ColdShutdown = 5, // MODE 5 · 冷停機 — Keff < 0.99 and Tavg ≤ 93.3 °C
+  Refueling = 6, // MODE 6 · 換料 — vessel head de-tensioned (operator latch), cold & subcritical
+}
+
+/** CVCS makeup blender mode — how the operator drives soluble boron. */
+export enum CvcsBlenderMode {
+  Automatic = 'Automatic', // hold at the target ppm
+  Borate = 'Borate', // add boron (raise ppm) — shut the reactor down / lower power
+  Dilute = 'Dilute', // add primary water (lower ppm) — approach criticality / raise power
 }
 
 // ----------------------------------------------------------------- constants ----
@@ -109,6 +132,35 @@ const ShortPeriodTrip = 3.0; // s — trip on a genuinely fast positive period (
 const LowFlowTrip = 0.85; // fraction of nominal flow
 const HighThotTrip = 345.0; // °C
 const MeltdownDamageThreshold = 100.0; // accumulated damage → meltdown
+
+// ---- Nuclear instrumentation system (NIS) ranges — SR / IR / PR ----
+// Source Range (BF3 proportional counters, cps), Intermediate Range (compensated ion chambers, amps),
+// Power Range (uncompensated ion chambers, linear % rated). All driven from the single dimensionless
+// neutron power fraction so the readings stay finite across the full span and overlap by ≥1 decade.
+const SourceBaselineCps = 100.0; // count rate at the deep-subcritical reference (1/M datum)
+const SourceRangeMaxCps = 1.0e6; // BF3 counter saturation ceiling
+const SourceRangeHighTripCps = 1.0e5; // SR high-flux trip (startup protection), below P-10 / P-6
+const IrFullScaleAmps = 1.0e-3; // IR current at 100 % rated power
+const IrBottomAmps = 1.0e-11; // IR detector floor
+const P6CurrentThresholdA = 1.0e-10; // IR current that asserts the P-6 permissive (SR trip block)
+const IrHighFluxTripFrac = 0.25; // IR high-flux trip @ 25 % RTP (armed by P-6, blocked by P-10)
+const P10PowerFrac = 0.1; // P-10 permissive: power-range on-scale (> 10 % RTP)
+const SurPerInvSec = 26.05568; // 60/ln10 — startup rate (DPM) per (1/period)
+
+// ---- Tech-Spec MODE 1–6 breakpoints (Westinghouse) ----
+// The MODE 1/2-vs-3 split is the criticality boundary Keff = 0.99 (ρ = −1010 pcm), with a sticky band.
+const TsRhoEnterCriticalPcm = -900.0; // ρ to ENTER MODE 1/2 (Keff 0.99108) — harder to enter
+const TsRhoExitCriticalPcm = -1100.0; // ρ to LEAVE MODE 1/2 (Keff 0.98912) — sticky once critical
+const TsHotTavgC = 176.7; // 350 °F — MODE 3 ↔ 4 Tavg breakpoint
+const TsColdTavgC = 93.3; // 200 °F — MODE 4 ↔ 5 Tavg breakpoint
+const TsPowerRtpHi = 0.055; // → MODE 1 (5.5 % RTP), sticky power deadband
+const TsPowerRtpLo = 0.045; // → MODE 2 (4.5 % RTP)
+
+// ---- CVCS soluble-boron makeup ----
+export const BorateRatePpmPerS = 6.0; // ppm/s while borating (add boric acid) — blender wiring pending
+export const DiluteRatePpmPerS = 4.0; // ppm/s while diluting (add primary water) — blender wiring pending
+const RcsMixVolumeGal = 90000.0; // gal effective RCS mixing volume (time-to-criticality kernel)
+const DilutionActionWindowSec = 900.0; // 15-min operator-action criterion for an uncontrolled dilution
 
 // ANS-5.1 decay-heat groups (fraction-of-rated a_i, decay λ_i in 1/s). Σa ≈ 6.6% fission products.
 const DecayA = new Float64Array([
@@ -218,6 +270,47 @@ export interface ReactorState {
   shutdownMarginPcm: number;
   lastTripEn: string;
   lastTripZh: string;
+  // ---- nuclear instrumentation (NIS) ----
+  sourceRangeCps: number;
+  oneOverM: number;
+  intermediateRangeAmps: number;
+  intermediateRangeDecades: number;
+  intermediateRangePercent: number;
+  powerRangePercent: number;
+  startupRateDpm: number;
+  sourceRangeEnergized: boolean;
+  // ---- permissives / interlocks ----
+  p6: boolean; // IR on-scale — blocks SR trip, cuts SR HV
+  p7: boolean; // low-power reactor trips block (at-power)
+  p8: boolean; // 48 % RTP
+  p9: boolean; // 50 % RTP
+  p10: boolean; // 10 % RTP — power range on-scale
+  // ---- reactimeter (inverse kinetics) ----
+  measuredReactivityPcm: number;
+  measuredReactivityDollars: number;
+  measuredPeriodSeconds: number;
+  measuredStartupRateDpm: number;
+  reactimeterHasMark: boolean;
+  measuredWorthPcm: number;
+  positiveRateAlarm: boolean;
+  // ---- tech-spec mode ----
+  tsMode: ReactorTechSpecMode;
+  tsModeStatusEn: string;
+  tsModeStatusZh: string;
+  refuelingLatch: boolean;
+  // ---- CVCS / boron approach ----
+  blenderMode: CvcsBlenderMode;
+  timeToCriticalitySeconds: number;
+  dilutionActionMarginSeconds: number;
+  differentialBoronWorthPcmPerPpm: number;
+  // ---- thermal margin ----
+  subcoolingMarginC: number;
+  betaEffectivePcm: number;
+  // ---- fuel gate ----
+  fuelAvailable: boolean;
+  // ---- alarms ----
+  alarms: string[];
+  alarmsZh: string[];
 }
 
 export class ReactorSim {
@@ -295,6 +388,45 @@ export class ReactorSim {
   // RPS
   lastTripFunctionEn = '';
   lastTripFunctionZh = '';
+
+  // ---- nuclear instrumentation (NIS) ----
+  sourceRangeCps = SourceBaselineCps;
+  oneOverM = 1.0;
+  intermediateRangeAmps = IrBottomAmps;
+  intermediateRangeDecades = 0;
+  intermediateRangePercent = 0;
+  powerRangePercent = 0;
+  startupRateDpm = 0;
+  sourceRangeEnergized = true;
+  private _p6Latched = false;
+  p6 = false;
+  p7 = false;
+  p8 = false;
+  p9 = false;
+  p10 = false;
+
+  // ---- reactimeter (independent inverse-kinetics reactivity computer) ----
+  private _reactimeter = new Reactimeter(Beta, Lambda, PromptLifetime);
+
+  // ---- tech-spec mode ----
+  tsMode = ReactorTechSpecMode.ColdShutdown;
+  tsModeStatusEn = 'MODE 5 — Cold Shutdown';
+  tsModeStatusZh = '模式 5 — 冷停機';
+  private _tsCriticalLatch = false;
+  private _tsPowerLatch = false;
+  refuelingLatch = false;
+
+  // ---- CVCS makeup blender ----
+  blenderMode = CvcsBlenderMode.Automatic;
+  private _dilutionActive = false;
+  subcoolingMarginC = 0;
+
+  // ---- alarms ----
+  activeAlarmsEn: string[] = [];
+  activeAlarmsZh: string[] = [];
+
+  // ---- fuel gate (set by the fuel factory via the sim loop) ----
+  fuelAvailable = true;
 
   constructor() {
     for (let i = 0; i < 6; i++)
@@ -607,6 +739,12 @@ export class ReactorSim {
 
     // meltdown accrual
     this.updateDamage(dt);
+
+    // instrumentation / reactimeter / tech-spec / alarms (display + protection inputs)
+    this.updateInstrumentation();
+    this.updateReactimeter(dt);
+    this.updateTechSpecMode();
+    this.updateAlarms();
   }
 
   private updateDecayHeat(dt: number): void {
@@ -869,7 +1007,155 @@ export class ReactorSim {
     this.iodine = 1.0;
   }
 
+  // ----------------------------------------------------------------- NIS / instrumentation ----
+  /** Nuclear instrumentation: source/intermediate/power ranges, 1/M, startup rate, permissives. */
+  private updateInstrumentation(): void {
+    const p = Math.max(this._power, 0);
+    // Source range ∝ (source + power); self-calibrated so the deep-subcritical floor reads the baseline.
+    const srMap = SourceBaselineCps / (2.0 * this.sourceLevel);
+    this.sourceRangeCps = clamp((this.sourceLevel + p) * srMap, 1, SourceRangeMaxCps);
+    this.oneOverM = clamp(SourceBaselineCps / this.sourceRangeCps, 0, 1);
+    // Startup rate (decades/min) from the reactor period: SUR = (60/ln10)/T.
+    this.startupRateDpm =
+      this.reactorPeriodSeconds > 0 && this.reactorPeriodSeconds < 1e8 ? SurPerInvSec / this.reactorPeriodSeconds : 0;
+    // Intermediate range — compensated ion chambers (amps), 0..8 decades.
+    this.intermediateRangeAmps = clamp(p * IrFullScaleAmps, IrBottomAmps, IrFullScaleAmps);
+    this.intermediateRangeDecades = Math.log10(this.intermediateRangeAmps / IrBottomAmps);
+    this.intermediateRangePercent = p * 100.0;
+    // Power range — uncompensated ion chambers, linear % rated power.
+    this.powerRangePercent = clamp(p * 100.0, 0, 120);
+
+    // Permissives (interlocks). P-6: IR on-scale (10 % deadband); P-10: power-range on-scale.
+    if (!this._p6Latched && this.intermediateRangeAmps >= P6CurrentThresholdA * 1.1) this._p6Latched = true;
+    else if (this._p6Latched && this.intermediateRangeAmps < P6CurrentThresholdA * 0.9) this._p6Latched = false;
+    this.p10 = p >= P10PowerFrac;
+    this.p6 = this._p6Latched;
+    this.p7 = p >= 0.1; // at-power trips block below P-7
+    this.p8 = p >= 0.48;
+    this.p9 = p >= 0.5;
+    this.sourceRangeEnergized = !(this._p6Latched || this.p10); // SR HV removed above P-6 or P-10
+
+    // Sub-cooling margin: Tsat(P) − Thot; positive = sub-cooled liquid, negative = void risk.
+    this.subcoolingMarginC = satTempAt(this.primaryPressure) - this.thot;
+  }
+
+  /** Reactimeter — reconstruct ρ / period / SUR from the flux signal alone (independent of the engine). */
+  private updateReactimeter(dt: number): void {
+    this._reactimeter.update(this._power, dt, this.betaCycleFactor, this.sourceLevel);
+  }
+  markReactimeter(): void {
+    this._reactimeter.mark();
+  }
+  clearReactimeterMark(): void {
+    this._reactimeter.clearMark();
+  }
+
+  // ----------------------------------------------------------------- tech-spec MODE ----
+  /** Derive the Westinghouse MODE 1–6 licensing state from Keff, core power and Tavg (with sticky bands). */
+  private updateTechSpecMode(): void {
+    const rho = this.reactivityPcm;
+    // Criticality latch with hysteresis around Keff = 0.99.
+    if (!this._tsCriticalLatch && rho >= TsRhoEnterCriticalPcm) this._tsCriticalLatch = true;
+    else if (this._tsCriticalLatch && rho < TsRhoExitCriticalPcm) this._tsCriticalLatch = false;
+    // Power latch with hysteresis around 5 % RTP (core thermal power).
+    const corePow = this.coreThermalPowerFraction;
+    if (!this._tsPowerLatch && corePow >= TsPowerRtpHi) this._tsPowerLatch = true;
+    else if (this._tsPowerLatch && corePow < TsPowerRtpLo) this._tsPowerLatch = false;
+
+    const cold = this.tavg <= TsColdTavgC;
+    let m: ReactorTechSpecMode;
+    if (this.refuelingLatch && cold && !this._tsCriticalLatch) {
+      m = ReactorTechSpecMode.Refueling;
+    } else if (this._tsCriticalLatch) {
+      m = this._tsPowerLatch ? ReactorTechSpecMode.PowerOperation : ReactorTechSpecMode.Startup;
+    } else if (this.tavg >= TsHotTavgC) {
+      m = ReactorTechSpecMode.HotStandby;
+    } else if (this.tavg > TsColdTavgC) {
+      m = ReactorTechSpecMode.HotShutdown;
+    } else {
+      m = ReactorTechSpecMode.ColdShutdown;
+    }
+    this.tsMode = m;
+    const labels: Record<ReactorTechSpecMode, [string, string]> = {
+      [ReactorTechSpecMode.PowerOperation]: ['MODE 1 — Power Operation', '模式 1 — 功率運轉'],
+      [ReactorTechSpecMode.Startup]: ['MODE 2 — Startup', '模式 2 — 啟動'],
+      [ReactorTechSpecMode.HotStandby]: ['MODE 3 — Hot Standby', '模式 3 — 熱待機'],
+      [ReactorTechSpecMode.HotShutdown]: ['MODE 4 — Hot Shutdown', '模式 4 — 熱停機'],
+      [ReactorTechSpecMode.ColdShutdown]: ['MODE 5 — Cold Shutdown', '模式 5 — 冷停機'],
+      [ReactorTechSpecMode.Refueling]: ['MODE 6 — Refueling', '模式 6 — 換料'],
+    };
+    [this.tsModeStatusEn, this.tsModeStatusZh] = labels[m];
+  }
+
+  /** 距臨界時間 · Closed-form seconds to criticality under the active dilution (∞ if not approaching). */
+  get timeToCriticalitySeconds(): number {
+    if (!this._dilutionActive) return Number.POSITIVE_INFINITY;
+    const rhoNow = this.reactivityPcm / 1e5;
+    if (rhoNow >= 0) return 0;
+    // Effective dilution rate constant from the boron makeup flow through the RCS mixing volume.
+    const flowGpm = 75.0; // nominal dilution/makeup flow
+    const k = flowGpm / RcsMixVolumeGal / 60.0; // 1/s
+    const arg = 1.0 + rhoNow / -BoronRhoTotal(this.boronPpm);
+    if (arg <= 0) return Number.POSITIVE_INFINITY;
+    return -Math.log(arg) / k;
+  }
+  get dilutionActionMarginSeconds(): number {
+    const t = this.timeToCriticalitySeconds;
+    return Number.isFinite(t) ? t - DilutionActionWindowSec : Number.POSITIVE_INFINITY;
+  }
+
+  // ----------------------------------------------------------------- alarms ----
+  private updateAlarms(): void {
+    const en: string[] = [];
+    const zh: string[] = [];
+    const add = (e: string, z: string) => {
+      en.push(e);
+      zh.push(z);
+    };
+    if (this.isScrammed) add('Reactor Trip', '反應堆跳脫');
+    if (this._reactimeter.positiveRateAlarm || this.startupRateDpm > 1.0) add('Startup Rate High', '起動率高');
+    if (this._power >= HighPowerTrip * 0.95) add('Power Range High', '功率量程高');
+    if (this.thot >= HighThotTrip - 5) add('Hot-Leg Temperature High', '熱管溫度高');
+    if (this.primaryPressure >= VesselPressureLimit - 0.5) add('Pressurizer Pressure High', '穩壓器壓力高');
+    if (this.primaryPressure < 12.0 && this.thot > 150) add('Pressurizer Pressure Low', '穩壓器壓力低');
+    if (this.subcoolingMarginC < 15 && this.thot > 150) add('Low Subcooling Margin', '過冷裕度低');
+    if (this._power > 0.1 && this.coolantFlowFraction < LowFlowTrip) add('Reactor Coolant Flow Low', '反應堆冷卻劑流量低');
+    if (this.pressurizerLevel < 17) add('Pressurizer Level Low', '穩壓器水位低');
+    if (this.pressurizerLevel > 92) add('Pressurizer Level High', '穩壓器水位高');
+    if (this._dilutionActive && this.dilutionActionMarginSeconds < 0) add('Boron Dilution — Action Window', '硼稀釋 — 操作時窗');
+    if (!this.fuelAvailable) add('No Fuel In Core', '堆芯無燃料');
+    if (this.fuelTemp > FuelDamageTemp) add('Fuel Temperature High', '燃料溫度高');
+    if (this.mode === ReactorMode.Meltdown) add('CORE MELT', '堆芯熔毀');
+    this.activeAlarmsEn = en;
+    this.activeAlarmsZh = zh;
+  }
+
+  /** Inject a simulated transient from loading counterfeit/off-spec fuel (fuel-factory unsafe path). */
+  injectFuelHarm(severity: number, kind: string): void {
+    const s = clamp(severity, 0, 1);
+    // Cladding breach: fuel temperature spike + a reactivity perturbation whose sign depends on the fault.
+    this.fuelTemp += 300 * s;
+    if (kind === 'enrichment') this._power *= 1 + 2.0 * s; // grossly wrong enrichment → prompt power jump
+    else this.damageAccumulation += 20 * s;
+  }
+
   private updateProtection(): void {
+    if (this.isScrammed) return;
+    // --- startup-range NIS trips (gated by permissives) ---
+    // Source-Range High Flux: armed while SR is energized, blocked by P-6 / P-10.
+    if (this.sourceRangeEnergized && this.sourceRangeCps >= SourceRangeHighTripCps) {
+      this.tryAutoScram('Source Range High Flux', '源量程高中子通量');
+      return;
+    }
+    // Intermediate-Range High Flux: armed by P-6, blocked above P-10 (the SR↔PR overlap trip).
+    if (this._p6Latched && !this.p10 && this._power >= IrHighFluxTripFrac) {
+      this.tryAutoScram('Intermediate Range High Flux', '中間量程高中子通量');
+      return;
+    }
+    return this.updateProtectionCore();
+  }
+
+  private updateProtectionCore(): void {
     if (this.isScrammed) return;
     // High neutron flux (power-range) trip @118% RTP.
     if (this._power >= HighPowerTrip) {
@@ -963,6 +1249,39 @@ export class ReactorSim {
       shutdownMarginPcm: this.shutdownMarginPcm,
       lastTripEn: this.lastTripFunctionEn,
       lastTripZh: this.lastTripFunctionZh,
+      sourceRangeCps: this.sourceRangeCps,
+      oneOverM: this.oneOverM,
+      intermediateRangeAmps: this.intermediateRangeAmps,
+      intermediateRangeDecades: this.intermediateRangeDecades,
+      intermediateRangePercent: this.intermediateRangePercent,
+      powerRangePercent: this.powerRangePercent,
+      startupRateDpm: this.startupRateDpm,
+      sourceRangeEnergized: this.sourceRangeEnergized,
+      p6: this.p6,
+      p7: this.p7,
+      p8: this.p8,
+      p9: this.p9,
+      p10: this.p10,
+      measuredReactivityPcm: this._reactimeter.reactivityPcm,
+      measuredReactivityDollars: this._reactimeter.reactivityDollars,
+      measuredPeriodSeconds: this._reactimeter.periodSeconds,
+      measuredStartupRateDpm: this._reactimeter.startupRateDpm,
+      reactimeterHasMark: this._reactimeter.hasMark,
+      measuredWorthPcm: this._reactimeter.measuredWorthPcm,
+      positiveRateAlarm: this._reactimeter.positiveRateAlarm,
+      tsMode: this.tsMode,
+      tsModeStatusEn: this.tsModeStatusEn,
+      tsModeStatusZh: this.tsModeStatusZh,
+      refuelingLatch: this.refuelingLatch,
+      blenderMode: this.blenderMode,
+      timeToCriticalitySeconds: this.timeToCriticalitySeconds,
+      dilutionActionMarginSeconds: this.dilutionActionMarginSeconds,
+      differentialBoronWorthPcmPerPpm: this.differentialBoronWorthPcmPerPpm,
+      subcoolingMarginC: this.subcoolingMarginC,
+      betaEffectivePcm: this.betaEffectivePcm,
+      fuelAvailable: this.fuelAvailable,
+      alarms: [...this.activeAlarmsEn],
+      alarmsZh: [...this.activeAlarmsZh],
     };
   }
 }
