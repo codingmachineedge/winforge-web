@@ -2,6 +2,27 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  diagram: {
+    "hint": "拖曳形狀嚟移動。撳一下揀住，再撳「連接」畫箭咀去另一個形狀。雙擊改名。存做 JSON 或者匯出 PNG — 全部留喺你部機。",
+    "rect": "矩形",
+    "rounded": "圓角",
+    "ellipse": "橢圓",
+    "diamond": "菱形",
+    "text": "文字",
+    "connect": "連接",
+    "connecting": "撳目標…",
+    "delete": "刪除",
+    "snap": "貼齊格線",
+    "save": "儲存",
+    "load": "載入",
+    "exportPng": "匯出 PNG",
+    "fill": "填色",
+    "rename": "改名",
+    "renamePrompt": "標籤：",
+    "shapeLabel": "形狀",
+    "textLabel": "文字",
+    "counts": "{{nodes}} 個形狀 · {{edges}} 條連線"
+  },
   adb: {
     "blurb": "用 adb 管理 Android 裝置 — 主控台、檔案推送／拉取瀏覽器、APK 備份，同 logcat。手機要先開 USB 偵錯。",
     "connect": "連接",

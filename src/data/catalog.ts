@@ -1029,7 +1029,7 @@ export const catalog: CatalogSection[] = [
             "zh": "圖表編輯器",
             "glyph": "",
             "keywords": "diagram drawio draw.io diagrams.net flowchart flow chart shapes shape rectangle rounded ellipse circle diamond text node connector arrow edge link canvas whiteboard mind map mindmap org chart graph vector editor zoom snap grid duplicate z-order bring front send back png export json save load 圖表 流程圖 圖 形狀 矩形 圓角 橢圓 菱形 文字 節點 連線 箭咀 畫布 白板 心智圖 組織圖 向量 縮放 貼齊 格線 複製 層次 匯出 儲存",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.flashcards",
@@ -3685,7 +3685,7 @@ export const allModules: CatalogModule[] = [
     "zh": "圖表編輯器",
     "glyph": "",
     "keywords": "diagram drawio draw.io diagrams.net flowchart flow chart shapes shape rectangle rounded ellipse circle diamond text node connector arrow edge link canvas whiteboard mind map mindmap org chart graph vector editor zoom snap grid duplicate z-order bring front send back png export json save load 圖表 流程圖 圖 形狀 矩形 圓角 橢圓 菱形 文字 節點 連線 箭咀 畫布 白板 心智圖 組織圖 向量 縮放 貼齊 格線 複製 層次 匯出 儲存",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.flashcards",

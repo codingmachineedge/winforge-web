@@ -1,5 +1,26 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  diagram: {
+    "hint": "Drag a shape to move it. Click to select, then Connect to draw an arrow to another shape. Double-click to rename. Save to JSON or export a PNG — everything stays on your machine.",
+    "rect": "Rectangle",
+    "rounded": "Rounded",
+    "ellipse": "Ellipse",
+    "diamond": "Diamond",
+    "text": "Text",
+    "connect": "Connect",
+    "connecting": "Click a target…",
+    "delete": "Delete",
+    "snap": "Snap to grid",
+    "save": "Save",
+    "load": "Load",
+    "exportPng": "Export PNG",
+    "fill": "Fill",
+    "rename": "Rename",
+    "renamePrompt": "Label:",
+    "shapeLabel": "Shape",
+    "textLabel": "Text",
+    "counts": "{{nodes}} shapes · {{edges}} connectors"
+  },
   adb: {
     "blurb": "Manage Android devices over adb — console, a file push/pull browser, APK backup, and logcat. Enable USB debugging on the phone first.",
     "connect": "Connect",

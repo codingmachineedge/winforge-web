@@ -152,6 +152,7 @@ import { EmulatorModule } from './EmulatorModule';
 import { DockerModule } from './DockerModule';
 import { DockerSshModule } from './DockerSshModule';
 import { AwsCliModule } from './AwsCliModule';
+import { DiagramEditorModule } from './DiagramEditorModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -320,6 +321,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.docker': DockerModule,
   'module.dockerssh': DockerSshModule,
   'module.aws': AwsCliModule,
+  'module.diagram': DiagramEditorModule,
   ...moduleRegistryB,
 };
 
