@@ -7,6 +7,8 @@ import { TextStatsModule } from './TextStatsModule';
 import { PhoneticModule } from './PhoneticModule';
 import { SubnetCalcModule } from './SubnetCalcModule';
 import { NumberFormatModule } from './NumberFormatModule';
+import { TextEscapeModule } from './TextEscapeModule';
+import { StringInspectorModule } from './StringInspectorModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -22,4 +24,6 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.phonetic': PhoneticModule,
   'module.subnetcalc': SubnetCalcModule,
   'module.numberformat': NumberFormatModule,
+  'module.textescape': TextEscapeModule,
+  'module.stringinspector': StringInspectorModule,
 };
