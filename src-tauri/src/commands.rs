@@ -36,6 +36,14 @@ pub fn run_command(program: String, args: Vec<String>) -> Result<CommandOutput, 
     if program.trim().is_empty() {
         return Err("program is empty".into());
     }
+    // Defense-in-depth (feature #33): reject a narrow, precise set of catastrophic
+    // invocations (format, cipher /w, bcdedit, diskpart, recursive delete of a drive
+    // root / %SystemRoot%, reg delete of a hive root). This does NOT change the
+    // signature or behaviour for the ~100+ legitimate module commands — see the
+    // extensive "allows normal commands" tests in ops.rs.
+    if let Some(reason) = crate::ops::denylist_reason(&program, &args) {
+        return Err(reason);
+    }
     let mut cmd = Command::new(&program);
     cmd.args(&args);
     run(cmd)
