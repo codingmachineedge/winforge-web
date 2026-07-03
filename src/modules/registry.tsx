@@ -186,6 +186,13 @@ import { MinecraftLauncherModule } from './MinecraftLauncherModule';
 import { MailModule } from './MailModule';
 import { CommsModule } from './CommsModule';
 import { ColliderModule } from './ColliderModule';
+import { ReactorBankModule } from './ReactorBankModule';
+import { HomeAssistantModule } from './HomeAssistantModule';
+import { AiAgentsModule } from './AiAgentsModule';
+import { AiChatModule } from './AiChatModule';
+import { ConnectorsModule } from './ConnectorsModule';
+import { CmdNotFoundModule } from './CmdNotFoundModule';
+import { ConfigBackupModule } from './ConfigBackupModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -388,6 +395,13 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.mail': MailModule,
   'module.comms': CommsModule,
   'module.collider': ColliderModule,
+  'module.reactorbank': ReactorBankModule,
+  'module.homeassistant': HomeAssistantModule,
+  'module.aiagents': AiAgentsModule,
+  'module.aichat': AiChatModule,
+  'module.connectors': ConnectorsModule,
+  'module.cmdnotfound': CmdNotFoundModule,
+  'module.configbackup': ConfigBackupModule,
   ...moduleRegistryB,
 };
 

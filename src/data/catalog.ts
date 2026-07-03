@@ -277,7 +277,7 @@ export const catalog: CatalogSection[] = [
             "zh": "重複檔案搜尋",
             "glyph": "",
             "keywords": "duplicate hash find dedupe 重複",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.everything",
@@ -2973,7 +2973,7 @@ export const allModules: CatalogModule[] = [
     "zh": "即時檔案搜尋",
     "glyph": "",
     "keywords": "everything voidtools instant file search find filename ntfs mft master file table usn journal index locate substring wildcard regex fast search box open folder copy path 即時 檔案搜尋 搜尋 搵檔案 檔名 索引 萬用字元 正規表示式 主檔案表 開啟資料夾 複製路徑",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.filelocksmith",
