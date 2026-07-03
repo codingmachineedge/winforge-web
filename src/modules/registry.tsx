@@ -67,6 +67,12 @@ import { HtmlToMdModule } from './HtmlToMdModule';
 import { HtmlFormatModule } from './HtmlFormatModule';
 import { MetaTagsModule } from './MetaTagsModule';
 import { BinaryTextModule } from './BinaryTextModule';
+import { JsonSchemaModule } from './JsonSchemaModule';
+import { MarkdownTocModule } from './MarkdownTocModule';
+import { AsciiTableModule } from './AsciiTableModule';
+import { BoxTextModule } from './BoxTextModule';
+import { CharMapModule } from './CharMapModule';
+import { Base32Module } from './Base32Module';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -148,6 +154,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.htmlformat': HtmlFormatModule,
   'module.metatags': MetaTagsModule,
   'module.binarytext': BinaryTextModule,
+  'module.jsonschema': JsonSchemaModule,
+  'module.markdowntoc': MarkdownTocModule,
+  'module.asciitable': AsciiTableModule,
+  'module.boxtext': BoxTextModule,
+  'module.charmap': CharMapModule,
+  'module.base32': Base32Module,
   ...moduleRegistryB,
 };
 
