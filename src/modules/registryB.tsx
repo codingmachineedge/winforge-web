@@ -14,6 +14,8 @@ import { SemverRangeModule } from './SemverRangeModule';
 import { SciNotationModule } from './SciNotationModule';
 import { UnitPriceModule } from './UnitPriceModule';
 import { TextWrapModule } from './TextWrapModule';
+import { NumSeqModule } from './NumSeqModule';
+import { UrlToolsModule } from './UrlToolsModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools). Kept in a
@@ -36,4 +38,6 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.scinotation': SciNotationModule,
   'module.unitprice': UnitPriceModule,
   'module.textwrap': TextWrapModule,
+  'module.numseq': NumSeqModule,
+  'module.urltools': UrlToolsModule,
 };
