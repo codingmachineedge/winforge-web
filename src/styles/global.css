@@ -23,8 +23,37 @@
   --glyph-font: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', var(--font);
 }
 
+/* ---- Light token overrides ----
+ * :root (above) holds the DARK tokens as the default. The light palette applies
+ * in two situations, which CSS cannot share across a media-query boundary, so
+ * the block is duplicated verbatim below (keep the two copies identical):
+ *   1. Explicitly chosen light theme:  :root[data-theme='light']
+ *   2. System mode (or no JS yet) while the OS prefers light, inside the
+ *      prefers-color-scheme media query.
+ * ThemeMode ('light' | 'dark' | 'system') sets data-theme on <html>; the
+ * :not([data-theme]) selector is the no-JS fallback before initTheme() runs. */
+
+/* (1) Manual light theme — copy A of the light palette. */
+:root[data-theme='light'] {
+  --bg: #f3f3f5;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f3;
+  --sidebar-bg: #eaeaee;
+  --stroke: #d8d8de;
+  --stroke-subtle: #e6e6ea;
+  --text: #1b1b1f;
+  --text-secondary: #46464e;
+  --text-tertiary: #6a6a74;
+  --accent: #0091f7;
+  --accent-strong: #0067c0;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* (2) System mode / no-JS fallback following the OS — copy B (must match A). */
 @media (prefers-color-scheme: light) {
-  :root {
+  :root[data-theme='system'],
+  :root:not([data-theme]) {
     --bg: #f3f3f5;
     --bg-elevated: #ffffff;
     --bg-card: #ffffff;
@@ -1504,4 +1533,18 @@ body {
 @media (max-width: 560px) {
   .cp-badges { display: none; }
   .cp-controls { gap: 10px; }
+}
+
+/* ---- Reduced motion ----
+ * Honour the OS "reduce motion" setting: near-instant transitions/animations
+ * and no smooth scrolling, applied globally so every module inherits it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

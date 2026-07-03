@@ -4,6 +4,8 @@ import { catalog, allModules, type CatalogModule, type CatalogSection } from '..
 import { nonEmptySections } from '../data/catalogHelpers';
 import { pick } from '../i18n';
 import { ModuleCard } from './ModuleCard';
+import { FavoritesRail } from './FavoritesRail';
+import { RecentStrip } from './RecentStrip';
 
 type Filter = 'all' | 'web' | 'native';
 
@@ -94,6 +96,13 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
       </div>
       <FilterChips filter={filter} setFilter={setFilter} />
       <p className="count-note">{t('catalog.count', { count: total })}</p>
+
+      {!sectionId && (
+        <>
+          <FavoritesRail lang={lang} onOpen={onOpen} />
+          <RecentStrip lang={lang} onOpen={onOpen} />
+        </>
+      )}
 
       {sections.map((s) => (
         <section key={s.id}>

@@ -5,6 +5,7 @@ import { pick, sub } from '../i18n';
 import { isTauri } from '../tauri/bridge';
 import { actionFor } from '../tauri/nativeActions';
 import { realModuleFor } from '../modules/registry';
+import { toggleFavorite, useFavorites } from '../state/favorites';
 
 interface Props {
   module: CatalogModule | null;
@@ -38,6 +39,8 @@ function locate(tag: string): Location | null {
 export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
   const { t } = useTranslation();
   const loc = useMemo(() => (module ? locate(module.tag) : null), [module]);
+  const favorites = useFavorites();
+  const pinned = module ? favorites.includes(module.tag) : false;
 
   if (!module) {
     return (
@@ -68,6 +71,15 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
           <h1>{title}</h1>
           {subtitle && subtitle !== title && <div className="zh">{subtitle}</div>}
         </div>
+        <button
+          className={`pin-toggle${pinned ? ' pinned' : ''}`}
+          onClick={() => toggleFavorite(module.tag)}
+          title={t(pinned ? 'shellnav.unpinAria' : 'shellnav.pinAria', { name: title })}
+          aria-label={t(pinned ? 'shellnav.unpinAria' : 'shellnav.pinAria', { name: title })}
+          aria-pressed={pinned}
+        >
+          <span className="glyph" aria-hidden="true">{pinned ? '★' : '☆'}</span>
+        </button>
       </div>
 
       {RealModule && (inDesktop || !module.native) ? (

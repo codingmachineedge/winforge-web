@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { catalog, moduleCount } from '../data/catalog';
 import { sectionCount, nonEmptySections } from '../data/catalogHelpers';
 import { LANGS, setLang, pick, type LangCode } from '../i18n';
+import { ThemeToggle } from './ThemeToggle';
 import type { View } from '../types';
 
 interface Props {
@@ -33,7 +34,7 @@ export function Sidebar({ view, query, lang, onNavigate, onOpenPalette }: Props)
         </button>
       </div>
 
-      <nav className="nav">
+      <nav className="nav" aria-label={t('shella11y.primaryNav')}>
         <button
           className={`nav-item${view.kind === 'catalog' && !activeSection ? ' active' : ''}`}
           onClick={() => onNavigate({ kind: 'catalog', sectionId: null })}
@@ -77,6 +78,7 @@ export function Sidebar({ view, query, lang, onNavigate, onOpenPalette }: Props)
       </nav>
 
       <div className="sidebar-foot">
+        <ThemeToggle />
         {LANGS.map((l) => (
           <button
             key={l.code}

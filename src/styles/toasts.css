@@ -1,0 +1,132 @@
+/* In-app toast queue — fixed bottom-right stack, portal-rendered to document.body.
+   Colours map to the app's semantic tokens: info→accent, success→web (green),
+   warning→native (amber), error→danger. */
+
+.toast-host {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none; /* let clicks pass through the gaps; toasts re-enable it */
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  border-left: 3px solid var(--accent);
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.45;
+  animation: toast-enter 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.toast.leaving {
+  animation: toast-leave 0.16s ease-in forwards;
+}
+
+.toast-accent {
+  border-left-color: var(--accent);
+}
+.toast-info {
+  border-left-color: var(--accent);
+}
+.toast-success {
+  border-left-color: var(--web);
+}
+.toast-warning {
+  border-left-color: var(--native);
+}
+.toast-error {
+  border-left-color: var(--danger);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.toast-info .toast-icon {
+  color: var(--accent);
+}
+.toast-success .toast-icon {
+  color: var(--web);
+}
+.toast-warning .toast-icon {
+  color: var(--native);
+}
+.toast-error .toast-icon {
+  color: var(--danger);
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+}
+.toast-message {
+  font-weight: 600;
+  word-break: break-word;
+}
+.toast-detail {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.toast-close:hover {
+  background: var(--bg-card-hover);
+  color: var(--text);
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toast-leave {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.leaving {
+    animation: none;
+  }
+}

@@ -1,0 +1,59 @@
+/* Accessibility: skip link + lazy-route suspense fallback. */
+
+/* Visually hidden until focused; jumps to the top-left when a keyboard user
+   tabs to it. Styled with the shared theme tokens. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--accent-strong);
+  color: #fff;
+  font: 600 14px var(--font);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  left: 12px;
+  top: 12px;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Suspense fallback shown while a lazy route chunk downloads. */
+.route-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 32px;
+  color: var(--text-tertiary);
+  font: 500 15px var(--font);
+}
+
+.route-fallback::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  border-top-color: var(--accent);
+  animation: route-fallback-spin 0.7s linear infinite;
+}
+
+@keyframes route-fallback-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-fallback::before {
+    animation-duration: 2s;
+  }
+}

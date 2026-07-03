@@ -1,0 +1,166 @@
+/* Pinned favorites rail + recently-viewed strip. Uses the shared token set
+   from global.css (--bg-card, --stroke, --accent, --radius, etc.). */
+
+.rail {
+  margin: 0 0 18px;
+}
+
+.rail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rail-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.rail-clear {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.rail-clear:hover {
+  color: var(--accent);
+  background: var(--bg-card-hover);
+}
+
+/* Favorites rail — wraps; supports drag-and-drop reorder. */
+.fav-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Recents strip — single horizontal scroll row. */
+.recent-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.rail-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  max-width: 220px;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.rail-chip:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+}
+
+.rail-chip .glyph {
+  font-size: 15px;
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.rail-chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A favorite chip carries an inline unpin control, so it's a wrapper, not a button. */
+.fav-chip {
+  padding-right: 4px;
+}
+
+.fav-chip.dragging {
+  opacity: 0.5;
+}
+
+.fav-chip.drop-target {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.fav-chip-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.fav-unpin {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fav-unpin:hover {
+  background: var(--bg-elevated);
+  color: var(--danger);
+}
+
+/* Pin/unpin star in the module-detail header. */
+.pin-toggle {
+  margin-left: auto;
+  align-self: flex-start;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  color: var(--text-tertiary);
+  font-size: 17px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.pin-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pin-toggle.pinned {
+  color: var(--native);
+  border-color: var(--native);
+}
