@@ -48,22 +48,22 @@ echo.
 
 :: ── Menu ───────────────────────────────────────────────────
 echo Choose mode:
-echo   [1] Dev run ^(hot reload, opens app window^)
-echo   [2] Production build ^(creates installer .exe/.msi^)
-echo   [3] Dev run + auto-rebuild on changes
+echo   [1] Dev run (hot reload, terminal shows logs)
+echo   [2] Run release (no console window)
+echo   [3] Build installer (creates .exe + .msi)
 echo.
 set /p choice="Enter 1, 2, or 3: "
 
 if "%choice%"=="1" goto dev
-if "%choice%"=="2" goto build
-if "%choice%"=="3" goto dev
+if "%choice%"=="2" goto release
+if "%choice%"=="3" goto build
 echo Invalid choice. Exiting.
 pause & exit /b 1
 
 :: ── Dev run ────────────────────────────────────────────────
 :dev
 echo.
-echo [INFO] Starting dev mode...
+echo [INFO] Starting dev mode (Ctrl+C to stop)...
 call npm.cmd run tauri:dev
 if !errorlevel! neq 0 (
     echo [ERROR] Tauri dev failed.
@@ -71,7 +71,33 @@ if !errorlevel! neq 0 (
 )
 exit /b 0
 
-:: ── Production build ───────────────────────────────────────
+:: ── Release run (no console) ───────────────────────────────
+:release
+echo.
+echo [INFO] Building frontend...
+call npm.cmd run build
+if !errorlevel! neq 0 (
+    echo [ERROR] Frontend build failed.
+    pause & exit /b 1
+)
+
+echo [INFO] Building release binary...
+pushd src-tauri
+cargo build --release
+set CARGO_RESULT=!errorlevel!
+popd
+if !CARGO_RESULT! neq 0 (
+    echo [ERROR] Release build failed.
+    pause & exit /b 1
+)
+
+echo [INFO] Launching WinForge Web (no console)...
+start "" /D "src-tauri" "src-tauri\target\release\winforge-web.exe"
+echo [DONE] App launched. This window will close.
+timeout /t 2 >nul
+exit /b 0
+
+:: ── Build installer ────────────────────────────────────────
 :build
 echo.
 echo [INFO] Building installers (NSIS + MSI)...
