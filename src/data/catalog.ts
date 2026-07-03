@@ -925,7 +925,7 @@ export const catalog: CatalogSection[] = [
             "zh": "喇叭語音廣播",
             "glyph": "",
             "keywords": "announce announcements pa public address speaker tannoy intercom broadcast loudspeaker chime tone ding dong tts speak voice queue urgent priority alarm alert reactor evacuate countdown attention all personnel sapi 廣播 喇叭 公共廣播 語音廣播 對講 警報 警示 叮咚 排隊 緊急 優先 反應堆 撤離 倒數 注意",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.rainmeter",
@@ -3589,7 +3589,7 @@ export const allModules: CatalogModule[] = [
     "zh": "喇叭語音廣播",
     "glyph": "",
     "keywords": "announce announcements pa public address speaker tannoy intercom broadcast loudspeaker chime tone ding dong tts speak voice queue urgent priority alarm alert reactor evacuate countdown attention all personnel sapi 廣播 喇叭 公共廣播 語音廣播 對講 警報 警示 叮咚 排隊 緊急 優先 反應堆 撤離 倒數 注意",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.rainmeter",

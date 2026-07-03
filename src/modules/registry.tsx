@@ -160,6 +160,7 @@ import { FileServerModule } from './FileServerModule';
 import { BitwardenModule } from './BitwardenModule';
 import { KeePassModule } from './KeePassModule';
 import { DecompilerModule } from './DecompilerModule';
+import { AnnouncementsModule } from './AnnouncementsModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -336,6 +337,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.bitwarden': BitwardenModule,
   'module.keepass': KeePassModule,
   'module.decompiler': DecompilerModule,
+  'module.announcements': AnnouncementsModule,
   ...moduleRegistryB,
 };
 

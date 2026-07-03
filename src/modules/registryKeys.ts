@@ -7,6 +7,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.advancedpaste',
   'module.aicluster',
   'module.altsnap',
+  'module.announcements',
   'module.apiclient',
   'module.archives',
   'module.ascii85',

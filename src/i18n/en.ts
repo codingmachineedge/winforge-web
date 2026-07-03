@@ -1,5 +1,22 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  announcements: {
+    "blurb": "Speak public-address announcements through the speakers. Announcements queue so they never overlap; urgent ones jump the queue, and a two-tone chime can play first.",
+    "unsupported": "Speech synthesis is not available in this environment.",
+    "speaking": "Speaking",
+    "idle": "Idle",
+    "testChime": "Test chime",
+    "stop": "Stop / clear queue",
+    "voice": "Voice",
+    "volume": "Volume",
+    "rate": "Speed",
+    "chime": "Chime first",
+    "urgent": "Urgent (jump the queue)",
+    "both": "Speak both languages",
+    "placeholder": "Type the announcement to speak…",
+    "speak": "Announce",
+    "presets": "Preset announcements"
+  },
   cloudflare: {
     "blurb": "Run cloudflared from inside WinForge: named tunnels, free quick tunnels, route DNS, Cloudflare Access, DNS-over-HTTPS and WARP.",
     "cfReady": "cloudflared ready",

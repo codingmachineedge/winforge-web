@@ -2,6 +2,23 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  announcements: {
+    "blurb": "透過喇叭廣播公共語音通告。通告會排隊，唔會重疊；緊急嘅會插隊，仲可以先播一個叮咚兩聲。",
+    "unsupported": "呢個環境冇語音合成功能。",
+    "speaking": "廣播緊",
+    "idle": "閒置",
+    "testChime": "試播叮咚",
+    "stop": "停止／清空隊列",
+    "voice": "語音",
+    "volume": "音量",
+    "rate": "速度",
+    "chime": "先播叮咚",
+    "urgent": "緊急（插隊）",
+    "both": "讀出兩種語言",
+    "placeholder": "輸入要廣播嘅文字…",
+    "speak": "廣播",
+    "presets": "預設廣播"
+  },
   cloudflare: {
     "blurb": "喺 WinForge 直接用 cloudflared：具名 tunnel、免費快速 tunnel、DNS 路由、Cloudflare Access、DNS-over-HTTPS 同 WARP。",
     "cfReady": "cloudflared 就緒",
