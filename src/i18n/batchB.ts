@@ -1997,4 +1997,18 @@ export const yueB = {
     emptied: '回收筒已清空。', totals: '{{count}} 個項目 · {{size}}', empty0: '回收筒係空嘅。',
     name: '名稱', location: '原始位置', size: '大小', deleted: '刪除日期',
   },
+  git: {
+    repo: '儲存庫路徑', open: '開啟', notRepo: '呢個唔係 git 儲存庫。',
+    refresh: '重新整理', stageAll: '全部暫存', unstageAll: '全部取消暫存',
+    fetch: '抓取', pull: '拉取', push: '推送',
+    changesCount: '{{n}} 個變更 · 已暫存 {{staged}}', clean: '工作區乾淨。',
+    discard: '放棄變更', discardConfirm: '放棄 {{path}} 嘅變更？冇得復原。',
+    selectFile: '揀一個檔案睇 diff。', noDiff: '冇差異。',
+    summary: '摘要（必填）', description: '描述（可選）',
+    commit: '提交 {{n}} 個檔案', committing: '提交緊…', needSummary: '請先輸入摘要。',
+    noHistory: '仲未有提交。', selectCommit: '揀一個提交睇佢嘅變更。',
+    newBranch: '新分支名…', create: '建立',
+    switch: '切換', merge: '合併', delete: '刪除',
+    mergeConfirm: '將 {{name}} 合併入目前分支？', deleteConfirm: '刪除分支 {{name}}？',
+  },
 };
