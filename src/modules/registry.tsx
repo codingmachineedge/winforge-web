@@ -55,6 +55,12 @@ import { JsonMergePatchModule } from './JsonMergePatchModule';
 import { JsonToTsModule } from './JsonToTsModule';
 import { CsvLintModule } from './CsvLintModule';
 import { FakerModule } from './FakerModule';
+import { JsonStatModule } from './JsonStatModule';
+import { JsonlToolsModule } from './JsonlToolsModule';
+import { TableFormatModule } from './TableFormatModule';
+import { EnvFileModule } from './EnvFileModule';
+import { XPathTesterModule } from './XPathTesterModule';
+import { HexDumpModule } from './HexDumpModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -124,6 +130,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.jsontots': JsonToTsModule,
   'module.csvlint': CsvLintModule,
   'module.faker': FakerModule,
+  'module.jsonstat': JsonStatModule,
+  'module.jsonltools': JsonlToolsModule,
+  'module.tableformat': TableFormatModule,
+  'module.envfile': EnvFileModule,
+  'module.xpathtester': XPathTesterModule,
+  'module.hexdump': HexDumpModule,
   ...moduleRegistryB,
 };
 
