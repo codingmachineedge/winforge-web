@@ -43,6 +43,54 @@ import { YamlJsonModule } from './YamlJsonModule';
 import { PingModule } from './PingModule';
 import { PortScanModule } from './PortScanModule';
 import { RecycleBinModule } from './RecycleBinModule';
+import { VscodeModule } from './VscodeModule';
+import { VirtualBoxModule } from './VirtualBoxModule';
+import { YtdlpModule } from './YtdlpModule';
+import { VivetoolModule } from './VivetoolModule';
+import { ZoomItModule } from './ZoomItModule';
+import { RustDeskModule } from './RustDeskModule';
+import { WiresharkModule } from './WiresharkModule';
+import { TerminalModule } from './TerminalModule';
+import { PixelEditorModule } from './PixelEditorModule';
+import { PgAdminModule } from './PgAdminModule';
+import { SqliteBrowserModule } from './SqliteBrowserModule';
+import { RainmeterModule } from './RainmeterModule';
+import { WindhawkModule } from './WindhawkModule';
+import { NilesoftShellModule } from './NilesoftShellModule';
+import { PeekModule } from './PeekModule';
+import { QuicktypeModule } from './QuicktypeModule';
+import { SettingsHubModule } from './SettingsHubModule';
+import { PdfToolkitModule } from './PdfToolkitModule';
+import { TorrentModule } from './TorrentModule';
+import { OllamaModule } from './OllamaModule';
+import { SshModule } from './SshModule';
+import { QbittorrentModule } from './QbittorrentModule';
+import { PackerModule } from './PackerModule';
+import { TestdiskModule } from './TestdiskModule';
+import { NewPlusModule } from './NewPlusModule';
+import { OneDriveModule } from './OneDriveModule';
+import { ProxmoxModule } from './ProxmoxModule';
+import { QuickAccentModule } from './QuickAccentModule';
+import { RenameModule } from './RenameModule';
+import { RichPreviewModule } from './RichPreviewModule';
+import { ScreenRulerModule } from './ScreenRulerModule';
+import { ShellMenuModule } from './ShellMenuModule';
+import { ShortcutGuideModule } from './ShortcutGuideModule';
+import { TaskbarTweakerModule } from './TaskbarTweakerModule';
+import { TextOcrModule } from './TextOcrModule';
+import { TimeLensModule } from './TimeLensModule';
+import { TimeUnitModule } from './TimeUnitModule';
+import { VaultVolumesModule } from './VaultVolumesModule';
+import { ViaProxyModule } from './ViaProxyModule';
+import { VoiceModule } from './VoiceModule';
+import { WebClonerModule } from './WebClonerModule';
+import { WebLoginModule } from './WebLoginModule';
+import { NativeUtilitiesModule } from './NativeUtilitiesModule';
+import { PowerToysExtrasModule } from './PowerToysExtrasModule';
+import { ScreenRecorderModule } from './ScreenRecorderModule';
+import { ResumeWriterModule } from './ResumeWriterModule';
+import { AppUninstallerModule } from './AppUninstallerModule';
+import { VpnMeshModule } from './VpnMeshModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -96,4 +144,52 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.ping': PingModule,
   'module.portscan': PortScanModule,
   'module.recyclebin': RecycleBinModule,
+  'module.vscode': VscodeModule,
+  'module.virtualbox': VirtualBoxModule,
+  'module.ytdlp': YtdlpModule,
+  'module.vivetool': VivetoolModule,
+  'module.zoomit': ZoomItModule,
+  'module.rustdesk': RustDeskModule,
+  'module.wireshark': WiresharkModule,
+  'module.terminal': TerminalModule,
+  'module.pixeleditor': PixelEditorModule,
+  'module.pgadmin': PgAdminModule,
+  'module.sqlitebrowser': SqliteBrowserModule,
+  'module.rainmeter': RainmeterModule,
+  'module.windhawk': WindhawkModule,
+  'module.nilesoftshell': NilesoftShellModule,
+  'module.peek': PeekModule,
+  'module.quicktype': QuicktypeModule,
+  'module.settingshub': SettingsHubModule,
+  'module.pdftoolkit': PdfToolkitModule,
+  'module.torrent': TorrentModule,
+  'module.ollama': OllamaModule,
+  'module.ssh': SshModule,
+  'module.qbittorrent': QbittorrentModule,
+  'module.packer': PackerModule,
+  'module.testdisk': TestdiskModule,
+  'module.newplus': NewPlusModule,
+  'module.onedrive': OneDriveModule,
+  'module.proxmox': ProxmoxModule,
+  'module.quickaccent': QuickAccentModule,
+  'module.rename': RenameModule,
+  'module.richpreview': RichPreviewModule,
+  'module.screenruler': ScreenRulerModule,
+  'module.shellmenu': ShellMenuModule,
+  'module.shortcutguide': ShortcutGuideModule,
+  'module.taskbar-tweaker': TaskbarTweakerModule,
+  'module.textocr': TextOcrModule,
+  'module.timelens': TimeLensModule,
+  'module.timeunit': TimeUnitModule,
+  'module.vault-volumes': VaultVolumesModule,
+  'module.viaproxy': ViaProxyModule,
+  'module.voice': VoiceModule,
+  'module.webcloner': WebClonerModule,
+  'module.weblogin': WebLoginModule,
+  'module.native': NativeUtilitiesModule,
+  'module.powertoys': PowerToysExtrasModule,
+  'module.recorder': ScreenRecorderModule,
+  'module.resume': ResumeWriterModule,
+  'module.uninstall': AppUninstallerModule,
+  'module.vpn': VpnMeshModule,
 };
