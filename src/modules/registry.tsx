@@ -102,6 +102,7 @@ import { ColorNameModule } from './ColorNameModule';
 import { CalendarMonthModule } from './CalendarMonthModule';
 import { ColorPaletteModule } from './ColorPaletteModule';
 import { ICalendarModule } from './ICalendarModule';
+import { HttpHeaderRefModule } from './HttpHeaderRefModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -218,6 +219,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.calendarmonth': CalendarMonthModule,
   'module.colorpalette': ColorPaletteModule,
   'module.icalendar': ICalendarModule,
+  'module.httpheaderref': HttpHeaderRefModule,
   ...moduleRegistryB,
 };
 
