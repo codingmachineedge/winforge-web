@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isTauri, runPowershellJson } from '../tauri/bridge';
 
 // HTTP Header Inspector — port of WinForge HttpHeadersService/HttpHeadersModule.
-// The desktop original fires a real HttpClient GET/HEAD and reports the final
-// status, elapsed time and every response/content header. In the browser a live
-// cross-origin request is blocked by CORS for almost every URL, so we ship two
-// modes:
-//   • "paste" (always works, fully offline): paste a raw HTTP response or a bare
-//     header block and inspect the status line + every header, sorted, plus the
-//     Content-Type / Content-Length / Location summary the desktop tool shows.
-//   • "fetch" (best-effort): issue a real request; the browser only surfaces the
-//     handful of CORS-safelisted response headers, but the status/timing are real.
+// A live GET/HEAD reports the final status, elapsed time and every response/content
+// header. WinForge runs the real request through its own background service (a native
+// HttpClient), so it sees the COMPLETE header set with no cross-origin restriction.
+// When only a browser preview is available (no background service), it falls back to
+// a direct fetch — real status/timing, but the browser exposes just the handful of
+// CORS-safelisted response headers. Either way a "paste" mode inspects any raw
+// response fully offline.
 
 interface HeaderRow {
   key: string;
@@ -176,10 +175,28 @@ export function HttpHeadersModule() {
     setFetched(null);
     const t0 = performance.now();
     try {
-      const resp = await fetch(u, { method, redirect: 'follow' });
+      let statusCode: number;
+      let reason: string;
+      let finalUrl: string;
+      let headers: HeaderRow[];
+
+      if (isTauri()) {
+        // Real request through WinForge's background service — complete header set,
+        // no cross-origin restriction.
+        const r = await backendHeaders(u, method);
+        statusCode = r.code;
+        reason = r.desc;
+        finalUrl = r.final || u;
+        headers = collectHeaders(r.headers.map((p) => [p.k, p.v] as [string, string]));
+      } else {
+        // Browser preview: real status/timing, but only CORS-safelisted headers.
+        const resp = await fetch(u, { method, redirect: 'follow' });
+        statusCode = resp.status;
+        reason = resp.statusText;
+        finalUrl = resp.url || u;
+        headers = collectHeaders([...resp.headers.entries()]);
+      }
       const elapsed = Math.round(performance.now() - t0);
-      const pairs: [string, string][] = [...resp.headers.entries()];
-      const headers = collectHeaders(pairs);
 
       const contentType = findHeader(headers, 'Content-Type') || '—';
       const clRaw = findHeader(headers, 'Content-Length');
@@ -188,18 +205,18 @@ export function HttpHeadersModule() {
       setFetched({
         ok: true,
         message: t('httpheaders.fetchSummary', {
-          code: resp.status,
-          reason: resp.statusText,
+          code: statusCode,
+          reason,
           ms: elapsed,
           n: headers.length,
         }),
-        statusCode: resp.status,
-        reason: resp.statusText,
+        statusCode,
+        reason,
         elapsedMs: elapsed,
         contentType,
         contentLength,
         location: findHeader(headers, 'Location'),
-        finalUrl: resp.url || u,
+        finalUrl,
         headers,
       });
     } catch (e) {
@@ -246,8 +263,11 @@ export function HttpHeadersModule() {
         </div>
       ) : (
         <div className="kv-list" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 12 }}>
-          <p className="count-note" style={{ margin: 0, color: 'var(--danger)' }}>
-            {t('httpheaders.corsNotice')}
+          <p
+            className="count-note"
+            style={{ margin: 0, color: isTauri() ? 'var(--text-secondary)' : 'var(--danger)' }}
+          >
+            {isTauri() ? t('httpheaders.backendNotice') : t('httpheaders.corsNotice')}
           </p>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <input
@@ -322,6 +342,47 @@ export function HttpHeadersModule() {
       )}
     </div>
   );
+}
+
+// One header pair as returned by the backend PowerShell payload.
+interface BackendHeader {
+  k: string;
+  v: string;
+}
+interface BackendResp {
+  code: number;
+  desc: string;
+  final: string;
+  headers: BackendHeader[];
+}
+
+// Perform the request through WinForge's background service using a native HttpClient.
+// HttpClient does NOT throw on 4xx/5xx, so every status is captured uniformly, and it
+// returns the full response + content header set with no cross-origin filtering.
+async function backendHeaders(u: string, method: 'GET' | 'HEAD'): Promise<BackendResp> {
+  const safeUrl = u.replace(/'/g, "''");
+  const verb = method === 'HEAD' ? 'Head' : 'Get';
+  const script = [
+    "Add-Type -AssemblyName System.Net.Http -ErrorAction SilentlyContinue",
+    "$h = New-Object System.Net.Http.HttpClientHandler",
+    "$h.AllowAutoRedirect = $true",
+    "$c = New-Object System.Net.Http.HttpClient($h)",
+    "$c.Timeout = [TimeSpan]::FromSeconds(30)",
+    `$req = New-Object System.Net.Http.HttpRequestMessage([System.Net.Http.HttpMethod]::${verb}, '${safeUrl}')`,
+    "$resp = $c.SendAsync($req).GetAwaiter().GetResult()",
+    "$pairs = @()",
+    "foreach ($kv in $resp.Headers) { foreach ($v in $kv.Value) { $pairs += [pscustomobject]@{ k = $kv.Key; v = [string]$v } } }",
+    "if ($resp.Content) { foreach ($kv in $resp.Content.Headers) { foreach ($v in $kv.Value) { $pairs += [pscustomobject]@{ k = $kv.Key; v = [string]$v } } } }",
+    "[pscustomobject]@{ code = [int]$resp.StatusCode; desc = [string]$resp.ReasonPhrase; final = [string]$resp.RequestMessage.RequestUri.AbsoluteUri; headers = @($pairs) }",
+  ].join('\n');
+
+  const rows = await runPowershellJson<BackendResp>(script);
+  const r = rows[0];
+  if (!r) throw new Error('empty backend response');
+  // ConvertTo-Json collapses a single-element array to an object — normalise back.
+  const rawHeaders = r.headers as BackendHeader[] | BackendHeader | undefined;
+  const headers = Array.isArray(rawHeaders) ? rawHeaders : rawHeaders ? [rawHeaders] : [];
+  return { code: r.code, desc: r.desc ?? '', final: r.final ?? u, headers };
 }
 
 function emptySummary(): Summary {
