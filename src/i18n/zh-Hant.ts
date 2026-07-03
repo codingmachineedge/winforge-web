@@ -2,6 +2,34 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  worldmonitor: {
+    "blurb": "開源 World Monitor 全球情報儀表板，即時內嵌。喺上面切換變體；WinForge 只係內嵌官方網頁，唔會 fork 或重新編譯原始碼。",
+    "reload": "重新載入",
+    "copyUrl": "複製網址",
+    "copied": "已複製",
+    "openBrowser": "喺瀏覽器開啟",
+    "license": "World Monitor 係 koala73 嘅開源項目（AGPL-3.0）。AI 功能同部分資料源可能需要第三方金鑰或網絡。"
+  },
+  reactorsettings: {
+    "blurb": "影響真實電腦或外部系統嘅控制放喺呢度，同純模擬分開。全部可逆；最危險嗰個（熔毀時真實關機）預設關閉。",
+    "reset": "還原預設",
+    "on": "開",
+    "off": "關",
+    "armed": "已啟用",
+    "keepAwake": "發電時保持電腦喚醒",
+    "keepAwakeNote": "反應堆發緊電時唔畀電腦瞓覺或者熄屏。預設開。",
+    "sysLink": "將反應堆連動 Windows 設定",
+    "sysLinkNote": "將 Windows 電源計劃、主題色同亮度改到配合反應堆。關閉時會還原。預設關。",
+    "statusApi": "公開狀態 API",
+    "statusApiNote": "經本機 API 提供反應堆狀態畀其他工具讀取。預設開。",
+    "autosave": "防當機自動儲存",
+    "autosaveNote": "定期儲存反應堆狀態，當機都唔會失去進度。預設開。",
+    "haMirror": "將反應堆鏡像到 Home Assistant",
+    "haMirrorNote": "將反應堆讀數以 Home Assistant 實體發佈。預設關。",
+    "armShutdown": "⚠ 熔毀時真實關機",
+    "armShutdownNote": "如果爐芯熔毀，啟用一個可中止嘅真實關機。預設關 — 倒數隨時可以取消。",
+    "armConfirm": "確定喺反應堆熔毀時真實關閉呢部電腦？倒數可以中止，但會影響真實機器。"
+  },
   homeassistant: {
     "title": "Home Assistant · 家居助理",
     "blurb": "用 REST API 控制你嘅 Home Assistant — 跑範本、驗 config 再重啟、畫歷史走勢、跑場景、控制燈同插座、推手機通知等等。全部喺 app 內做。",

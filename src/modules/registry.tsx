@@ -193,6 +193,9 @@ import { AiChatModule } from './AiChatModule';
 import { ConnectorsModule } from './ConnectorsModule';
 import { CmdNotFoundModule } from './CmdNotFoundModule';
 import { ConfigBackupModule } from './ConfigBackupModule';
+import { ReactorModule } from './ReactorModule';
+import { ReactorSettingsModule } from './ReactorSettingsModule';
+import { WorldMonitorModule } from './WorldMonitorModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -402,6 +405,9 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.connectors': ConnectorsModule,
   'module.cmdnotfound': CmdNotFoundModule,
   'module.configbackup': ConfigBackupModule,
+  'module.reactor': ReactorModule,
+  'module.reactorsettings': ReactorSettingsModule,
+  'module.worldmonitor': WorldMonitorModule,
   ...moduleRegistryB,
 };
 

@@ -1,5 +1,33 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  worldmonitor: {
+    "blurb": "The open-source World Monitor global-intelligence dashboard, embedded live. Switch variants above; WinForge embeds the hosted app and never forks or recompiles its source.",
+    "reload": "Reload",
+    "copyUrl": "Copy URL",
+    "copied": "Copied",
+    "openBrowser": "Open in browser",
+    "license": "World Monitor is open-source (AGPL-3.0) by koala73. AI features and some feeds may need third-party keys or network access."
+  },
+  reactorsettings: {
+    "blurb": "Controls that affect the REAL computer or EXTERNAL systems live here, separate from the pure reactor simulation. All are reversible; the dangerous one (real shutdown on meltdown) defaults OFF.",
+    "reset": "Reset to defaults",
+    "on": "On",
+    "off": "Off",
+    "armed": "Armed",
+    "keepAwake": "Keep PC awake while generating",
+    "keepAwakeNote": "Stops the PC sleeping or dimming while the reactor is producing power. Default on.",
+    "sysLink": "Link reactor to Windows settings",
+    "sysLinkNote": "Changes your Windows power plan, accent colour and brightness to match the reactor. Originals are restored when turned off. Default off.",
+    "statusApi": "Expose public status API",
+    "statusApiNote": "Serves the reactor status over a local API other tools can read. Default on.",
+    "autosave": "Crash-safe autosave",
+    "autosaveNote": "Periodically saves reactor state so a crash never loses your run. Default on.",
+    "haMirror": "Mirror reactor to Home Assistant",
+    "haMirrorNote": "Publishes reactor readouts as Home Assistant entities. Default off.",
+    "armShutdown": "⚠ Real shutdown on meltdown",
+    "armShutdownNote": "Arms an abortable real-PC shutdown if the core melts down. Off by default — the countdown is always cancellable.",
+    "armConfirm": "Arm a REAL shutdown of this PC on reactor meltdown? The countdown is abortable, but this affects the real machine."
+  },
   homeassistant: {
     "title": "Home Assistant · 家居助理",
     "blurb": "Control your Home Assistant over its REST API — render templates, check config and restart, plot history, run scenes, control lights and plugs, push phone notifications and more. Everything runs in-app.",

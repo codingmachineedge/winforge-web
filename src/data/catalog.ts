@@ -285,7 +285,7 @@ export const catalog: CatalogSection[] = [
             "zh": "即時檔案搜尋",
             "glyph": "",
             "keywords": "everything voidtools instant file search find filename ntfs mft master file table usn journal index locate substring wildcard regex fast search box open folder copy path 即時 檔案搜尋 搜尋 搵檔案 檔名 索引 萬用字元 正規表示式 主檔案表 開啟資料夾 複製路徑",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.filelocksmith",
@@ -293,7 +293,7 @@ export const catalog: CatalogSection[] = [
             "zh": "檔案鎖偵測",
             "glyph": "",
             "keywords": "file locksmith locked file folder which process is locking handle open handle restart manager rstrtmgr in use cannot delete cannot move being used by another program end task unlock who is using whatslocking lockedfile powertoys 檔案鎖 鎖住 邊個程序 鎖定 控制代碼 佔用 刪唔到 移動唔到 解鎖 結束工作 開啟中",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.diffmerge",
@@ -1261,7 +1261,7 @@ export const catalog: CatalogSection[] = [
             "zh": "世界監察",
             "glyph": "",
             "keywords": "world monitor worldmonitor news geopolitics finance commodity energy happy instability index intelligence dashboard globe map webview variant 世界 監察 新聞 地緣政治 金融 商品 能源 情報 儀表板 地球 不穩定指數",
-            "native": true
+            "native": false
           },
           {
             "tag": "module.webcloner",
@@ -2981,7 +2981,7 @@ export const allModules: CatalogModule[] = [
     "zh": "檔案鎖偵測",
     "glyph": "",
     "keywords": "file locksmith locked file folder which process is locking handle open handle restart manager rstrtmgr in use cannot delete cannot move being used by another program end task unlock who is using whatslocking lockedfile powertoys 檔案鎖 鎖住 邊個程序 鎖定 控制代碼 佔用 刪唔到 移動唔到 解鎖 結束工作 開啟中",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.diffmerge",
@@ -2989,7 +2989,7 @@ export const allModules: CatalogModule[] = [
     "zh": "比對與合併",
     "glyph": "",
     "keywords": "diff merge winmerge compare comparison file folder directory side by side three way two way text line word intra-line myers lcs hash content sha256 only left only right different identical changed added removed unchanged synchronized scroll ignore whitespace next previous difference copy left right save patch beyond compare meld kdiff 比對 合併 比較 差異 檔案 資料夾 並排 逐行 逐字 雜湊 內容 相同 不同 只在左邊 只在右邊 新增 刪除 改動 忽略空白 下一處 上一處 抄左 抄右 儲存",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.hexeditor",
@@ -3917,7 +3917,7 @@ export const allModules: CatalogModule[] = [
     "zh": "世界監察",
     "glyph": "",
     "keywords": "world monitor worldmonitor news geopolitics finance commodity energy happy instability index intelligence dashboard globe map webview variant 世界 監察 新聞 地緣政治 金融 商品 能源 情報 儀表板 地球 不穩定指數",
-    "native": true
+    "native": false
   },
   {
     "tag": "module.webcloner",
