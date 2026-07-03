@@ -85,6 +85,12 @@ import { GuidGenModule } from './GuidGenModule';
 import { CheckDigitModule } from './CheckDigitModule';
 import { MimeTypesModule } from './MimeTypesModule';
 import { BarcodeModule } from './BarcodeModule';
+import { HttpStatusModule } from './HttpStatusModule';
+import { CiphersModule } from './CiphersModule';
+import { BaseConvertModule } from './BaseConvertModule';
+import { GitignoreModule } from './GitignoreModule';
+import { CssUnitsModule } from './CssUnitsModule';
+import { CalculatorModule } from './CalculatorModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -184,6 +190,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.checkdigit': CheckDigitModule,
   'module.mimetypes': MimeTypesModule,
   'module.barcode': BarcodeModule,
+  'module.httpstatus': HttpStatusModule,
+  'module.ciphers': CiphersModule,
+  'module.baseconvert': BaseConvertModule,
+  'module.gitignore': GitignoreModule,
+  'module.cssunits': CssUnitsModule,
+  'module.calculator': CalculatorModule,
   ...moduleRegistryB,
 };
 
