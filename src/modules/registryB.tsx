@@ -85,6 +85,12 @@ import { ViaProxyModule } from './ViaProxyModule';
 import { VoiceModule } from './VoiceModule';
 import { WebClonerModule } from './WebClonerModule';
 import { WebLoginModule } from './WebLoginModule';
+import { NativeUtilitiesModule } from './NativeUtilitiesModule';
+import { PowerToysExtrasModule } from './PowerToysExtrasModule';
+import { ScreenRecorderModule } from './ScreenRecorderModule';
+import { ResumeWriterModule } from './ResumeWriterModule';
+import { AppUninstallerModule } from './AppUninstallerModule';
+import { VpnMeshModule } from './VpnMeshModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -180,4 +186,10 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.voice': VoiceModule,
   'module.webcloner': WebClonerModule,
   'module.weblogin': WebLoginModule,
+  'module.native': NativeUtilitiesModule,
+  'module.powertoys': PowerToysExtrasModule,
+  'module.recorder': ScreenRecorderModule,
+  'module.resume': ResumeWriterModule,
+  'module.uninstall': AppUninstallerModule,
+  'module.vpn': VpnMeshModule,
 };
