@@ -62,6 +62,11 @@ import { QuicktypeModule } from './QuicktypeModule';
 import { SettingsHubModule } from './SettingsHubModule';
 import { PdfToolkitModule } from './PdfToolkitModule';
 import { TorrentModule } from './TorrentModule';
+import { OllamaModule } from './OllamaModule';
+import { SshModule } from './SshModule';
+import { QbittorrentModule } from './QbittorrentModule';
+import { PackerModule } from './PackerModule';
+import { TestdiskModule } from './TestdiskModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -134,4 +139,9 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.settingshub': SettingsHubModule,
   'module.pdftoolkit': PdfToolkitModule,
   'module.torrent': TorrentModule,
+  'module.ollama': OllamaModule,
+  'module.ssh': SshModule,
+  'module.qbittorrent': QbittorrentModule,
+  'module.packer': PackerModule,
+  'module.testdisk': TestdiskModule,
 };
