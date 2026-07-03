@@ -7,13 +7,14 @@ import { enShellNav, yueShellNav } from './shellNav';
 import { enShellFeedback, yueShellFeedback } from './shellFeedback';
 import { enShellTheme, yueShellTheme } from './shellTheme';
 import { enShellA11y, yueShellA11y } from './shellA11y';
+import { enShellSettings, yueShellSettings } from './shellSettings';
 
 // batch-B modules (N–Z) keep their strings in a dedicated file to avoid collisions
 // with concurrent edits to en.ts / zh-Hant.ts. Merge them into the base bundles here.
 // Shell UI features (favorites/recents, toasts, theme, a11y) do the same, one file
 // per feature slice, each under its own shell* namespace.
-const enAll = { ...en, ...enB, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y };
-const yueAll = { ...zhHant, ...yueB, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y };
+const enAll = { ...en, ...enB, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings };
+const yueAll = { ...zhHant, ...yueB, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings };
 
 // Three language modes:
 //   en        — English only

@@ -69,6 +69,13 @@ export function Sidebar({ view, query, lang, onNavigate, onOpenPalette }: Props)
 
         <div className="nav-header">&nbsp;</div>
         <button
+          className={`nav-item${view.kind === 'settings' ? ' active' : ''}`}
+          onClick={() => onNavigate({ kind: 'settings' })}
+        >
+          <span className="glyph">⚙</span>
+          {t('shellsettings.title')}
+        </button>
+        <button
           className={`nav-item${view.kind === 'about' ? ' active' : ''}`}
           onClick={() => onNavigate({ kind: 'about' })}
         >

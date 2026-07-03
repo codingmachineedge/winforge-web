@@ -5,8 +5,10 @@ import { ModuleCatalog } from './components/ModuleCatalog';
 import { CommandPalette } from './components/CommandPalette';
 import { ToastHost } from './components/ToastHost';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { SettingsView } from './components/SettingsView';
 import { allModules } from './data/catalog';
 import { pushRecent } from './state/recents';
+import { useApplyLayoutPrefs } from './state/applyPrefs';
 import type { View } from './types';
 
 // Route-level code splitting: the module-detail registry, the reactor simulator,
@@ -22,6 +24,7 @@ const About = lazy(() => import('./components/About').then((m) => ({ default: m.
 
 export function App() {
   const { t, i18n } = useTranslation();
+  useApplyLayoutPrefs();
   const [view, setView] = useState<View>({ kind: 'catalog', sectionId: null });
   const [query, setQuery] = useState('');
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -107,6 +110,7 @@ export function App() {
           )}
           {effectiveView.kind === 'about' && <About />}
         </Suspense>
+        {effectiveView.kind === 'settings' && <SettingsView />}
       </main>
 
       <CommandPalette
