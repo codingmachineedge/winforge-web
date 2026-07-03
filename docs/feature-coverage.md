@@ -11,20 +11,37 @@ the ~312 modules.
 - **~5,000+ individual features** (per-module average ≈ 16; range 5–48). Sample maxima:
   Audio Editor 48, Android ADB 45, Nuclear Reactor 45, Package Manager 42, Docker 42,
   Communications 42, SSH 38, Config & Backup 36, AWS CLI 36, Packer 35.
-- **Implemented in winforge-web: ~60 features across 15 modules** → roughly **1%** of the
-  full surface. Everything else is Stub/Missing.
+- **Implemented in winforge-web: 166 / 311 modules working (53%)** as of 2026-07-03.
+  Everything else is Stub/Missing.
 
-Status legend per module: **working** (real interactive port), **partial** (read-only
-live probe only), **stub** (catalog card / not started).
+Status legend per module: **working** (real interactive port, registered), **partial**
+(read-only live probe only), **stub** (catalog card / not started).
 
-## Current winforge-web module status (15 working, 2 partial, 297 stub)
+## Current winforge-web module status — 166 working / 145 stub (53%)  [updated 2026-07-03]
 
-Working: Services, System Monitor, Process Explorer, Environment Variables, Connections,
-Drives, Hosts, Package Manager (basic), Nmap, Git, Startup Apps, Scheduled Tasks,
-Event Viewer, Devices, System Info.
-Partial (probe only): Disk Analyser, Battery & Thermal.
+| Bucket | Working | Stub | Total |
+|---|---|---|---|
+| **All modules** | **166** | **145** | **311** |
+| Web-capable (`native:false`) | 151 | 23 | 174 |
+| Native (`native:true`, needs Rust backend) | 15 | 122 | 137 |
 
-Even the "working" modules cover only a slice of their WinForge feature set — e.g. WinForge
+- The **web-capable surface is essentially complete** — the ~23 remaining web stubs are almost
+  all reactor **industrial simulators** owned by a separate agent (branch `feature/reactor-sim`).
+- Remaining real work = the **122 native stubs** (disk/hardware/system tools) that run through
+  the Tauri Rust backend. A scripted native batch (`tools/port-pipeline/winforge-native-batch.js`)
+  is ready to re-run — see `HANDOFF.md`.
+- The 15 native "working" modules are read-only/action probes: Services, System Monitor,
+  Process Explorer, Environment Variables, Connections, Drives, Hosts, Package Manager (basic),
+  Nmap, Git, Startup Apps, Scheduled Tasks, Event Viewer, Devices, System Info. The other ~151
+  working modules are pure-client tools (JSON/text/color/encoding/crypto/network-lookup/etc.).
+
+### Recount (run anytime to refresh the headline)
+
+```bash
+node -e 'const fs=require("fs");const cat=fs.readFileSync("src/data/catalog.ts","utf8");let reg="";for(const f of ["src/modules/registry.tsx","src/modules/registryB.tsx","src/modules/registryA.tsx"])if(fs.existsSync(f))reg+=fs.readFileSync(f,"utf8");const R=new Set([...reg.matchAll(/["\x27\x60](module\.[a-z0-9]+)["\x27\x60]/g)].map(m=>m[1]));const I=[...cat.matchAll(/"tag":\s*"(module\.[a-z0-9]+)",\s*\n\s*"en":\s*"([^"]+)",[\s\S]*?"native":\s*(true|false)/g)];const seen=new Set();let t=0,w=0;for(const m of I){if(seen.has(m[1]))continue;seen.add(m[1]);t++;if(R.has(m[1]))w++;}console.log(`Working ${w}/${t} (${Math.round(w/t*100)}%)  Stub ${t-w}`);'
+```
+
+Even the "working" native modules cover only a slice of their WinForge feature set — e.g. WinForge
 Services has start/stop/restart **plus** set-startup-type (Automatic/Manual/Disabled) which
 the web port lacks; Package Manager has 8 sub-tabs and 9 package managers vs the port's winget-only.
 
