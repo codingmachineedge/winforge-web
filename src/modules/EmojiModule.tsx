@@ -1,0 +1,768 @@
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+// Category keys — stable, language-neutral (mirrors WinForge EmojiService cat tags).
+type Cat = 'Smileys' | 'People' | 'Animals' | 'Food' | 'Travel' | 'Activities' | 'Objects' | 'Symbols' | 'Flags';
+
+const CATEGORIES: Cat[] = ['Smileys', 'People', 'Animals', 'Food', 'Travel', 'Activities', 'Objects', 'Symbols', 'Flags'];
+
+type EmojiRow = readonly [emoji: string, name: string, cat: Cat, kw: string];
+
+// ~608 common emoji, ported verbatim from WinForge Services/EmojiService.cs.
+const EMOJI: readonly EmojiRow[] = [
+  ['😀','grinning face','Smileys','smile happy'],
+  ['😃','grinning face with big eyes','Smileys','smile happy'],
+  ['😄','grinning face with smiling eyes','Smileys','smile happy'],
+  ['😁','beaming face','Smileys','grin'],
+  ['😆','grinning squinting face','Smileys','laugh'],
+  ['😅','grinning face with sweat','Smileys','nervous'],
+  ['🤣','rolling on the floor laughing','Smileys','rofl lol'],
+  ['😂','face with tears of joy','Smileys','laugh lol'],
+  ['🙂','slightly smiling face','Smileys','smile'],
+  ['🙃','upside-down face','Smileys','silly'],
+  ['😉','winking face','Smileys','wink'],
+  ['😊','smiling face with smiling eyes','Smileys','blush happy'],
+  ['😇','smiling face with halo','Smileys','angel innocent'],
+  ['🥰','smiling face with hearts','Smileys','love adore'],
+  ['😍','smiling face with heart-eyes','Smileys','love'],
+  ['🤩','star-struck','Smileys','wow amazed'],
+  ['😘','face blowing a kiss','Smileys','kiss love'],
+  ['😗','kissing face','Smileys','kiss'],
+  ['😚','kissing face with closed eyes','Smileys','kiss'],
+  ['😋','face savoring food','Smileys','yum tasty'],
+  ['😛','face with tongue','Smileys','silly'],
+  ['😜','winking face with tongue','Smileys','silly joke'],
+  ['🤪','zany face','Smileys','crazy goofy'],
+  ['🤨','face with raised eyebrow','Smileys','skeptic suspicious'],
+  ['🧐','face with monocle','Smileys','inspect'],
+  ['🤓','nerd face','Smileys','geek glasses'],
+  ['😎','smiling face with sunglasses','Smileys','cool'],
+  ['🤩','star struck','Smileys','wow'],
+  ['🤔','thinking face','Smileys','hmm ponder'],
+  ['🤐','zipper-mouth face','Smileys','quiet secret'],
+  ['😑','expressionless face','Smileys','blank'],
+  ['😐','neutral face','Smileys','meh'],
+  ['😶','face without mouth','Smileys','speechless'],
+  ['😏','smirking face','Smileys','smug'],
+  ['😒','unamused face','Smileys','meh annoyed'],
+  ['🙄','face with rolling eyes','Smileys','eyeroll'],
+  ['😬','grimacing face','Smileys','awkward'],
+  ['🤥','lying face','Smileys','pinocchio liar'],
+  ['😌','relieved face','Smileys','calm'],
+  ['😔','pensive face','Smileys','sad'],
+  ['😪','sleepy face','Smileys','tired'],
+  ['😴','sleeping face','Smileys','zzz'],
+  ['😷','face with medical mask','Smileys','sick mask'],
+  ['🤒','face with thermometer','Smileys','sick fever'],
+  ['🤕','face with head-bandage','Smileys','hurt'],
+  ['🤢','nauseated face','Smileys','sick'],
+  ['🤮','face vomiting','Smileys','sick puke'],
+  ['🤧','sneezing face','Smileys','sick tissue'],
+  ['🥵','hot face','Smileys','heat sweat'],
+  ['🥶','cold face','Smileys','freezing'],
+  ['🥴','woozy face','Smileys','dizzy drunk'],
+  ['😵','dizzy face','Smileys','ko'],
+  ['🤯','exploding head','Smileys','mind blown'],
+  ['🤠','cowboy hat face','Smileys','yeehaw'],
+  ['🥳','partying face','Smileys','party celebrate'],
+  ['😏','smirk','Smileys','smug'],
+  ['😔','sad','Smileys','down'],
+  ['😕','confused face','Smileys','unsure'],
+  ['😟','worried face','Smileys','concern'],
+  ['🙁','slightly frowning face','Smileys','sad'],
+  ['☹️','frowning face','Smileys','sad'],
+  ['😮','face with open mouth','Smileys','surprised wow'],
+  ['😯','hushed face','Smileys','surprised'],
+  ['😲','astonished face','Smileys','shock'],
+  ['😳','flushed face','Smileys','embarrassed'],
+  ['🥺','pleading face','Smileys','puppy eyes'],
+  ['😦','frowning face with open mouth','Smileys','distress'],
+  ['😧','anguished face','Smileys','worried'],
+  ['😨','fearful face','Smileys','scared'],
+  ['😰','anxious face with sweat','Smileys','nervous'],
+  ['😥','sad but relieved face','Smileys','phew'],
+  ['😢','crying face','Smileys','cry tear'],
+  ['😭','loudly crying face','Smileys','sob cry'],
+  ['😱','face screaming in fear','Smileys','scream'],
+  ['😖','confounded face','Smileys','frustrated'],
+  ['😣','persevering face','Smileys','struggle'],
+  ['😞','disappointed face','Smileys','sad'],
+  ['😓','downcast face with sweat','Smileys','stress'],
+  ['😩','weary face','Smileys','tired'],
+  ['😫','tired face','Smileys','exhausted'],
+  ['🥱','yawning face','Smileys','bored tired'],
+  ['😤','face with steam from nose','Smileys','triumph angry'],
+  ['😡','pouting face','Smileys','angry rage'],
+  ['😠','angry face','Smileys','mad'],
+  ['🤬','face with symbols on mouth','Smileys','swearing curse'],
+  ['😈','smiling face with horns','Smileys','devil'],
+  ['👿','angry face with horns','Smileys','devil imp'],
+  ['💀','skull','Smileys','dead'],
+  ['💩','pile of poo','Smileys','poop'],
+  ['🤡','clown face','Smileys','circus'],
+  ['👹','ogre','Smileys','monster'],
+  ['👻','ghost','Smileys','boo'],
+  ['👽','alien','Smileys','ufo'],
+  ['🤖','robot','Smileys','bot ai'],
+  ['😺','grinning cat','Smileys','cat smile'],
+  ['😸','grinning cat with smiling eyes','Smileys','cat'],
+  ['😻','smiling cat with heart-eyes','Smileys','cat love'],
+  ['🙀','weary cat','Smileys','cat scared'],
+  ['😿','crying cat','Smileys','cat cry'],
+  ['🙈','see-no-evil monkey','Smileys','monkey'],
+  ['🙉','hear-no-evil monkey','Smileys','monkey'],
+  ['🙊','speak-no-evil monkey','Smileys','monkey'],
+  ['💘','heart with arrow','Smileys','cupid love'],
+  ['❤️','red heart','Smileys','love'],
+  ['🧡','orange heart','Smileys','love'],
+  ['💛','yellow heart','Smileys','love'],
+  ['💚','green heart','Smileys','love'],
+  ['💙','blue heart','Smileys','love'],
+  ['💜','purple heart','Smileys','love'],
+  ['🖤','black heart','Smileys','love'],
+  ['💔','broken heart','Smileys','heartbreak'],
+  ['💕','two hearts','Smileys','love'],
+  ['💞','revolving hearts','Smileys','love'],
+  ['💯','hundred points','Smileys','100 perfect'],
+  ['💥','collision','Smileys','boom bang'],
+  ['💦','sweat droplets','Smileys','water'],
+  ['💤','zzz','Smileys','sleep'],
+  ['👋','waving hand','People','hi bye hello'],
+  ['🤚','raised back of hand','People','hand'],
+  ['🖐️','hand with fingers splayed','People','hand'],
+  ['✋','raised hand','People','stop hand'],
+  ['👌','OK hand','People','okay'],
+  ['🤌','pinched fingers','People','italian'],
+  ['🤏','pinching hand','People','small'],
+  ['✌️','victory hand','People','peace v'],
+  ['🤞','crossed fingers','People','luck hope'],
+  ['🤟','love-you gesture','People','ily'],
+  ['🤘','sign of the horns','People','rock'],
+  ['🤙','call me hand','People','shaka'],
+  ['👈','backhand index pointing left','People','point'],
+  ['👉','backhand index pointing right','People','point'],
+  ['👆','backhand index pointing up','People','point'],
+  ['👇','backhand index pointing down','People','point'],
+  ['☝️','index pointing up','People','point one'],
+  ['👍','thumbs up','People','like yes good'],
+  ['👎','thumbs down','People','dislike no bad'],
+  ['✊','raised fist','People','power'],
+  ['👊','oncoming fist','People','punch bump'],
+  ['🤛','left-facing fist','People','bump'],
+  ['🤜','right-facing fist','People','bump'],
+  ['👏','clapping hands','People','clap applause'],
+  ['🙌','raising hands','People','celebrate hooray'],
+  ['👐','open hands','People','hug'],
+  ['🤲','palms up together','People','pray'],
+  ['🤝','handshake','People','deal agree'],
+  ['🙏','folded hands','People','pray thanks please'],
+  ['✍️','writing hand','People','write'],
+  ['💅','nail polish','People','manicure'],
+  ['💪','flexed biceps','People','muscle strong'],
+  ['🧠','brain','People','smart mind'],
+  ['👀','eyes','People','look watch'],
+  ['👁️','eye','People','look'],
+  ['👄','mouth','People','lips'],
+  ['👅','tongue','People','taste'],
+  ['👶','baby','People','child'],
+  ['🧒','child','People','kid'],
+  ['👦','boy','People','kid'],
+  ['👧','girl','People','kid'],
+  ['🧑','person','People','adult'],
+  ['👨','man','People','male'],
+  ['👩','woman','People','female'],
+  ['🧓','older person','People','elder'],
+  ['👴','old man','People','grandpa'],
+  ['👵','old woman','People','grandma'],
+  ['👨‍💻','man technologist','People','developer coder'],
+  ['👩‍💻','woman technologist','People','developer coder'],
+  ['👷','construction worker','People','builder'],
+  ['💂','guard','People','soldier'],
+  ['🕵️','detective','People','spy'],
+  ['👨‍🍳','man cook','People','chef'],
+  ['👩‍🍳','woman cook','People','chef'],
+  ['👷‍♂️','man construction worker','People','builder'],
+  ['🤴','prince','People','royal'],
+  ['👸','princess','People','royal'],
+  ['🎅','Santa Claus','People','christmas'],
+  ['🤶','Mrs. Claus','People','christmas'],
+  ['🦸','superhero','People','hero'],
+  ['🦹','supervillain','People','villain'],
+  ['🧙','mage','People','wizard'],
+  ['🧚','fairy','People','magic'],
+  ['🧛','vampire','People','dracula'],
+  ['🧟','zombie','People','undead'],
+  ['💆','person getting massage','People','spa relax'],
+  ['💇','person getting haircut','People','salon'],
+  ['🚶','person walking','People','walk'],
+  ['🏃','person running','People','run'],
+  ['💃','woman dancing','People','dance'],
+  ['🕺','man dancing','People','dance'],
+  ['👫','woman and man holding hands','People','couple'],
+  ['👪','family','People','parents kids'],
+  ['🗣️','speaking head','People','talk'],
+  ['👤','bust in silhouette','People','user profile'],
+  ['👥','busts in silhouette','People','users group'],
+  ['🐶','dog face','Animals','puppy pet'],
+  ['🐱','cat face','Animals','kitten pet'],
+  ['🐭','mouse face','Animals','rodent'],
+  ['🐹','hamster','Animals','pet'],
+  ['🐰','rabbit face','Animals','bunny'],
+  ['🦊','fox','Animals',''],
+  ['🐻','bear','Animals',''],
+  ['🐼','panda','Animals',''],
+  ['🐨','koala','Animals',''],
+  ['🐯','tiger face','Animals',''],
+  ['🦁','lion','Animals',''],
+  ['🐮','cow face','Animals',''],
+  ['🐷','pig face','Animals',''],
+  ['🐸','frog','Animals',''],
+  ['🐵','monkey face','Animals',''],
+  ['🐔','chicken','Animals','hen'],
+  ['🐧','penguin','Animals',''],
+  ['🐦','bird','Animals',''],
+  ['🐤','baby chick','Animals',''],
+  ['🦆','duck','Animals',''],
+  ['🦅','eagle','Animals',''],
+  ['🦉','owl','Animals',''],
+  ['🦇','bat','Animals',''],
+  ['🐺','wolf','Animals',''],
+  ['🐗','boar','Animals',''],
+  ['🐴','horse face','Animals',''],
+  ['🦄','unicorn','Animals',''],
+  ['🐝','honeybee','Animals','bee'],
+  ['🐛','bug','Animals','caterpillar'],
+  ['🦋','butterfly','Animals',''],
+  ['🐌','snail','Animals',''],
+  ['🐞','lady beetle','Animals','ladybug'],
+  ['🐜','ant','Animals',''],
+  ['🕷️','spider','Animals',''],
+  ['🐢','turtle','Animals','tortoise'],
+  ['🐍','snake','Animals',''],
+  ['🦎','lizard','Animals',''],
+  ['🐙','octopus','Animals',''],
+  ['🐟','fish','Animals',''],
+  ['🐠','tropical fish','Animals',''],
+  ['🐬','dolphin','Animals',''],
+  ['🐳','spouting whale','Animals',''],
+  ['🦈','shark','Animals',''],
+  ['🐋','whale','Animals',''],
+  ['🦀','crab','Animals',''],
+  ['🦐','shrimp','Animals',''],
+  ['🐙','octopus alt','Animals',''],
+  ['🐘','elephant','Animals',''],
+  ['🦏','rhinoceros','Animals','rhino'],
+  ['🦒','giraffe','Animals',''],
+  ['🦘','kangaroo','Animals',''],
+  ['🐆','leopard','Animals',''],
+  ['🦓','zebra','Animals',''],
+  ['🐎','horse','Animals',''],
+  ['🐖','pig','Animals',''],
+  ['🐑','ewe','Animals','sheep'],
+  ['🐐','goat','Animals',''],
+  ['🐫','two-hump camel','Animals',''],
+  ['🦙','llama','Animals',''],
+  ['🦕','sauropod','Animals','dinosaur'],
+  ['🦖','T-Rex','Animals','dinosaur'],
+  ['🌵','cactus','Animals','plant'],
+  ['🎄','Christmas tree','Animals','xmas'],
+  ['🌲','evergreen tree','Animals','pine'],
+  ['🌳','deciduous tree','Animals','tree'],
+  ['🌿','herb','Animals','leaf'],
+  ['🍀','four leaf clover','Animals','luck'],
+  ['🍁','maple leaf','Animals','autumn'],
+  ['🍄','mushroom','Animals','fungus'],
+  ['🌷','tulip','Animals','flower'],
+  ['🌸','cherry blossom','Animals','sakura flower'],
+  ['🌹','rose','Animals','flower'],
+  ['🌻','sunflower','Animals','flower'],
+  ['🌼','blossom','Animals','flower'],
+  ['💐','bouquet','Animals','flowers'],
+  ['🌍','globe showing Europe-Africa','Animals','earth world'],
+  ['🌞','sun with face','Animals',''],
+  ['🌙','crescent moon','Animals','night'],
+  ['⭐','star','Animals',''],
+  ['✨','sparkles','Animals','shine glitter'],
+  ['⚡','high voltage','Animals','lightning bolt'],
+  ['🔥','fire','Animals','flame lit'],
+  ['🌈','rainbow','Animals',''],
+  ['☀️','sun','Animals','sunny'],
+  ['⛅','sun behind cloud','Animals','partly cloudy'],
+  ['☁️','cloud','Animals','cloudy'],
+  ['🌧️','cloud with rain','Animals','rain'],
+  ['⛄','snowman without snow','Animals','winter'],
+  ['❄️','snowflake','Animals','snow cold'],
+  ['💧','droplet','Animals','water'],
+  ['🌊','water wave','Animals','ocean sea'],
+  ['🍏','green apple','Food','fruit'],
+  ['🍎','red apple','Food','fruit'],
+  ['🍊','tangerine','Food','orange fruit'],
+  ['🍋','lemon','Food','fruit sour'],
+  ['🍌','banana','Food','fruit'],
+  ['🍉','watermelon','Food','fruit'],
+  ['🍇','grapes','Food','fruit'],
+  ['🍓','strawberry','Food','fruit'],
+  ['🍒','cherries','Food','fruit'],
+  ['🍑','peach','Food','fruit'],
+  ['🥭','mango','Food','fruit'],
+  ['🍍','pineapple','Food','fruit'],
+  ['🥝','kiwi fruit','Food','fruit'],
+  ['🍅','tomato','Food','vegetable'],
+  ['🥑','avocado','Food',''],
+  ['🍆','eggplant','Food','aubergine'],
+  ['🥕','carrot','Food','vegetable'],
+  ['🌽','ear of corn','Food','maize'],
+  ['🌶️','hot pepper','Food','chili spicy'],
+  ['🥦','broccoli','Food','vegetable'],
+  ['🍄','mushroom food','Food',''],
+  ['🍞','bread','Food','loaf'],
+  ['🥐','croissant','Food','pastry'],
+  ['🥖','baguette bread','Food',''],
+  ['🥨','pretzel','Food',''],
+  ['🧀','cheese wedge','Food',''],
+  ['🥚','egg','Food',''],
+  ['🍳','cooking','Food','fried egg'],
+  ['🥓','bacon','Food',''],
+  ['🥞','pancakes','Food',''],
+  ['🍔','hamburger','Food','burger'],
+  ['🍟','french fries','Food','fries'],
+  ['🍕','pizza','Food','slice'],
+  ['🌭','hot dog','Food',''],
+  ['🌮','taco','Food',''],
+  ['🌯','burrito','Food',''],
+  ['🍜','steaming bowl','Food','ramen noodles'],
+  ['🍛','curry rice','Food',''],
+  ['🍣','sushi','Food',''],
+  ['🍙','rice ball','Food','onigiri'],
+  ['🍚','cooked rice','Food',''],
+  ['🍨','ice cream','Food','dessert'],
+  ['🍦','soft ice cream','Food',''],
+  ['🍩','doughnut','Food','donut'],
+  ['🍪','cookie','Food','biscuit'],
+  ['🎂','birthday cake','Food',''],
+  ['🍰','shortcake','Food','cake dessert'],
+  ['🍫','chocolate bar','Food',''],
+  ['🍬','candy','Food','sweet'],
+  ['🍭','lollipop','Food',''],
+  ['🍯','honey pot','Food',''],
+  ['🍿','popcorn','Food',''],
+  ['☕','hot beverage','Food','coffee tea'],
+  ['🍵','teacup without handle','Food','green tea'],
+  ['🍺','beer mug','Food',''],
+  ['🍻','clinking beer mugs','Food','cheers'],
+  ['🍷','wine glass','Food',''],
+  ['🍸','cocktail glass','Food','martini'],
+  ['🍹','tropical drink','Food',''],
+  ['🥂','clinking glasses','Food','cheers'],
+  ['🥃','tumbler glass','Food','whisky'],
+  ['🍾','bottle with popping cork','Food','champagne'],
+  ['🥤','cup with straw','Food','soda drink'],
+  ['🧋','bubble tea','Food','boba'],
+  ['🚗','automobile','Travel','car'],
+  ['🚕','taxi','Travel','cab'],
+  ['🚙','sport utility vehicle','Travel','suv'],
+  ['🚌','bus','Travel',''],
+  ['🚓','police car','Travel',''],
+  ['🚑','ambulance','Travel',''],
+  ['🚒','fire engine','Travel',''],
+  ['🚚','delivery truck','Travel',''],
+  ['🚜','tractor','Travel','farm'],
+  ['🏍️','motorcycle','Travel',''],
+  ['🚲','bicycle','Travel','bike'],
+  ['🛴','kick scooter','Travel',''],
+  ['🚆','train','Travel',''],
+  ['🚄','high-speed train','Travel','bullet'],
+  ['🚇','metro','Travel','subway'],
+  ['✈️','airplane','Travel','flight plane'],
+  ['🚁','helicopter','Travel',''],
+  ['🚀','rocket','Travel','space launch'],
+  ['🛸','flying saucer','Travel','ufo'],
+  ['⛵','sailboat','Travel',''],
+  ['🚤','speedboat','Travel',''],
+  ['🛳️','passenger ship','Travel','cruise'],
+  ['⛴️','ferry','Travel',''],
+  ['⚓','anchor','Travel',''],
+  ['🚢','ship','Travel',''],
+  ['🏠','house','Travel','home'],
+  ['🏡','house with garden','Travel','home'],
+  ['🏢','office building','Travel',''],
+  ['🏥','hospital','Travel',''],
+  ['🏦','bank','Travel',''],
+  ['🏨','hotel','Travel',''],
+  ['🏫','school','Travel',''],
+  ['🏭','factory','Travel',''],
+  ['🏰','castle','Travel',''],
+  ['🗼','Tokyo tower','Travel',''],
+  ['🗽','Statue of Liberty','Travel',''],
+  ['🗺️','world map','Travel',''],
+  ['🗻','mount fuji','Travel','mountain'],
+  ['⛰️','mountain','Travel',''],
+  ['🌋','volcano','Travel',''],
+  ['🏕️','camping','Travel','tent'],
+  ['🏖️','beach with umbrella','Travel',''],
+  ['🏜️','desert','Travel',''],
+  ['🏝️','desert island','Travel',''],
+  ['🗿','moai','Travel','statue'],
+  ['🌁','foggy','Travel',''],
+  ['🌃','night with stars','Travel','city'],
+  ['🌅','sunrise','Travel',''],
+  ['🌇','sunset over buildings','Travel',''],
+  ['🌉','bridge at night','Travel',''],
+  ['🎡','ferris wheel','Travel',''],
+  ['🎢','roller coaster','Travel',''],
+  ['🎪','circus tent','Travel',''],
+  ['⛲','fountain','Travel',''],
+  ['🗺','map','Travel',''],
+  ['⚽','soccer ball','Activities','football'],
+  ['🏀','basketball','Activities',''],
+  ['🏈','american football','Activities',''],
+  ['⚾','baseball','Activities',''],
+  ['🎾','tennis','Activities',''],
+  ['🏐','volleyball','Activities',''],
+  ['🏉','rugby football','Activities',''],
+  ['🎱','pool 8 ball','Activities','billiards'],
+  ['🏓','ping pong','Activities','table tennis'],
+  ['🏸','badminton','Activities',''],
+  ['🏒','ice hockey','Activities',''],
+  ['🥊','boxing glove','Activities',''],
+  ['🥅','goal net','Activities',''],
+  ['⛳','flag in hole','Activities','golf'],
+  ['🏹','bow and arrow','Activities','archery'],
+  ['🎣','fishing pole','Activities',''],
+  ['🎿','skis','Activities','ski'],
+  ['⛸️','ice skate','Activities',''],
+  ['🛹','skateboard','Activities',''],
+  ['🏆','trophy','Activities','winner award'],
+  ['🏅','sports medal','Activities',''],
+  ['🥇','1st place medal','Activities','gold'],
+  ['🥈','2nd place medal','Activities','silver'],
+  ['🥉','3rd place medal','Activities','bronze'],
+  ['🎯','bullseye','Activities','target dart'],
+  ['🎮','video game','Activities','controller gaming'],
+  ['🕹️','joystick','Activities',''],
+  ['🎲','game die','Activities','dice'],
+  ['♠️','spade suit','Activities','cards'],
+  ['♥️','heart suit','Activities','cards'],
+  ['♦️','diamond suit','Activities','cards'],
+  ['♣️','club suit','Activities','cards'],
+  ['🃏','joker','Activities','card'],
+  ['🎭','performing arts','Activities','theater masks'],
+  ['🎨','artist palette','Activities','paint art'],
+  ['🎬','clapper board','Activities','movie film'],
+  ['🎤','microphone','Activities','sing karaoke'],
+  ['🎧','headphone','Activities','music'],
+  ['🎸','guitar','Activities','music'],
+  ['🎹','musical keyboard','Activities','piano'],
+  ['🎺','trumpet','Activities','music'],
+  ['🎻','violin','Activities','music'],
+  ['🥁','drum','Activities','music'],
+  ['🎵','musical note','Activities','music'],
+  ['🎶','musical notes','Activities','music'],
+  ['🎆','fireworks','Activities','celebrate'],
+  ['🎇','sparkler','Activities',''],
+  ['🎉','party popper','Activities','celebrate tada'],
+  ['🎊','confetti ball','Activities','celebrate'],
+  ['🎀','ribbon','Activities','bow'],
+  ['🎁','wrapped gift','Activities','present'],
+  ['📱','mobile phone','Objects','smartphone'],
+  ['💻','laptop','Objects','computer'],
+  ['⌨️','keyboard','Objects',''],
+  ['🖥️','desktop computer','Objects','pc'],
+  ['🖨️','printer','Objects',''],
+  ['🖱️','computer mouse','Objects',''],
+  ['💾','floppy disk','Objects','save'],
+  ['💿','optical disk','Objects','cd'],
+  ['📀','dvd','Objects',''],
+  ['🎥','movie camera','Objects',''],
+  ['📷','camera','Objects','photo'],
+  ['📸','camera with flash','Objects',''],
+  ['📺','television','Objects','tv'],
+  ['📻','radio','Objects',''],
+  ['☎️','telephone','Objects','phone'],
+  ['🔋','battery','Objects',''],
+  ['🔌','electric plug','Objects','power'],
+  ['💡','light bulb','Objects','idea'],
+  ['🔦','flashlight','Objects','torch'],
+  ['🕯️','candle','Objects',''],
+  ['📖','open book','Objects','read'],
+  ['📚','books','Objects','library'],
+  ['📝','memo','Objects','note write'],
+  ['✏️','pencil','Objects','write'],
+  ['📎','paperclip','Objects','attach'],
+  ['📌','pushpin','Objects','pin'],
+  ['📍','round pushpin','Objects','location'],
+  ['📅','calendar','Objects','date'],
+  ['📈','chart increasing','Objects','graph up'],
+  ['📉','chart decreasing','Objects','graph down'],
+  ['📊','bar chart','Objects','graph'],
+  ['💰','money bag','Objects','cash'],
+  ['💵','dollar banknote','Objects','money'],
+  ['💳','credit card','Objects','payment'],
+  ['💸','money with wings','Objects','spend'],
+  ['💎','gem stone','Objects','diamond jewel'],
+  ['🔑','key','Objects','unlock'],
+  ['🔐','locked with key','Objects','secure'],
+  ['🔒','locked','Objects','lock secure'],
+  ['🔓','unlocked','Objects','open'],
+  ['🔨','hammer','Objects','tool'],
+  ['🔧','wrench','Objects','tool fix'],
+  ['🔩','nut and bolt','Objects',''],
+  ['⚙️','gear','Objects','settings cog'],
+  ['🔗','link','Objects','chain url'],
+  ['🧲','magnet','Objects',''],
+  ['🧪','test tube','Objects','science'],
+  ['🔬','microscope','Objects','science'],
+  ['💉','syringe','Objects','shot vaccine'],
+  ['💊','pill','Objects','medicine'],
+  ['🚿','shower','Objects',''],
+  ['🛁','bathtub','Objects',''],
+  ['🧹','broom','Objects','clean'],
+  ['🛒','shopping cart','Objects','trolley'],
+  ['🛎️','bellhop bell','Objects','service'],
+  ['🗑️','wastebasket','Objects','trash bin'],
+  ['📦','package','Objects','box parcel'],
+  ['📧','e-mail','Objects','email'],
+  ['✉️','envelope','Objects','mail letter'],
+  ['📮','postbox','Objects','mailbox'],
+  ['🔔','bell','Objects','notification'],
+  ['🔕','bell with slash','Objects','mute'],
+  ['🎫','ticket','Objects',''],
+  ['🎖️','military medal','Objects',''],
+  ['🔭','telescope','Objects',''],
+  ['⌛','hourglass done','Objects','time'],
+  ['⏰','alarm clock','Objects','time'],
+  ['⌚','watch','Objects','time'],
+  ['✔️','check mark','Symbols','tick yes done'],
+  ['✅','check mark button','Symbols','yes done green'],
+  ['❌','cross mark','Symbols','no x wrong'],
+  ['❎','cross mark button','Symbols','no x'],
+  ['➕','plus','Symbols','add'],
+  ['➖','minus','Symbols','subtract'],
+  ['➗','divide','Symbols',''],
+  ['✖️','multiply','Symbols','times x'],
+  ['♾️','infinity','Symbols',''],
+  ['❓','question mark','Symbols','help'],
+  ['❗','exclamation mark','Symbols','warning'],
+  ['‼️','double exclamation mark','Symbols',''],
+  ['⁉️','exclamation question mark','Symbols',''],
+  ['⚠️','warning','Symbols','caution alert'],
+  ['🚫','prohibited','Symbols','no forbidden'],
+  ['💯','hundred','Symbols','100'],
+  ['🔙','back arrow','Symbols',''],
+  ['🔝','top arrow','Symbols',''],
+  ['🔜','soon arrow','Symbols',''],
+  ['⬆️','up arrow','Symbols',''],
+  ['⬇️','down arrow','Symbols',''],
+  ['⬅️','left arrow','Symbols',''],
+  ['➡️','right arrow','Symbols',''],
+  ['🔄','counterclockwise arrows','Symbols','refresh reload'],
+  ['🔃','clockwise arrows','Symbols',''],
+  ['🔀','shuffle','Symbols','random'],
+  ['🔁','repeat','Symbols','loop'],
+  ['▶️','play button','Symbols','start'],
+  ['⏸️','pause button','Symbols',''],
+  ['⏹️','stop button','Symbols',''],
+  ['⏭️','next track','Symbols','skip'],
+  ['⏮️','last track','Symbols','previous'],
+  ['🔊','speaker high volume','Symbols','loud sound'],
+  ['🔇','muted speaker','Symbols','mute silence'],
+  ['💢','anger','Symbols','mad'],
+  ['💬','speech balloon','Symbols','chat talk'],
+  ['💭','thought balloon','Symbols','think'],
+  ['🗯️','right anger bubble','Symbols',''],
+  ['⭐','star symbol','Symbols','favorite'],
+  ['🌟','glowing star','Symbols',''],
+  ['✴️','eight-pointed star','Symbols',''],
+  ['🆕','NEW button','Symbols',''],
+  ['🆓','FREE button','Symbols',''],
+  ['🆗','OK button','Symbols',''],
+  ['🔟','keycap 10','Symbols','ten'],
+  ['#️⃣','keycap number sign','Symbols','hash'],
+  ['♻️','recycling symbol','Symbols','recycle'],
+  ['💟','heart decoration','Symbols',''],
+  ['❤️‍🔥','heart on fire','Symbols','burning love'],
+  ['☢️','radioactive','Symbols','nuclear'],
+  ['☣️','biohazard','Symbols',''],
+  ['♿','wheelchair symbol','Symbols','accessible'],
+  ['🚻','restroom','Symbols','toilet'],
+  ['📶','antenna bars','Symbols','signal'],
+  ['🆑','SOS button','Symbols','help'],
+  ['🏁','chequered flag','Flags','race finish'],
+  ['🚩','triangular flag','Flags',''],
+  ['🏴','black flag','Flags',''],
+  ['🏳️','white flag','Flags','surrender'],
+  ['🏳️‍🌈','rainbow flag','Flags','pride lgbt'],
+  ['🏴‍☠️','pirate flag','Flags','skull'],
+  ['🇭🇰','flag Hong Kong','Flags','hk'],
+  ['🇹🇼','flag Taiwan','Flags','tw'],
+  ['🇨🇳','flag China','Flags','cn'],
+  ['🇯🇵','flag Japan','Flags','jp'],
+  ['🇰🇷','flag South Korea','Flags','kr'],
+  ['🇺🇸','flag United States','Flags','us usa america'],
+  ['🇬🇧','flag United Kingdom','Flags','uk gb britain'],
+  ['🇨🇦','flag Canada','Flags','ca'],
+  ['🇦🇺','flag Australia','Flags','au'],
+  ['🇫🇷','flag France','Flags','fr'],
+  ['🇩🇪','flag Germany','Flags','de'],
+  ['🇮🇹','flag Italy','Flags','it'],
+  ['🇪🇸','flag Spain','Flags','es'],
+  ['🇵🇹','flag Portugal','Flags','pt'],
+  ['🇳🇱','flag Netherlands','Flags','nl'],
+  ['🇷🇺','flag Russia','Flags','ru'],
+  ['🇧🇷','flag Brazil','Flags','br'],
+  ['🇲🇽','flag Mexico','Flags','mx'],
+  ['🇮🇳','flag India','Flags','in'],
+  ['🇸🇬','flag Singapore','Flags','sg'],
+  ['🇹🇭','flag Thailand','Flags','th'],
+  ['🇻🇳','flag Vietnam','Flags','vn'],
+  ['🇵🇭','flag Philippines','Flags','ph'],
+  ['🇲🇾','flag Malaysia','Flags','my'],
+  ['🇮🇩','flag Indonesia','Flags','id'],
+];
+
+const RECENT_MAX = 12;
+
+// Localized display label for a category key ('' => the synthetic "All" entry).
+function catLabel(t: (k: string) => string, key: Cat | ''): string {
+  switch (key) {
+    case '':
+      return t('emoji.catAll');
+    case 'Smileys':
+      return t('emoji.catSmileys');
+    case 'People':
+      return t('emoji.catPeople');
+    case 'Animals':
+      return t('emoji.catAnimals');
+    case 'Food':
+      return t('emoji.catFood');
+    case 'Travel':
+      return t('emoji.catTravel');
+    case 'Activities':
+      return t('emoji.catActivities');
+    case 'Objects':
+      return t('emoji.catObjects');
+    case 'Symbols':
+      return t('emoji.catSymbols');
+    case 'Flags':
+      return t('emoji.catFlags');
+    default:
+      return key;
+  }
+}
+
+export function EmojiModule() {
+  const { t } = useTranslation();
+  const [category, setCategory] = useState<Cat | ''>('');
+  const [search, setSearch] = useState('');
+  const [recent, setRecent] = useState<string[]>([]);
+  const [status, setStatus] = useState('');
+
+  const items = useMemo(() => {
+    const s = search.trim().toLowerCase();
+    return EMOJI.filter((row) => {
+      const [emoji, name, cat, kw] = row;
+      if (category && cat !== category) return false;
+      if (!s) return true;
+      return name.toLowerCase().includes(s) || kw.toLowerCase().includes(s) || emoji.includes(search.trim());
+    });
+  }, [category, search]);
+
+  const copy = (emoji: string) => {
+    void navigator.clipboard?.writeText(emoji);
+    setRecent((prev) => [emoji, ...prev.filter((x) => x !== emoji)].slice(0, RECENT_MAX));
+    setStatus(t('emoji.copied', { emoji }));
+  };
+
+  return (
+    <div className="mod">
+      <p className="count-note" style={{ marginTop: 0, maxWidth: 900 }}>
+        {t('emoji.blurb')}
+      </p>
+
+      <div className="mod-toolbar">
+        <select className="mod-select" style={{ minWidth: 180 }} value={category} onChange={(e) => setCategory(e.target.value as Cat | '')}>
+          <option value="">{catLabel(t, '')}</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {catLabel(t, c)}
+            </option>
+          ))}
+        </select>
+        <input
+          className="mod-search"
+          style={{ flex: 1, minWidth: 160 }}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('emoji.searchPlaceholder')}
+        />
+      </div>
+
+      <div
+        style={{
+          border: '1px solid var(--border, #333)',
+          borderRadius: 8,
+          padding: '8px 12px',
+          marginBottom: 10,
+          background: 'var(--card, transparent)',
+        }}
+      >
+        <div className="count-note" style={{ marginTop: 0, marginBottom: 4 }}>
+          {t('emoji.recent')}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', minHeight: 30 }}>
+          {recent.length === 0 ? (
+            <span className="count-note" style={{ marginTop: 0, opacity: 0.6 }}>
+              {t('emoji.recentEmpty')}
+            </span>
+          ) : (
+            recent.map((e, i) => (
+              <button
+                key={e + i}
+                className="mini"
+                title={t('emoji.clickToCopy')}
+                style={{ fontSize: 22, lineHeight: 1, padding: '2px 6px' }}
+                onClick={() => copy(e)}
+              >
+                {e}
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div
+        className="dt-wrap"
+        style={{
+          maxHeight: 380,
+          border: '1px solid var(--border, #333)',
+          borderRadius: 8,
+        }}
+      >
+        <table className="dt">
+          <tbody>
+            {items.map((row, i) => {
+              const [emoji, name, cat, kw] = row;
+              return (
+                <tr key={emoji + i} style={{ cursor: 'pointer' }} title={t('emoji.clickToCopy')} onClick={() => copy(emoji)}>
+                  <td style={{ width: 48, fontSize: 26, textAlign: 'center' }}>{emoji}</td>
+                  <td>
+                    <div style={{ fontSize: 14 }}>{name}</div>
+                    <div className="env-val" style={{ fontSize: 11 }}>
+                      {catLabel(t, cat)}
+                      {kw ? ` · ${kw}` : ''}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="count-note">
+        {status ? status + ' · ' : ''}
+        {t('emoji.shown', { n: items.length })}
+      </p>
+    </div>
+  );
+}

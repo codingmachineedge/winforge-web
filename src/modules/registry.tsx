@@ -73,6 +73,12 @@ import { AsciiTableModule } from './AsciiTableModule';
 import { BoxTextModule } from './BoxTextModule';
 import { CharMapModule } from './CharMapModule';
 import { Base32Module } from './Base32Module';
+import { LeetModule } from './LeetModule';
+import { EmojiModule } from './EmojiModule';
+import { EncodingConvModule } from './EncodingConvModule';
+import { AsciiArtModule } from './AsciiArtModule';
+import { ColorBlindModule } from './ColorBlindModule';
+import { GradientModule } from './GradientModule';
 import { moduleRegistryB } from './registryB';
 
 /**
@@ -160,6 +166,12 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.boxtext': BoxTextModule,
   'module.charmap': CharMapModule,
   'module.base32': Base32Module,
+  'module.leet': LeetModule,
+  'module.emoji': EmojiModule,
+  'module.encodingconv': EncodingConvModule,
+  'module.asciiart': AsciiArtModule,
+  'module.colorblind': ColorBlindModule,
+  'module.gradient': GradientModule,
   ...moduleRegistryB,
 };
 
