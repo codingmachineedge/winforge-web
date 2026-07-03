@@ -10,12 +10,33 @@ winforge-web is the **React + TypeScript (Vite) + Tauri v2** rewrite of the WinF
 desktop suite. **This app IS the full product** — it must do everything itself (see the
 Architecture Rules below); it never tells the user to open the old desktop app.
 
-- **Build is GREEN** at this commit: `tsc --noEmit` = 0 errors, `vite build` = OK,
-  `vitest` 24/24 (reactor physics + fuel factory + reactimeter).
-- **Coverage: 226 / 311 modules working (73%)** — web-capable 165/174, native 61/137.
-  Regenerate anytime with the "Recount" snippet in `docs/feature-coverage.md`.
-- All feature branches are **merged to main and deleted**. Work is driven by the
-  **port pipeline** committed under `tools/port-pipeline/`.
+- 🎉 **FULL PARITY (2026-07-03): 314 / 314 modules working · 0 partial · 0 stub.** Every
+  catalog module now has a real working implementation. Regenerate the census with
+  `node tools/gen-parity.mjs` (writes `docs/PARITY.md`).
+- **Build is GREEN**: `tsc --noEmit` = 0 errors, `vite build` = OK, `vitest` **203 passing**
+  (16 files). Latest parity commit: `b699346`.
+- Reached via a Ralph-loop campaign (armed by `.ralph-loop-active`, now **disarmed** — it
+  auto-stops at 0 stubs): ~19 iterations, each = one hand-verified solo port + one 6-module
+  **Opus 4.8** Workflow batch, integrated by the single-writer `tools/port-pipeline/`.
+- **Shell features also shipped** earlier this session: prefs/favorites/recents/toasts/theme
+  stores, three-state theme toggle, fuzzy search + highlighting, searchable settings page,
+  PWA, catalog virtualization + keyboard nav, `run_op` allowlist + `winforge://` deep links,
+  reactor analog gauges/annunciator/NIS/permissives/MODE.
+
+### Pipeline hardening learned this campaign (keep these)
+- `tools/gen-parity.mjs` + `gen-registry-keys.mjs` scan **registry.tsx + registryA + registryB**
+  and accept the unprefixed `dashboard` tag.
+- `integrate.mjs` uses **CRLF-tolerant `\r?\n` anchors that throw if not found** (a bare `\n`
+  silently no-opped once files went CRLF, shipping unresolved i18n keys), and its validator
+  **skips trailing-dot dynamic key prefixes** (`t('ns.strength.' + level)`).
+- Recurring gotcha: Opus agents sometimes emit a flat key that collides with a nested one
+  (`media.folder` vs `media.folder.*`, `emulator.channel` vs `channel.0..3`). Scan for
+  prefix/leaf collisions before integrating and rename the flat key (e.g. `folderCol`).
+- Client-side modules must be flagged **`native: false`** in `catalog.ts` or the browser shows
+  a stub instead of the live UI.
+- Self-contained physics sims (desal/pumpedhydro/vertfarm/hpc/datacenter/collider) use an
+  operator power slider in place of the desktop reactor-status feed, and a compressed sim
+  clock so state changes are watchable.
 
 ## What the recovery merged (2026-07-03)
 
