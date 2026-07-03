@@ -61,6 +61,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.dac',
   'module.datecalc',
   'module.decompiler',
+  'module.desal',
   'module.devices',
   'module.diagram',
   'module.diceware',

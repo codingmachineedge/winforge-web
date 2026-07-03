@@ -2,6 +2,26 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  desal: {
+    "blurb": "由反應堆電力驅動嘅反滲透海水淡化廠。設定可用電站輸出同反滲透抽取功率，運行機組，睇住淡水注滿儲水缸。",
+    "start": "啟動廠房",
+    "stop": "停止",
+    "drainTank": "排空水缸",
+    "idle": "閒置 — 反滲透機組已關。",
+    "armed": "已準備 — 等待反應堆供電。",
+    "runningNow": "運行中 — 抽取 {{mw}} MW。",
+    "reactorTitle": "反應堆可用電力",
+    "availableLabel": "可用：{{mw}} MWe（電站總輸出 {{max}} MWe）",
+    "runTitle": "運行反滲透機組",
+    "drawLabel": "抽取功率：{{mw}} MW（上限 {{max}} MW）",
+    "readouts": "廠房讀數",
+    "drawn": "抽取功率",
+    "rate": "淡水產量",
+    "tank": "儲水缸",
+    "tankPct": "水缸 {{pct}}% 滿",
+    "specificEnergy": "比能耗 {{kwh}} kWh/m³",
+    "totalProduced": "累計產量 {{m3}} m³"
+  },
   audioeditor: {
     "blurb": "app 內音訊編輯器，由 ffmpeg 效果引擎驅動 — 偵測引擎、列出麥克風、瀏覽編輯器可套用嘅每個效果，逐個顯示佢實際嘅濾鏡鏈。",
     "engineReady": "ffmpeg 就緒",

@@ -1,5 +1,25 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  desal: {
+    "blurb": "A reverse-osmosis desalination plant powered by reactor electricity. Set the available station output and the RO draw, run the train, and watch fresh water fill the storage tank.",
+    "start": "Start plant",
+    "stop": "Stop",
+    "drainTank": "Drain tank",
+    "idle": "Idle — RO train off.",
+    "armed": "Armed — waiting for reactor power.",
+    "runningNow": "Running — drawing {{mw}} MW.",
+    "reactorTitle": "Reactor output available",
+    "availableLabel": "Available: {{mw}} MWe of {{max}} MWe station output",
+    "runTitle": "Run the RO train",
+    "drawLabel": "Power draw: {{mw}} MW (max {{max}} MW)",
+    "readouts": "Plant readouts",
+    "drawn": "Drawn power",
+    "rate": "Fresh water rate",
+    "tank": "Storage tank",
+    "tankPct": "Tank {{pct}}% full",
+    "specificEnergy": "Specific energy {{kwh}} kWh/m³",
+    "totalProduced": "Total produced {{m3}} m³"
+  },
   audioeditor: {
     "blurb": "In-app audio editor powered by the ffmpeg effects engine — detect the engine, list your microphones, and browse every effect the editor can apply, each with its exact filter chain.",
     "engineReady": "ffmpeg ready",

@@ -168,6 +168,7 @@ import { MediaPlayerModule } from './MediaPlayerModule';
 import { DiffMergeModule } from './DiffMergeModule';
 import { LibreOfficeModule } from './LibreOfficeModule';
 import { BlenderModule } from './BlenderModule';
+import { DesalModule } from './DesalModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -352,6 +353,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.diffmerge': DiffMergeModule,
   'module.libreoffice': LibreOfficeModule,
   'module.blender': BlenderModule,
+  'module.desal': DesalModule,
   ...moduleRegistryB,
 };
 
