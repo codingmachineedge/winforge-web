@@ -11,29 +11,32 @@ the ~312 modules.
 - **~5,000+ individual features** (per-module average ≈ 16; range 5–48). Sample maxima:
   Audio Editor 48, Android ADB 45, Nuclear Reactor 45, Package Manager 42, Docker 42,
   Communications 42, SSH 38, Config & Backup 36, AWS CLI 36, Packer 35.
-- **Implemented in winforge-web: 166 / 311 modules working (53%)** as of 2026-07-03.
-  Everything else is Stub/Missing.
+- **Implemented in winforge-web: 226 / 311 modules working (73%)** as of 2026-07-03
+  (post-merge of batch-a, batch-b and reactor-fidelity branches). Everything else is Stub/Missing.
 
 Status legend per module: **working** (real interactive port, registered), **partial**
 (read-only live probe only), **stub** (catalog card / not started).
 
-## Current winforge-web module status — 166 working / 145 stub (53%)  [updated 2026-07-03]
+## Current winforge-web module status — 226 working / 85 stub (73%)  [updated 2026-07-03, post-merge]
 
 | Bucket | Working | Stub | Total |
 |---|---|---|---|
-| **All modules** | **166** | **145** | **311** |
-| Web-capable (`native:false`) | 151 | 23 | 174 |
-| Native (`native:true`, needs Rust backend) | 15 | 122 | 137 |
+| **All modules** | **226** | **85** | **311** |
+| Web-capable (`native:false`) | 165 | 9 | 174 |
+| Native (`native:true`, needs Rust backend) | 61 | 76 | 137 |
 
-- The **web-capable surface is essentially complete** — the ~23 remaining web stubs are almost
-  all reactor **industrial simulators** owned by a separate agent (branch `feature/reactor-sim`).
-- Remaining real work = the **122 native stubs** (disk/hardware/system tools) that run through
-  the Tauri Rust backend. A scripted native batch (`tools/port-pipeline/winforge-native-batch.js`)
-  is ready to re-run — see `HANDOFF.md`.
-- The 15 native "working" modules are read-only/action probes: Services, System Monitor,
-  Process Explorer, Environment Variables, Connections, Drives, Hosts, Package Manager (basic),
-  Nmap, Git, Startup Apps, Scheduled Tasks, Event Viewer, Devices, System Info. The other ~151
-  working modules are pure-client tools (JSON/text/color/encoding/crypto/network-lookup/etc.).
+- The **web-capable surface is complete** except 9 stubs, all reactor-family industrial
+  simulators owned by the reactor agent: reactor, reactorsettings, hpc, datacenter, collider,
+  reactorbank, desal, pumpedhydro, vertfarm.
+- Remaining real work = the **76 native stubs** (disk/hardware/media/window-management tools)
+  that run through the Tauri Rust backend. A scripted native batch
+  (`tools/port-pipeline/winforge-native-batch.js`) is ready to re-run — see `HANDOFF.md`.
+- The 61 native "working" modules = the original 15 read-only/action probes (Services, System
+  Monitor, Process Explorer, Environment Variables, Connections, Drives, Hosts, Package Manager,
+  Nmap, Git, Startup Apps, Scheduled Tasks, Event Viewer, Devices, System Info) + the Git
+  workbench + ~45 batch-b N–Z native launchers/tools (VS Code, VirtualBox, Wireshark, Ollama,
+  SSH, OneDrive, OCR, Screen Recorder, …). The ~165 working web modules are pure-client tools
+  (JSON/text/color/encoding/crypto/network-lookup/factory-sims/etc.).
 
 ### Recount (run anytime to refresh the headline)
 
