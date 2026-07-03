@@ -67,6 +67,12 @@ import { SshModule } from './SshModule';
 import { QbittorrentModule } from './QbittorrentModule';
 import { PackerModule } from './PackerModule';
 import { TestdiskModule } from './TestdiskModule';
+import { NewPlusModule } from './NewPlusModule';
+import { OneDriveModule } from './OneDriveModule';
+import { ProxmoxModule } from './ProxmoxModule';
+import { QuickAccentModule } from './QuickAccentModule';
+import { RenameModule } from './RenameModule';
+import { RichPreviewModule } from './RichPreviewModule';
 
 /**
  * feature/modules-batch-b module registrations (N–Z web-capable tools + native OS/network
@@ -144,4 +150,10 @@ export const moduleRegistryB: Record<string, ComponentType> = {
   'module.qbittorrent': QbittorrentModule,
   'module.packer': PackerModule,
   'module.testdisk': TestdiskModule,
+  'module.newplus': NewPlusModule,
+  'module.onedrive': OneDriveModule,
+  'module.proxmox': ProxmoxModule,
+  'module.quickaccent': QuickAccentModule,
+  'module.rename': RenameModule,
+  'module.richpreview': RichPreviewModule,
 };
