@@ -1,5 +1,28 @@
 // English UI strings. Module titles themselves live in the catalog (per-module en/zh).
 export const en = {
+  mouse: {
+    "blurb": "Native mouse settings that apply instantly and persist — no Settings app needed.",
+    "refresh": "Refresh",
+    "live": "Live",
+    "preview": "Preview",
+    "previewNote": "Pointer settings apply through the built-in background service on the installed app.",
+    "on": "On",
+    "off": "Off",
+    "swap": "Swap primary & secondary buttons",
+    "swapDesc": "Make the right button the primary click (for left-handers).",
+    "speed": "Pointer speed",
+    "speedDesc": "How fast the cursor moves (1–20, default 10).",
+    "accel": "Enhance pointer precision (acceleration)",
+    "accelDesc": "Off gives 1:1 movement — gamers usually want this OFF.",
+    "doubleClick": "Double-click speed",
+    "doubleClickDesc": "Max time between clicks to count as a double-click.",
+    "wheelLines": "Wheel scroll lines",
+    "wheelLinesDesc": "Lines scrolled per wheel notch.",
+    "vanish": "Hide pointer while typing",
+    "vanishDesc": "The cursor vanishes while you type.",
+    "snap": "Snap to the default button in dialogs",
+    "snapDesc": "Auto-move the pointer onto the default button when a dialog opens."
+  },
   dashboard: {
     "heroSub": "An all-in-one, fully bilingual control center that genuinely tunes Windows 11.",
     "stats": "{{total}} modules · {{working}} working · {{sections}} sections",

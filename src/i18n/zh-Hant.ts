@@ -2,6 +2,29 @@ import type { Resources } from './en';
 
 // 繁體中文 UI strings. Mirrors the shape of en.ts exactly.
 export const zhHant: Resources = {
+  mouse: {
+    "blurb": "原生滑鼠設定，即時生效又會記住 — 唔使開設定 app。",
+    "refresh": "重新整理",
+    "live": "運行中",
+    "preview": "預覽",
+    "previewNote": "喺已安裝嘅 app 上，指標設定會經內置背景服務生效。",
+    "on": "開",
+    "off": "熄",
+    "swap": "交換左右鍵",
+    "swapDesc": "將右鍵變做主要點擊（左撇子啱用）。",
+    "speed": "指標速度",
+    "speedDesc": "游標移動有幾快（1–20，預設 10）。",
+    "accel": "增強指標精確度（加速）",
+    "accelDesc": "熄咗就 1:1 移動 — 打機通常想熄。",
+    "doubleClick": "雙擊速度",
+    "doubleClickDesc": "兩下點擊之間最長幾耐先算雙擊。",
+    "wheelLines": "滾輪捲動行數",
+    "wheelLinesDesc": "滾輪每格捲幾多行。",
+    "vanish": "打字時隱藏指標",
+    "vanishDesc": "打字時游標會消失。",
+    "snap": "對話框自動跳去預設按鈕",
+    "snapDesc": "開對話框時自動將指標移去預設按鈕。"
+  },
   dashboard: {
     "heroSub": "全方位、全雙語嘅控制中心，真係會幫你調校 Windows 11。",
     "stats": "{{total}} 個模組 · {{working}} 個運作中 · {{sections}} 個分區",

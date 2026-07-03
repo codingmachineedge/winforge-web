@@ -128,6 +128,7 @@ import { EverythingSearchModule } from './EverythingSearchModule';
 import { FileLocksmithModule } from './FileLocksmithModule';
 import { HexEditorModule } from './HexEditorModule';
 import { DiskBenchmarkModule } from './DiskBenchmarkModule';
+import { MouseModule } from './MouseModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
 
@@ -272,6 +273,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.filelocksmith': FileLocksmithModule,
   'module.hexeditor': HexEditorModule,
   'module.diskbench': DiskBenchmarkModule,
+  'module.mouse': MouseModule,
   ...moduleRegistryB,
 };
 

@@ -128,6 +128,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.mimetypes',
   'module.monitor',
   'module.morse',
+  'module.mouse',
   'module.namegen',
   'module.native',
   'module.newplus',
