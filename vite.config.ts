@@ -66,6 +66,9 @@ export default defineConfig({
     port: 5199,
     strictPort: true,
     host: '127.0.0.1',
+    watch: {
+      ignored: ['**/src-tauri/target/**', '**/node_modules/**', '**/dist/**'],
+    },
   },
   build: {
     outDir: 'dist',
