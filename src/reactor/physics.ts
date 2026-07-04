@@ -51,11 +51,12 @@ export enum ReactorTechSpecMode {
   Refueling = 6, // MODE 6 · 換料 — vessel head de-tensioned (operator latch), cold & subcritical
 }
 
-/** CVCS makeup blender mode — how the operator drives soluble boron. */
+/** CVCS makeup blender mode — how the operator drives soluble boron (source enum, L179). */
 export enum CvcsBlenderMode {
-  Automatic = 'Automatic', // hold at the target ppm
-  Borate = 'Borate', // add boron (raise ppm) — shut the reactor down / lower power
-  Dilute = 'Dilute', // add primary water (lower ppm) — approach criticality / raise power
+  Automatic = 'Automatic', // blend matches the operator's target ppm
+  Borate = 'Borate', // full boric-acid tank concentration (7000 ppm) — raise ppm
+  Dilute = 'Dilute', // pure reactor makeup water (0 ppm) — lower ppm
+  AlternateDilute = 'AlternateDilute', // RMW in, equal letdown diverted to the holdup tank
 }
 
 // ----------------------------------------------------------------- constants ----
@@ -156,10 +157,12 @@ const TsColdTavgC = 93.3; // 200 °F — MODE 4 ↔ 5 Tavg breakpoint
 const TsPowerRtpHi = 0.055; // → MODE 1 (5.5 % RTP), sticky power deadband
 const TsPowerRtpLo = 0.045; // → MODE 2 (4.5 % RTP)
 
-// ---- CVCS soluble-boron makeup ----
-export const BorateRatePpmPerS = 6.0; // ppm/s while borating (add boric acid) — blender wiring pending
-export const DiluteRatePpmPerS = 4.0; // ppm/s while diluting (add primary water) — blender wiring pending
-const RcsMixVolumeGal = 90000.0; // gal effective RCS mixing volume (time-to-criticality kernel)
+// ---- CVCS soluble-boron makeup (constants from ReactorSimService.cs) ----
+export const BoronRampPpmPerS = 4.0; // ppm/s max |ΔC| — the UpdateBoron slew clamp (source L4286)
+export const CvcsBoricAcidTankPpm = 7000.0; // boric-acid tank blend concentration (source L1271)
+const RcsMixVolumeGal = 80000.0; // gal effective RCS mixing volume (source L433)
+const DilutionFlowDefaultGpm = 150.0; // uncontrolled-dilution makeup flow (source L432)
+const MakeupFlowNominalGpm = 75.0; // controlled blender makeup flow (time-to-crit estimate)
 const DilutionActionWindowSec = 900.0; // 15-min operator-action criterion for an uncontrolled dilution
 
 // ANS-5.1 decay-heat groups (fraction-of-rated a_i, decay λ_i in 1/s). Σa ≈ 6.6% fission products.
@@ -186,6 +189,10 @@ const SatA = 10.2958;
 const SatB = 4668.6;
 
 // Reactor-coolant-pump flow dynamics.
+const RcpPumpHeatMW = 6.0; // MW mechanical heat per running RCP (real 4-loop figure ~5-6 MW/pump; the
+// C# source only carries it as the 0.20% RTP net-calorimetric bias, but the physical pump heat is
+// what lets a cold plant heat to hot standby with the reactor shut down)
+const AmbientLossMW = 0.4; // MW standing loop-to-containment loss once the plant is warm
 const RcpSpinUpTau = 1.5; // s per-pump first-order spin-up lag
 const RcpCoastHalf = 8.0; // s flow-halving time of a tripped pump's coastdown
 const RcpLoopShare = 0.25; // rated flow fraction carried by one of the 4 loops
@@ -300,6 +307,8 @@ export interface ReactorState {
   refuelingLatch: boolean;
   // ---- CVCS / boron approach ----
   blenderMode: CvcsBlenderMode;
+  makeupBlendPpm: number; // concentration the blender is currently injecting
+  dilutionActive: boolean; // uncontrolled-dilution scenario in progress
   timeToCriticalitySeconds: number;
   dilutionActionMarginSeconds: number;
   differentialBoronWorthPcmPerPpm: number;
@@ -308,6 +317,8 @@ export interface ReactorState {
   betaEffectivePcm: number;
   // ---- fuel gate ----
   fuelAvailable: boolean;
+  fuelGateNoteEn: string;
+  fuelGateNoteZh: string;
   // ---- alarms ----
   alarms: string[];
   alarmsZh: string[];
@@ -419,6 +430,8 @@ export class ReactorSim {
   // ---- CVCS makeup blender ----
   blenderMode = CvcsBlenderMode.Automatic;
   private _dilutionActive = false;
+  private _dilutionFlowGpm = DilutionFlowDefaultGpm;
+  private _dilutionCpsRef = SourceBaselineCps;
   subcoolingMarginC = 0;
 
   // ---- alarms ----
@@ -427,6 +440,8 @@ export class ReactorSim {
 
   // ---- fuel gate (set by the fuel factory via the sim loop) ----
   fuelAvailable = true;
+  fuelGateNoteEn = '';
+  fuelGateNoteZh = '';
 
   constructor() {
     for (let i = 0; i < 6; i++)
@@ -489,6 +504,11 @@ export class ReactorSim {
   // ----------------------------------------------------------------- controls ----
   setRodBank(bank: number, percentInserted: number): void {
     if (bank < 0 || bank >= this.rodBankInsertion.length) return;
+    // Fuel gate: rod WITHDRAWAL is blocked with no valid fuel in the core (insertion always works).
+    if (!this.fuelAvailable && percentInserted < this.rodBankInsertion[bank]!) {
+      this.setFuelGateNote();
+      return;
+    }
     this.rodBankInsertion[bank] = clamp(percentInserted, 0, 100);
   }
 
@@ -499,7 +519,17 @@ export class ReactorSim {
   setMode(m: ReactorMode): void {
     if (this.mode === ReactorMode.Meltdown) return;
     if (m === ReactorMode.Tripped || m === ReactorMode.Meltdown) return;
+    // Fuel gate: Startup/Run are blocked with no valid fuel in the core (source L6233).
+    if (!this.fuelAvailable && (m === ReactorMode.Startup || m === ReactorMode.Run)) {
+      this.setFuelGateNote();
+      return;
+    }
     this.mode = m;
+  }
+
+  private setFuelGateNote(): void {
+    this.fuelGateNoteEn = 'No fuel loaded — load a valid assembly before startup.';
+    this.fuelGateNoteZh = '未裝燃料 — 啟動前請先裝入有效燃料組件。';
   }
 
   startRcp(i: number): void {
@@ -507,6 +537,27 @@ export class ReactorSim {
   }
   stopRcp(i: number): void {
     if (i >= 0 && i < 4) this._rcpRunning[i] = false;
+  }
+
+  /** 硼混合器 · Line up the CVCS makeup blender (Automatic / Borate / Dilute / AlternateDilute). */
+  setBlenderMode(m: CvcsBlenderMode): void {
+    this.blenderMode = m;
+  }
+
+  /** 未受控稀釋 · Start the uncontrolled boron-dilution scenario (RMW in at flowGpm, no lineup). */
+  startUncontrolledDilution(flowGpm: number = DilutionFlowDefaultGpm): void {
+    this._dilutionActive = true;
+    this._dilutionFlowGpm = Math.max(1, flowGpm);
+    this._dilutionCpsRef = Math.max(1, this.sourceRangeCps); // count-rate baseline for the doubling alarm
+  }
+
+  /** Operator terminates the dilution (isolates RMW) — the credited action inside the 15-min window. */
+  terminateDilution(): void {
+    this._dilutionActive = false;
+  }
+
+  get dilutionActive(): boolean {
+    return this._dilutionActive;
   }
   private _rcpRunning = [false, false, false, false];
   get rcpRunning(): boolean[] {
@@ -606,6 +657,12 @@ export class ReactorSim {
     this.onNaturalCirc = false;
     this.boronPpm = NominalBoron;
     this.targetBoronPpm = NominalBoron;
+    this.blenderMode = CvcsBlenderMode.Automatic;
+    this._dilutionActive = false;
+    this._dilutionFlowGpm = DilutionFlowDefaultGpm;
+    this._dilutionCpsRef = SourceBaselineCps;
+    this.fuelGateNoteEn = '';
+    this.fuelGateNoteZh = '';
     for (let i = 0; i < this.rodBankInsertion.length; i++) this.rodBankInsertion[i] = 100.0;
     this._rodReleaseTimer = 0;
     this.rodDropElapsedS = 0;
@@ -745,6 +802,12 @@ export class ReactorSim {
     this.updateReactimeter(dt);
     this.updateTechSpecMode();
     this.updateAlarms();
+
+    // fuel-gate note clears itself once valid fuel is back in the core
+    if (this.fuelAvailable && this.fuelGateNoteEn) {
+      this.fuelGateNoteEn = '';
+      this.fuelGateNoteZh = '';
+    }
   }
 
   private updateDecayHeat(dt: number): void {
@@ -769,10 +832,22 @@ export class ReactorSim {
   }
 
   private updateBoron(dt: number): void {
-    // Charging/dilution moves boron toward target at a limited rate (ppm/s).
-    const rate = 4.0;
-    const diff = this.targetBoronPpm - this.boronPpm;
-    const step = clamp(diff, -rate * dt, rate * dt);
+    // Uncontrolled dilution scenario: exponential blend-out through the RCS mixing volume
+    // C(t) = C0·exp(−(Q/V)·t) — the scenario is the sole boron writer while active (source L3396, L4283).
+    if (this._dilutionActive) {
+      const kPerSec = this._dilutionFlowGpm / RcsMixVolumeGal / 60.0;
+      this.boronPpm = Math.max(0, this.boronPpm * Math.exp(-kPerSec * dt));
+      return;
+    }
+    // Blender lineup picks the concentration the charging flow drives toward: Borate → 7000 ppm
+    // tank, Dilute/AlternateDilute → 0 ppm RMW, Automatic → the operator's target (source L4355).
+    const target =
+      this.blenderMode === CvcsBlenderMode.Borate
+        ? CvcsBoricAcidTankPpm
+        : this.blenderMode === CvcsBlenderMode.Dilute || this.blenderMode === CvcsBlenderMode.AlternateDilute
+          ? 0.0
+          : this.targetBoronPpm;
+    const step = clamp(target - this.boronPpm, -BoronRampPpmPerS * dt, BoronRampPpmPerS * dt);
     this.boronPpm = clamp(this.boronPpm + step, 0, 3000);
   }
 
@@ -915,8 +990,13 @@ export class ReactorSim {
     // Coolant: receives fuelToCoolant, rejects heat to SG proportional to flow & secondary delta.
     let sgRemoval = (8.0 + 90.0 * this.coolantFlowFraction) * Math.max(0, this.tavg - this.secondarySatTemp()) * 0.01;
     sgRemoval *= 0.3 + 0.7 * this.feedwaterFlow; // feedwater enables heat sink
+    // RCP mechanical heat (~0.6 MW per running pump) minus a small standing loss — this is the
+    // real heatup path: a cold plant reaches hot standby on pump heat alone, no fission needed.
+    let pumpHeatMW = 0.0;
+    for (const r of this._rcpRunning) if (r) pumpHeatMW += RcpPumpHeatMW;
+    const ambientLossMW = this.tavg > ColdTemp + 0.5 ? AmbientLossMW : 0.0;
     const coolantHeatCap = 60.0; // MW·s per °C
-    const netCoolant = fuelToCoolant - sgRemoval;
+    const netCoolant = fuelToCoolant + pumpHeatMW - ambientLossMW - sgRemoval;
     const avg = this.tavg + (netCoolant / coolantHeatCap) * h;
 
     // Flow sets the Thot-Tcold spread for a given power: deltaT ~ power / flow.
@@ -1089,11 +1169,16 @@ export class ReactorSim {
 
   /** 距臨界時間 · Closed-form seconds to criticality under the active dilution (∞ if not approaching). */
   get timeToCriticalitySeconds(): number {
-    if (!this._dilutionActive) return Number.POSITIVE_INFINITY;
+    // Monitors both the uncontrolled scenario and a controlled Dilute lineup still in progress.
+    const diluting =
+      this._dilutionActive ||
+      ((this.blenderMode === CvcsBlenderMode.Dilute || this.blenderMode === CvcsBlenderMode.AlternateDilute) &&
+        this.boronPpm > 0.5);
+    if (!diluting) return Number.POSITIVE_INFINITY;
     const rhoNow = this.reactivityPcm / 1e5;
     if (rhoNow >= 0) return 0;
     // Effective dilution rate constant from the boron makeup flow through the RCS mixing volume.
-    const flowGpm = 75.0; // nominal dilution/makeup flow
+    const flowGpm = this._dilutionActive ? this._dilutionFlowGpm : MakeupFlowNominalGpm;
     const k = flowGpm / RcsMixVolumeGal / 60.0; // 1/s
     const arg = 1.0 + rhoNow / -BoronRhoTotal(this.boronPpm);
     if (arg <= 0) return Number.POSITIVE_INFINITY;
@@ -1122,6 +1207,15 @@ export class ReactorSim {
     if (this._power > 0.1 && this.coolantFlowFraction < LowFlowTrip) add('Reactor Coolant Flow Low', '反應堆冷卻劑流量低');
     if (this.pressurizerLevel < 17) add('Pressurizer Level Low', '穩壓器水位低');
     if (this.pressurizerLevel > 92) add('Pressurizer Level High', '穩壓器水位高');
+    // Uncontrolled-dilution detection: SR count rate doubling while shut down (source L5765).
+    if (
+      this._dilutionActive &&
+      this.sourceRangeEnergized &&
+      !this.isScrammed &&
+      this._power < 1.0 &&
+      this.sourceRangeCps > 2.0 * this._dilutionCpsRef
+    )
+      add('Boron Dilution — Count Rate Doubling', '硼稀釋 — 計數率倍增');
     if (this._dilutionActive && this.dilutionActionMarginSeconds < 0) add('Boron Dilution — Action Window', '硼稀釋 — 操作時窗');
     if (!this.fuelAvailable) add('No Fuel In Core', '堆芯無燃料');
     if (this.fuelTemp > FuelDamageTemp) add('Fuel Temperature High', '燃料溫度高');
@@ -1274,12 +1368,21 @@ export class ReactorSim {
       tsModeStatusZh: this.tsModeStatusZh,
       refuelingLatch: this.refuelingLatch,
       blenderMode: this.blenderMode,
+      makeupBlendPpm:
+        this.blenderMode === CvcsBlenderMode.Borate
+          ? CvcsBoricAcidTankPpm
+          : this.blenderMode === CvcsBlenderMode.Automatic
+            ? this.boronPpm
+            : 0,
+      dilutionActive: this._dilutionActive,
       timeToCriticalitySeconds: this.timeToCriticalitySeconds,
       dilutionActionMarginSeconds: this.dilutionActionMarginSeconds,
       differentialBoronWorthPcmPerPpm: this.differentialBoronWorthPcmPerPpm,
       subcoolingMarginC: this.subcoolingMarginC,
       betaEffectivePcm: this.betaEffectivePcm,
       fuelAvailable: this.fuelAvailable,
+      fuelGateNoteEn: this.fuelGateNoteEn,
+      fuelGateNoteZh: this.fuelGateNoteZh,
       alarms: [...this.activeAlarmsEn],
       alarmsZh: [...this.activeAlarmsZh],
     };
