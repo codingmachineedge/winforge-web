@@ -1,20 +1,22 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { runCommand } from '../tauri/bridge';
+import { isTauri, runCommand, runPowershell } from '../tauri/bridge';
 import { AsyncState, Column, DataTable, ModuleToolbar, StatusDot, useAsync } from './common';
+import { ModuleTabs } from './ModuleTabs';
 
-// ── Native Cloudflare & Tunnel module ───────────────────────────────────────
+// ── Native Cloudflare module ─────────────────────────────────────────────────
 //
 // Ported from WinForge's CloudflareModule / CloudflareService / CloudflareOperations
-// (a thin wrapper over the cloudflared and warp-cli CLIs). In winforge-web the live
-// path is those same two CLIs, driven through the Tauri run_command bridge. We probe
-// both engines, render live status tables (tunnel list, WARP status, routed IPs),
-// and expose the full operation catalog as run-and-capture buttons.
+// (a thin wrapper over the cloudflared and warp-cli CLIs). This upgrade keeps that
+// full CLI surface intact (tab 1) and ADDS a live Cloudflare REST API client (tab 2)
+// covering token auth, the account/zone pickers, DNS-record CRUD, cache purge and a
+// read-only zone settings summary — the API features the desktop equivalent exposes.
 //
-// Placeholders from the C# catalog (MYTUNNEL, app.example.com, http://localhost:8080)
-// are lifted into editable inputs so the emitted commands target the user's own
-// values. Read-only by default: every destructive/admin verb is gated behind an
-// explicit confirm and never auto-runs.
+// Every API call is routed through the backend (PowerShell Invoke-RestMethod) so the
+// browser's cross-origin rules never block it. The API token lives only in component
+// state, is entered masked, is never persisted and is never written to any log/output.
+// Reads auto-run on demand; every mutation (create/edit/delete/purge) needs an explicit
+// click and destructive ones get a confirm.
 
 interface CmdOut {
   stdout: string;
@@ -62,7 +64,6 @@ async function fetchTunnels(): Promise<Tunnel[]> {
   if (!ok && !text) {
     const err = stderr.trim();
     if (err && looksMissing(err)) throw new Error(err);
-    // Not logged in / no cert is a normal state, not a hard error — surface as empty.
     if (err) throw new Error(err);
     return [];
   }
@@ -172,7 +173,10 @@ function fillArgs(args: string[], tunnel: string, hostname: string, localUrl: st
   return args.map((a) => a.split(TUN).join(tun).split(HOST).join(host).split(URL).join(url));
 }
 
-export function CloudflareModule() {
+// ══════════════════════════════════════════════════════════════════════════
+// Tab 1 — cloudflared / WARP CLI surface (the WinForge desktop module)
+// ══════════════════════════════════════════════════════════════════════════
+function CliTab() {
   const { t } = useTranslation();
   const [tunnel, setTunnel] = useState('MYTUNNEL');
   const [hostname, setHostname] = useState('app.example.com');
@@ -220,7 +224,6 @@ export function CloudflareModule() {
         body: body.length > 8000 ? body.slice(-8000) : body,
         err: !ok,
       });
-      // Live-state actions refresh their table.
       if (op.id === 'tunnelCreate' || op.id === 'tunnelDelete' || op.id === 'tunnelCleanup') tunnels.reload();
       if (op.group === 'warp') warp.reload();
     } catch (e) {
@@ -271,9 +274,7 @@ export function CloudflareModule() {
   ];
 
   return (
-    <div className="mod">
-      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.blurb')}</p>
-
+    <div className="mod" style={{ paddingTop: 4 }}>
       <ModuleToolbar>
         <button className="mini" onClick={reloadAll}>
           ⟳ {t('modules.refresh')}
@@ -285,9 +286,7 @@ export function CloudflareModule() {
         {engine.data?.cf && <span className="count-note">{engine.data.cf}</span>}
       </ModuleToolbar>
 
-      {!engine.loading && !engine.data?.cf && (
-        <p className="mod-msg">{t('cloudflare.installHint')}</p>
-      )}
+      {!engine.loading && !engine.data?.cf && <p className="mod-msg">{t('cloudflare.installHint')}</p>}
 
       {/* Placeholder editors — feed every command that uses them. */}
       <div className="mod-form" style={{ marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
@@ -383,6 +382,552 @@ export function CloudflareModule() {
           <pre className={output.err ? 'cmd-out error' : 'cmd-out'}>{output.body}</pre>
         </div>
       )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Tab 2 — Cloudflare REST API client (token, account/zone pickers, DNS, purge)
+// ══════════════════════════════════════════════════════════════════════════
+
+const CF_API = 'https://api.cloudflare.com/client/v4';
+
+interface CfError {
+  code: number;
+  message: string;
+}
+interface CfEnvelope<T> {
+  success: boolean;
+  errors: CfError[];
+  messages: unknown[];
+  result: T;
+  result_info?: { total_count?: number };
+}
+
+// PowerShell single-quote escape.
+function psq(s: string): string {
+  return s.replace(/'/g, "''");
+}
+
+/**
+ * Call the Cloudflare API through the backend so the browser's CORS rules never
+ * apply. Uses Invoke-RestMethod with a Bearer header; the token is embedded in a
+ * single-quoted PS string (escaped) and is never echoed back. Returns the parsed
+ * CfEnvelope. Off Tauri there is no backend — the caller handles that separately.
+ */
+async function apiFetch<T>(
+  token: string,
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+  path: string,
+  body?: unknown,
+): Promise<CfEnvelope<T>> {
+  const uri = `${CF_API}${path}`;
+  const parts = [
+    "$ErrorActionPreference='Stop'",
+    '[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12',
+    `$h=@{ Authorization = 'Bearer ${psq(token)}'; 'Content-Type' = 'application/json' }`,
+  ];
+  let bodyArg = '';
+  if (body !== undefined) {
+    const json = JSON.stringify(body);
+    parts.push(`$b='${psq(json)}'`);
+    bodyArg = ' -Body $b';
+  }
+  // -SkipHttpErrorCheck isn't on PS 5.1, so trap non-2xx and read the response body,
+  // which Cloudflare fills with a proper {success:false,errors:[…]} envelope.
+  parts.push(
+    'try {' +
+      `$r = Invoke-RestMethod -Uri '${psq(uri)}' -Method ${method} -Headers $h${bodyArg} -TimeoutSec 30;` +
+      '$r | ConvertTo-Json -Depth 12 -Compress' +
+      '} catch {' +
+      '$resp = $_.Exception.Response;' +
+      'if ($resp) { $sr = New-Object IO.StreamReader($resp.GetResponseStream()); $txt = $sr.ReadToEnd(); if ($txt) { $txt } else { throw } }' +
+      'else { throw }' +
+      '}',
+  );
+  const script = parts.join('\n');
+  const res = await runPowershell(script);
+  const text = res.stdout.trim();
+  if (!text) {
+    if (!res.success) throw new Error(res.stderr.trim() || `exit ${res.code}`);
+    throw new Error('empty response');
+  }
+  let parsed: CfEnvelope<T>;
+  try {
+    parsed = JSON.parse(text) as CfEnvelope<T>;
+  } catch {
+    throw new Error(text.slice(0, 400));
+  }
+  return parsed;
+}
+
+/** Flatten a Cloudflare errors array into one readable line. */
+function cfErrText(env: CfEnvelope<unknown>): string {
+  const errs = Array.isArray(env.errors) ? env.errors : [];
+  if (errs.length === 0) return 'request failed';
+  return errs.map((e) => `${e.code}: ${e.message}`).join('; ');
+}
+
+interface CfAccount {
+  id: string;
+  name: string;
+}
+interface CfZone {
+  id: string;
+  name: string;
+  status: string;
+  plan?: { name?: string };
+}
+interface CfDns {
+  id: string;
+  type: string;
+  name: string;
+  content: string;
+  ttl: number;
+  proxied: boolean;
+}
+
+const DNS_TYPES = ['A', 'AAAA', 'CNAME', 'TXT', 'MX', 'NS', 'SRV', 'CAA'];
+
+interface DnsDraft {
+  type: string;
+  name: string;
+  content: string;
+  ttl: string;
+  proxied: boolean;
+}
+
+function emptyDraft(): DnsDraft {
+  return { type: 'A', name: '', content: '', ttl: '1', proxied: false };
+}
+
+function ApiTab() {
+  const { t } = useTranslation();
+  const tauri = isTauri();
+
+  const [token, setToken] = useState('');
+  const [tokenActive, setTokenActive] = useState(false); // set once a call succeeds
+  const [accounts, setAccounts] = useState<CfAccount[]>([]);
+  const [accountId, setAccountId] = useState('');
+  const [zones, setZones] = useState<CfZone[]>([]);
+  const [zoneId, setZoneId] = useState('');
+  const [records, setRecords] = useState<CfDns[]>([]);
+  const [settings, setSettings] = useState<{ ssl: string; dev: string; https: string } | null>(null);
+
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<{ text: string; err: boolean } | null>(null);
+
+  // DNS create / edit draft.
+  const [draft, setDraft] = useState<DnsDraft>(emptyDraft());
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const selectedZone = useMemo(() => zones.find((z) => z.id === zoneId) ?? null, [zones, zoneId]);
+
+  const flash = (text: string, err: boolean) => setMsg({ text, err });
+
+  const guardTauri = (): boolean => {
+    if (!tauri) {
+      flash(t('cloudflare.api.previewNotice'), true);
+      return false;
+    }
+    if (!token.trim()) {
+      flash(t('cloudflare.api.needToken'), true);
+      return false;
+    }
+    return true;
+  };
+
+  // Verify the token, then load accounts. This is the entry point for the whole tab.
+  const connect = async () => {
+    if (!guardTauri()) return;
+    setBusy('connect');
+    setMsg(null);
+    try {
+      const verify = await apiFetch<{ status: string }>(token, 'GET', '/user/tokens/verify');
+      if (!verify.success) {
+        setTokenActive(false);
+        flash(cfErrText(verify), true);
+        return;
+      }
+      const accEnv = await apiFetch<CfAccount[]>(token, 'GET', '/accounts?per_page=50');
+      if (!accEnv.success) {
+        flash(cfErrText(accEnv), true);
+        return;
+      }
+      const accs = Array.isArray(accEnv.result) ? accEnv.result : [];
+      setAccounts(accs);
+      setTokenActive(true);
+      const firstAcc = accs[0]?.id ?? '';
+      setAccountId(firstAcc);
+      flash(t('cloudflare.api.verified', { status: verify.result?.status ?? 'active' }), false);
+      await loadZones(firstAcc);
+    } catch (e) {
+      setTokenActive(false);
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const loadZones = async (acc: string) => {
+    setBusy('zones');
+    try {
+      const q = acc ? `?account.id=${encodeURIComponent(acc)}&per_page=50` : '?per_page=50';
+      const env = await apiFetch<CfZone[]>(token, 'GET', `/zones${q}`);
+      if (!env.success) {
+        flash(cfErrText(env), true);
+        return;
+      }
+      const zs = Array.isArray(env.result) ? env.result : [];
+      setZones(zs);
+      const firstZone = zs[0]?.id ?? '';
+      setZoneId(firstZone);
+      setRecords([]);
+      setSettings(null);
+      if (firstZone) await loadZoneData(firstZone);
+    } catch (e) {
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // DNS records + a compact settings summary for a zone.
+  const loadZoneData = async (zone: string) => {
+    setBusy('records');
+    try {
+      const dnsEnv = await apiFetch<CfDns[]>(token, 'GET', `/zones/${zone}/dns_records?per_page=100`);
+      if (dnsEnv.success) {
+        setRecords(Array.isArray(dnsEnv.result) ? dnsEnv.result : []);
+      } else {
+        flash(cfErrText(dnsEnv), true);
+      }
+      // Read-only settings the desktop surface shows: SSL mode, Dev mode, Always-HTTPS.
+      const read = async (key: string): Promise<string> => {
+        try {
+          const s = await apiFetch<{ value: unknown }>(token, 'GET', `/zones/${zone}/settings/${key}`);
+          return s.success ? String(s.result?.value ?? '—') : '—';
+        } catch {
+          return '—';
+        }
+      };
+      const [ssl, dev, https] = await Promise.all([read('ssl'), read('development_mode'), read('always_use_https')]);
+      setSettings({ ssl, dev, https });
+    } catch (e) {
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const onAccountChange = async (acc: string) => {
+    setAccountId(acc);
+    if (tauri && token.trim()) await loadZones(acc);
+  };
+
+  const onZoneChange = async (zone: string) => {
+    setZoneId(zone);
+    setRecords([]);
+    setSettings(null);
+    if (tauri && token.trim() && zone) await loadZoneData(zone);
+  };
+
+  // ── DNS mutations (all gated behind an explicit click; delete also confirms) ──
+  const submitDraft = async () => {
+    if (!guardTauri() || !zoneId) return;
+    const name = draft.name.trim();
+    const content = draft.content.trim();
+    if (!name || !content) {
+      flash(t('cloudflare.api.needNameContent'), true);
+      return;
+    }
+    const ttlNum = Number.parseInt(draft.ttl, 10);
+    const payload = {
+      type: draft.type,
+      name,
+      content,
+      ttl: Number.isFinite(ttlNum) && ttlNum > 0 ? ttlNum : 1,
+      proxied: draft.proxied,
+    };
+    setBusy('dns-save');
+    setMsg(null);
+    try {
+      const env = editId
+        ? await apiFetch<CfDns>(token, 'PUT', `/zones/${zoneId}/dns_records/${editId}`, payload)
+        : await apiFetch<CfDns>(token, 'POST', `/zones/${zoneId}/dns_records`, payload);
+      if (!env.success) {
+        flash(cfErrText(env), true);
+        return;
+      }
+      flash(editId ? t('cloudflare.api.dnsUpdated', { name }) : t('cloudflare.api.dnsCreated', { name }), false);
+      setDraft(emptyDraft());
+      setEditId(null);
+      await loadZoneData(zoneId);
+    } catch (e) {
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const startEdit = (r: CfDns) => {
+    setEditId(r.id);
+    setDraft({ type: r.type, name: r.name, content: r.content, ttl: String(r.ttl), proxied: r.proxied });
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setDraft(emptyDraft());
+  };
+
+  const deleteRecord = async (r: CfDns) => {
+    if (!guardTauri() || !zoneId) return;
+    if (!window.confirm(t('cloudflare.api.confirmDeleteDns', { name: r.name }))) return;
+    setBusy(`del-${r.id}`);
+    setMsg(null);
+    try {
+      const env = await apiFetch<{ id: string }>(token, 'DELETE', `/zones/${zoneId}/dns_records/${r.id}`);
+      if (!env.success) {
+        flash(cfErrText(env), true);
+        return;
+      }
+      flash(t('cloudflare.api.dnsDeleted', { name: r.name }), false);
+      await loadZoneData(zoneId);
+    } catch (e) {
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const purgeCache = async () => {
+    if (!guardTauri() || !zoneId) return;
+    const zn = selectedZone?.name ?? zoneId;
+    if (!window.confirm(t('cloudflare.api.confirmPurge', { name: zn }))) return;
+    setBusy('purge');
+    setMsg(null);
+    try {
+      const env = await apiFetch<{ id: string }>(token, 'POST', `/zones/${zoneId}/purge_cache`, {
+        purge_everything: true,
+      });
+      if (!env.success) {
+        flash(cfErrText(env), true);
+        return;
+      }
+      flash(t('cloudflare.api.purged', { name: zn }), false);
+    } catch (e) {
+      flash(String(e instanceof Error ? e.message : e), true);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const dnsCols: Column<CfDns>[] = [
+    { key: 'type', header: t('cloudflare.api.colType'), width: 70, render: (r) => <span style={{ fontWeight: 600 }}>{r.type}</span> },
+    { key: 'name', header: t('cloudflare.api.colName'), render: (r) => <span style={{ wordBreak: 'break-all' }}>{r.name}</span> },
+    { key: 'content', header: t('cloudflare.api.colContent'), render: (r) => <span style={{ wordBreak: 'break-all', fontSize: 12 }}>{r.content}</span> },
+    { key: 'ttl', header: t('cloudflare.api.colTtl'), width: 80, align: 'center', render: (r) => (r.ttl === 1 ? t('cloudflare.api.ttlAuto') : String(r.ttl)) },
+    {
+      key: 'proxied',
+      header: t('cloudflare.api.colProxied'),
+      width: 90,
+      align: 'center',
+      render: (r) => <StatusDot ok={r.proxied} label={r.proxied ? t('cloudflare.api.proxied') : t('cloudflare.api.dnsOnly')} />,
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: 150,
+      render: (r) => (
+        <span className="row-actions">
+          <button className="mini" disabled={!!busy} onClick={() => startEdit(r)}>
+            {t('cloudflare.api.edit')}
+          </button>
+          <button className="mini danger" disabled={busy === `del-${r.id}`} onClick={() => deleteRecord(r)}>
+            {t('cloudflare.api.delete')}
+          </button>
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div className="mod" style={{ paddingTop: 4 }}>
+      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.api.blurb')}</p>
+
+      {!tauri && <p className="mod-msg">{t('cloudflare.api.previewNotice')}</p>}
+
+      {/* Credentials — masked, never persisted. */}
+      <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.tokenLabel')}</label>
+        <input
+          className="mod-search"
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          style={{ minWidth: 280, flex: 1, fontFamily: 'Consolas, monospace' }}
+          placeholder={t('cloudflare.api.tokenPlaceholder')}
+          value={token}
+          onChange={(e) => {
+            setToken(e.target.value);
+            setTokenActive(false);
+          }}
+        />
+        <button className="mini primary" disabled={busy === 'connect'} onClick={connect}>
+          {busy === 'connect' ? t('cloudflare.api.verifying') : t('cloudflare.api.connect')}
+        </button>
+        <StatusDot ok={tokenActive} label={tokenActive ? t('cloudflare.api.connected') : t('cloudflare.api.notConnected')} />
+      </div>
+      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.api.tokenNote')}</p>
+
+      {/* Account + zone pickers */}
+      {tokenActive && (
+        <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.account')}</label>
+          <select className="mod-select" value={accountId} onChange={(e) => void onAccountChange(e.target.value)} disabled={!!busy}>
+            {accounts.length === 0 && <option value="">{t('cloudflare.api.noAccounts')}</option>}
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.zone')}</label>
+          <select className="mod-select" value={zoneId} onChange={(e) => void onZoneChange(e.target.value)} disabled={!!busy || zones.length === 0}>
+            {zones.length === 0 && <option value="">{t('cloudflare.api.noZones')}</option>}
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>{z.name}</option>
+            ))}
+          </select>
+          <button className="mini" disabled={!zoneId || !!busy} onClick={() => void loadZoneData(zoneId)}>
+            ⟳ {t('modules.refresh')}
+          </button>
+        </div>
+      )}
+
+      {msg && (
+        <p className="mod-msg" style={{ color: msg.err ? 'var(--danger)' : undefined }}>{msg.text}</p>
+      )}
+
+      {/* Zone settings summary (read-only) */}
+      {tokenActive && selectedZone && (
+        <div className="dt-wrap" style={{ marginTop: 8 }}>
+          <table className="dt">
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zoneStatus')}</td>
+                <td>
+                  <StatusDot ok={selectedZone.status === 'active'} label={selectedZone.status} />
+                </td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zonePlan')}</td>
+                <td>{selectedZone.plan?.name ?? '—'}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.sslMode')}</td>
+                <td>{settings?.ssl ?? '…'}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.devMode')}</td>
+                <td>{settings?.dev ?? '…'}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.alwaysHttps')}</td>
+                <td>{settings?.https ?? '…'}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zoneId')}</td>
+                <td style={{ fontSize: 12, wordBreak: 'break-all' }}>{selectedZone.id}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Cache purge (gated) */}
+      {tokenActive && zoneId && (
+        <div className="mod-form" style={{ gap: 8, marginTop: 8, alignItems: 'center' }}>
+          <strong>{t('cloudflare.api.cacheTitle')}</strong>
+          <button className="mini danger" disabled={busy === 'purge'} onClick={purgeCache}>
+            {busy === 'purge' ? t('cloudflare.api.purging') : t('cloudflare.api.purgeEverything')}
+          </button>
+          <span className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.purgeNote')}</span>
+        </div>
+      )}
+
+      {/* DNS create / edit form (gated) */}
+      {tokenActive && zoneId && (
+        <div style={{ marginTop: 12 }}>
+          <strong>{editId ? t('cloudflare.api.editRecord') : t('cloudflare.api.addRecord')}</strong>
+          <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 4, alignItems: 'center' }}>
+            <select className="mod-select" value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })}>
+              {DNS_TYPES.map((ty) => (
+                <option key={ty} value={ty}>{ty}</option>
+              ))}
+            </select>
+            <input
+              className="mod-search"
+              style={{ maxWidth: 200 }}
+              placeholder={t('cloudflare.api.namePlaceholder')}
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+            />
+            <input
+              className="mod-search"
+              style={{ maxWidth: 240 }}
+              placeholder={t('cloudflare.api.contentPlaceholder')}
+              value={draft.content}
+              onChange={(e) => setDraft({ ...draft, content: e.target.value })}
+            />
+            <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.ttl')}</label>
+            <input
+              className="mod-search"
+              style={{ maxWidth: 90 }}
+              value={draft.ttl}
+              onChange={(e) => setDraft({ ...draft, ttl: e.target.value })}
+            />
+            <label className="count-note" style={{ margin: 0, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+              <input type="checkbox" checked={draft.proxied} onChange={(e) => setDraft({ ...draft, proxied: e.target.checked })} />
+              {t('cloudflare.api.proxy')}
+            </label>
+            <button className="mini primary" disabled={busy === 'dns-save'} onClick={submitDraft}>
+              {busy === 'dns-save'
+                ? t('cloudflare.api.saving')
+                : editId
+                  ? t('cloudflare.api.saveEdit')
+                  : t('cloudflare.api.create')}
+            </button>
+            {editId && (
+              <button className="mini" disabled={busy === 'dns-save'} onClick={cancelEdit}>
+                {t('cloudflare.api.cancel')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* DNS records table */}
+      {tokenActive && zoneId && (
+        <div style={{ marginTop: 12 }}>
+          <div className="count-note" style={{ margin: '0 0 4px', fontWeight: 600 }}>
+            {t('cloudflare.api.recordsTitle', { total: records.length })}
+          </div>
+          {busy === 'records' ? (
+            <p className="count-note">{t('modules.loading')}</p>
+          ) : (
+            <DataTable columns={dnsCols} rows={records} rowKey={(r) => r.id} empty={t('cloudflare.api.noRecords')} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+export function CloudflareModule() {
+  const { t } = useTranslation();
+  return (
+    <div className="mod">
+      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.blurb')}</p>
+      <ModuleTabs
+        tabs={[
+          { id: 'cli', en: 'Tunnel & WARP', zh: 'Tunnel 與 WARP', render: () => <CliTab /> },
+          { id: 'api', en: 'Cloudflare API', zh: 'Cloudflare API', render: () => <ApiTab /> },
+        ]}
+      />
     </div>
   );
 }
