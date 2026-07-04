@@ -47,3 +47,9 @@ reactor
 cakefactory
 camoufox
 minecraftlauncher
+fancyzones
+imaging
+torrent
+pdftoolkit
+resume
+native
