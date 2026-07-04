@@ -6,6 +6,7 @@ import { Annunciator } from './reactor/Annunciator';
 import { NisPanel } from './reactor/NisPanel';
 import { PermissiveLamps } from './reactor/PermissiveLamps';
 import { ModeAnnunciator } from './reactor/ModeAnnunciator';
+import { FuelCvcsPanel } from './reactor/FuelCvcsPanel';
 import { useNumberFmt, type NumberFmt } from './reactor/format';
 import '../styles/reactor-panels.css';
 
@@ -184,6 +185,7 @@ export function ReactorView() {
             <span className={`badge tone-${crit.tone}`}>{crit.text}</span>
             <span className="badge mode-badge">{t(`reactor.mode${st.mode}`) ?? st.mode}</span>
             {st.rodsDropping && <span className="badge tone-warn">↓ {t('reactor.rodsDropping')}</span>}
+            {!st.fuelAvailable && <span className="badge tone-danger">{t('reactorfuel.noFuel')}</span>}
             {st.lastTripEn && st.isScrammed && (
               <span className="trip-note">{t('reactor.trips')}: {st.lastTripEn}</span>
             )}
@@ -277,6 +279,11 @@ export function ReactorView() {
         <PermissiveLamps p6={st.p6} p7={st.p7} p8={st.p8} p9={st.p9} p10={st.p10} />
 
         <ModeAnnunciator tsMode={st.tsMode} />
+      </div>
+
+      {/* ---- fuel factory + CVCS blender ---- */}
+      <div className="reactor-grid reactor-grid-fuel">
+        <FuelCvcsPanel sim={sim} fmt={nf} />
       </div>
 
       <div className="reactor-grid">

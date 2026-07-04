@@ -306,3 +306,26 @@
 .mode-name {
   font-size: 13px;
 }
+
+/* ---- fuel factory + CVCS panel ---- */
+.reactor-grid-fuel { grid-template-columns: 1fr; }
+.fuel-panel { display: flex; flex-direction: column; gap: 10px; }
+.fuel-status { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fuel-status-text { color: var(--text-secondary); font-size: 0.9em; }
+.fuel-gate-note { color: var(--danger, #e5484d); font-size: 0.9em; }
+.fuel-note { color: var(--text-secondary); font-size: 0.85em; }
+.fuel-fab { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+.fuel-fab-title { font-weight: 600; width: 100%; }
+.fuel-fab label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85em; color: var(--text-secondary); }
+.fuel-fab input { width: 120px; }
+.fuel-fab-actions { display: flex; gap: 8px; }
+.fuel-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.fuel-list-title { font-weight: 600; margin-bottom: 4px; }
+.fuel-empty { color: var(--text-secondary); font-size: 0.85em; }
+.fuel-row { display: grid; grid-template-columns: 5.5em 3.5em 4.5em 4em auto; gap: 6px; align-items: center; font-size: 0.85em; padding: 2px 0; }
+.fuel-id { font-family: var(--mono, monospace); overflow: hidden; text-overflow: ellipsis; }
+.fuel-discharge-all { margin-top: 6px; }
+.cvcs { display: flex; flex-direction: column; gap: 8px; }
+.cvcs-readouts { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 0.9em; }
+.cvcs-drill { display: flex; align-items: center; gap: 10px; }
+.cvcs-drill-btn { align-self: start; }

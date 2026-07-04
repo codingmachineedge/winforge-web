@@ -84,43 +84,31 @@ completed by a concurrent session in d08dd85.
 
 ## What remains (priority order)
 
-1. **Re-run the interrupted native batch of 6** — `diskhealth`, `battery`, `disk`,
-   `clipboard`, `duplicates`, `doctors`. It is idempotent:
-   launch `tools/port-pipeline/winforge-native-batch.js` as a Workflow, then point
-   `integrate.mjs`'s `OUT`/`RUNDIR` at the new run and `node tools/port-pipeline/integrate.mjs`.
-2. **5 batch-B native N–Z stubs** — `regedit` (source `Pages/RegistryEditor.xaml.cs` — no
-   `Module` suffix), `windows` (WindowManager), `workspaces`, `wslvm`, `ossapps` (no standalone
-   page — find its real source in MainWindow/registry first). Use the batch-B wave pipeline
-   (waves ≤ 6 dodge the transient rate limiter).
-3. **Remaining ~65 other native stubs** — archives, bulkops, hexeditor, media/audio suite,
-   window-management suite (fancyzones, komorebi, glazewm, altsnap), ADB/fastboot, Docker,
-   AWS, mail/comms, Minecraft suite, … (full list: run the Recount snippet).
-4. **Reactor fidelity continuation** (branch merged & deleted; start a fresh branch):
-   - Wire the CVCS blender borate/dilute rates (`BorateRatePpmPerS` / `DiluteRatePpmPerS`
-     are exported but unused) into boron/makeup dynamics.
-   - RCP pump-heat heatup path (reach hot standby on pump heat alone, enabling the
-     realistic heatup-before-criticality sequence).
-   - **Expose the new systems in the reactor UI** (NIS ranges, permissive lamps, MODE
-     annunciator, reactimeter panel, alarms, fuel factory screens), trilingual.
-   - Startup-sequence integration tests (cold shutdown → criticality is NOT instant and
-     follows the source's procedure) + an in-repo reactor feature-coverage checklist
-     vs `WinForge/Services/ReactorSimService.cs` (6.5k lines — MODEs, CSF trees, App-G/LTOP/
-     PTS, PORV/MSSV, RCP seal-LOCA, containment, AVR still unported).
-   - The 9 web-capable reactor-family sim stubs: reactor, reactorsettings, hpc, datacenter,
-     collider, reactorbank, desal, pumpedhydro, vertfarm.
-5. **Custom installer** (`installer/` scaffold exists): one-click flow with auto-UAC,
+_The original items 1–3 are DONE: the interrupted native batch of 6 landed in `3a84b2e`, the
+5 batch-B stubs in `d08dd85`, and the remaining native stubs via the 314/314 parity campaign._
+
+1. **Reactor fidelity continuation** — CVCS blender + uncontrolled-dilution scenario, RCP
+   pump-heat heatup, fuel-factory screens + fuel gate, and the cold-startup integration test
+   landed 2026-07-03 (branch `feature/reactor-cvcs`; see **`docs/reactor-parity.md`** for the
+   full ✅/🟡/❌ checklist vs `ReactorSimService.cs`). Next per that checklist: rod-bank overlap
+   program (228 steps / 128 overlap / 8–72 spm) + Tavg/Tref auto controller, App-G/LTOP/PORV
+   envelope, SI model + CSF trees, reactimeter panel, containment/PRT/MSSV/seal-LOCA scenarios.
+2. **Custom installer** (`installer/` scaffold exists): one-click flow with auto-UAC,
    per-dependency progress, "Auto-build dependencies from source" checked by default,
    trilingual, animations. Never finished; portable build also unverified on a clean machine.
-6. **C background helper** — pattern documented, still **not needed yet**; add a tiny bundled
+3. **C background helper** — pattern documented, still **not needed yet**; add a tiny bundled
    sidecar only when a module exceeds the Rust backend, auto-installed and invisible.
+4. **Deep feature parity inside ported modules** — the catalog is 314/314 "working", but many
+   native modules cover a slice of their WinForge feature set (see `docs/feature-coverage.md`
+   per-module counts). `FEATURES_BRAINSTORM.md` (1,202 ideas) is the expansion backlog.
 
 ### Known issues
 
-- **WebLogin i18n collision (cosmetic):** `weblogin.provider` (string) vs
-  `weblogin.provider.<id>` sub-keys — provider names render as raw keys. Fix by renaming the
-  per-provider keys (e.g. `weblogin.prov_github`) in the module + `batchB.ts`.
+- ~~WebLogin i18n collision~~ — **fixed 2026-07-03** (`1d4fa8d`): the EN weblogin block was
+  restored (it had been lost entirely in a wave-6 integrator crash, not just the provider
+  sub-keys) and per-provider labels renamed `weblogin.prov_<id>` in both languages.
 - `installer/` is scaffold-only; `tauri build` not re-run since the last Rust change window.
-- Catalog counts use 311 (early docs said 312/314).
+- Catalog counts use 311 in older docs; the parity census uses 314 (`node tools/gen-parity.mjs`).
 
 ## Architecture Rules (MUST follow — every module & subagent)
 

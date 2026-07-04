@@ -9,13 +9,14 @@ import { enShellTheme, yueShellTheme } from './shellTheme';
 import { enShellA11y, yueShellA11y } from './shellA11y';
 import { enShellSettings, yueShellSettings } from './shellSettings';
 import { enReactorUi, yueReactorUi } from './reactorUi';
+import { enReactorFuel, yueReactorFuel } from './reactorFuel';
 
 // batch-B modules (N–Z) keep their strings in a dedicated file to avoid collisions
 // with concurrent edits to en.ts / zh-Hant.ts. Merge them into the base bundles here.
 // Shell UI features (favorites/recents, toasts, theme, a11y) do the same, one file
 // per feature slice, each under its own shell* namespace.
-const enAll = { ...en, ...enB, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi };
-const yueAll = { ...zhHant, ...yueB, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi };
+const enAll = { ...en, ...enB, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi, ...enReactorFuel };
+const yueAll = { ...zhHant, ...yueB, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi, ...yueReactorFuel };
 
 // Three language modes:
 //   en        — English only
