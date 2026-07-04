@@ -8,6 +8,13 @@ const ROOT = 'C:/Users/cntow/Documents/GitHub/winforge-web';
 const CS = 'C:/Users/cntow/Documents/GitHub/WinForge';
 const skipArg = process.argv.indexOf('--skip');
 const SKIP = new Set(skipArg >= 0 ? process.argv[skipArg + 1].split(',') : []);
+// Also read the persisted done-list so we don't have to pass the full skip every wave.
+const donePath = `${import.meta.dirname}/parity-done.txt`;
+if (fs.existsSync(donePath))
+  for (const line of fs.readFileSync(donePath, 'utf8').split('\n')) {
+    const t = line.trim();
+    if (t && !t.startsWith('#')) SKIP.add(t);
+  }
 
 // tag -> C# page class, from MainWindow.xaml.cs "module.x" => typeof(YModule)
 const mw = fs.readFileSync(`${CS}/MainWindow.xaml.cs`, 'utf8');
