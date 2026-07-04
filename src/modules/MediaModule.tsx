@@ -216,6 +216,24 @@ async function scanMedia(): Promise<MediaFile[]> {
   return files;
 }
 
+// ---- Split a path into { dir, base (no ext), ext } for deriving sibling outputs. ----
+function splitPath(p: string): { dir: string; base: string; ext: string } {
+  const norm = p.replace(/\//g, '\\');
+  const slash = norm.lastIndexOf('\\');
+  const dir = slash < 0 ? '' : norm.slice(0, slash);
+  const file = slash < 0 ? norm : norm.slice(slash + 1);
+  const dot = file.lastIndexOf('.');
+  const base = dot < 0 ? file : file.slice(0, dot);
+  const ext = dot < 0 ? '' : file.slice(dot);
+  return { dir, base, ext };
+}
+// Derive an output path beside the input (mirrors MediaModule.xaml.cs DeriveBeside).
+function deriveBeside(input: string, suffixWithExt: string): string {
+  const { dir, base } = splitPath(input);
+  const name = base + suffixWithExt;
+  return dir ? `${dir}\\${name}` : name;
+}
+
 export function MediaModule() {
   const { t, i18n } = useTranslation();
   const zh = i18n.language.startsWith('zh') || i18n.language.startsWith('yue');
@@ -234,8 +252,21 @@ export function MediaModule() {
   const [runOut, setRunOut] = useState<string | null>(null);
   const [busyOp, setBusyOp] = useState<string | null>(null);
 
+  // ---- Explicit Input / Output paths (mirrors the C# Open… / Save as… pickers + AppState) ----
+  const [inputPath, setInputPath] = useState('');
+  const [outputPath, setOutputPath] = useState('');
+  // ---- Trim panel (start + length, HH:MM:SS) ----
+  const [trimStart, setTrimStart] = useState('');
+  const [trimDuration, setTrimDuration] = useState('');
+  // ---- GIF / frame panel (fps · width) ----
+  const [gifFps, setGifFps] = useState(12);
+  const [gifWidth, setGifWidth] = useState(480);
+
   const eng = engine.data;
   const installed = eng?.installed ?? false;
+
+  // The active input is the typed path if set, otherwise the selected library row.
+  const activeInput = inputPath.trim() || selected?.path || '';
 
   const files = useMemo(() => {
     const all = media.data ?? [];
@@ -262,11 +293,11 @@ export function MediaModule() {
     );
   }, [cat, opFilter]);
 
-  // ---- Inspect selected file with ffprobe (read-only) ----
-  const inspect = async (f: MediaFile) => {
-    setSelected(f);
+  // ---- Probe a path with ffprobe (read-only). Shared by inspect + Input picker. ----
+  const probePath = async (path: string) => {
     setProbeOut(null);
     setRunOut(null);
+    if (!path) return;
     if (!installed || !eng?.ffprobePath) {
       setProbeOut(pick('ffprobe not found — install ffmpeg to inspect files.', '搵唔到 ffprobe — 裝咗 ffmpeg 先可以檢視。'));
       return;
@@ -277,7 +308,7 @@ export function MediaModule() {
         '-v', 'error', '-hide_banner',
         '-show_entries',
         'format=duration,size,bit_rate,format_long_name:stream=index,codec_type,codec_name,width,height,r_frame_rate,channels,sample_rate',
-        '-of', 'default=noprint_wrappers=0', f.path,
+        '-of', 'default=noprint_wrappers=0', path,
       ];
       const r = await runCommand('ffprobe', args);
       const text = (r.stdout || r.stderr || '').trim();
@@ -289,17 +320,72 @@ export function MediaModule() {
     }
   };
 
-  // ---- Run an ffmpeg/ffprobe op on the selected file (probe ops run freely; encode ops confirm) ----
-  const runOp = async (o: Op) => {
-    if (!selected) {
-      setRunOut(pick('Pick a file first (click a row).', '請先揀個檔（撳一行）。'));
+  // ---- Inspect selected library file with ffprobe (read-only). Also sets it as the input. ----
+  const inspect = async (f: MediaFile) => {
+    setSelected(f);
+    setInputPath(f.path);
+    await probePath(f.path);
+  };
+
+  // ---- Set the explicit input path (mirrors PickInput_Click → auto-probe on select). ----
+  const useAsInput = async () => {
+    const p = inputPath.trim();
+    if (!p) return;
+    setSelected(null);
+    await probePath(p);
+  };
+
+  // ---- Shared ffmpeg encode runner: derives output, confirms, writes a new file beside input. ----
+  // outPath: explicit output (from Output picker) wins; else derived beside input via suffixOrExt.
+  const runEncode = async (opts: {
+    busyId: string;
+    label: string;
+    argsTemplate: string; // contains {in} and {out}
+    suffixOrExt: string; // e.g. '.trimmed.mp4' or '.gif' — used when no explicit output set
+  }) => {
+    const input = activeInput;
+    if (!input) {
+      setRunOut(pick('Pick an input file first.', '請先揀輸入檔。'));
       return;
     }
     if (!installed) {
       setRunOut(pick('ffmpeg not found.', '搵唔到 ffmpeg。'));
       return;
     }
-    const input = selected.path;
+    const outPath = outputPath.trim() || deriveBeside(input, opts.suffixOrExt);
+    const cmdPreview = `ffmpeg -y ${opts.argsTemplate.replace('{in}', `"${input}"`).replace('{out}', `"${outPath}"`)}`;
+    const ok = window.confirm(
+      `${opts.label}\n\n${pick('This writes a new file:', '呢個會寫一個新檔：')}\n${outPath}\n\n${cmdPreview}\n\n${pick('Proceed?', '繼續？')}`,
+    );
+    if (!ok) return;
+
+    setBusyOp(opts.busyId);
+    setRunOut(pick('Running ffmpeg…', '執行緊 ffmpeg…'));
+    try {
+      const argv = ['-y', ...buildArgv(opts.argsTemplate.replace('{out}', outPath), input)];
+      const r = await runCommand('ffmpeg', argv);
+      const tail = (r.stderr || r.stdout || '').trim().slice(-3000);
+      const head = r.success ? pick('✓ Done', '✓ 完成') : pick('✗ Failed', '✗ 失敗');
+      setRunOut(`${head} → ${outPath}\n\n${tail}`);
+      media.reload();
+    } catch (e) {
+      setRunOut(String(e));
+    } finally {
+      setBusyOp(null);
+    }
+  };
+
+  // ---- Run an ffmpeg/ffprobe op on the active input (probe ops run freely; encode ops confirm) ----
+  const runOp = async (o: Op) => {
+    const input = activeInput;
+    if (!input) {
+      setRunOut(pick('Pick a file first (click a row or set an input path).', '請先揀個檔（撳一行或者填輸入路徑）。'));
+      return;
+    }
+    if (!installed) {
+      setRunOut(pick('ffmpeg not found.', '搵唔到 ffmpeg。'));
+      return;
+    }
 
     if (o.probe) {
       setBusyOp(o.id);
@@ -317,33 +403,50 @@ export function MediaModule() {
       return;
     }
 
-    // Encoding op — writes a NEW file beside the input. Gate behind explicit confirm.
-    const dot = input.lastIndexOf('.');
-    const base = dot < 0 ? input : input.slice(0, dot);
-    // Derive an output extension from the op's args/id, defaulting to .out.mp4
-    const guessed = guessOutExt(o);
-    const outPath = `${base}${guessed}`;
-    const cmdPreview = `ffmpeg -y ${o.args.replace('{in}', `"${input}"`).replace('{out}', `"${outPath}"`)}`;
-    const ok = window.confirm(
-      `${pick(o.en, o.zh)}\n\n${pick('This writes a new file:', '呢個會寫一個新檔：')}\n${outPath}\n\n${cmdPreview}\n\n${pick('Proceed?', '繼續？')}`,
-    );
-    if (!ok) return;
-
-    setBusyOp(o.id);
-    setRunOut(pick('Running ffmpeg…', '執行緊 ffmpeg…'));
-    try {
-      const argv = ['-y', ...buildArgv(o.args.replace('{out}', outPath), input)];
-      const r = await runCommand('ffmpeg', argv);
-      const tail = (r.stderr || r.stdout || '').trim().slice(-3000);
-      const head = r.success ? pick('✓ Done', '✓ 完成') : pick('✗ Failed', '✗ 失敗');
-      setRunOut(`${head} → ${outPath}\n\n${tail}`);
-      media.reload();
-    } catch (e) {
-      setRunOut(String(e));
-    } finally {
-      setBusyOp(null);
-    }
+    await runEncode({
+      busyId: o.id,
+      label: pick(o.en, o.zh),
+      argsTemplate: o.args,
+      suffixOrExt: guessOutExt(o),
+    });
   };
+
+  // ---- Trim: start + length (HH:MM:SS). Copy = no re-encode, Encode = H.264/AAC. ----
+  const start = () => (trimStart.trim() || '00:00:00');
+  const dur = () => (trimDuration.trim() || '00:00:10');
+
+  const trimCopy = () =>
+    runEncode({
+      busyId: 'trim.copy',
+      label: pick('Trim (no re-encode)', '剪裁（唔重編碼）'),
+      argsTemplate: `-ss ${start()} -i {in} -t ${dur()} -c copy {out}`,
+      suffixOrExt: `.trimmed${splitPath(activeInput).ext || '.mp4'}`,
+    });
+
+  const trimEncode = () =>
+    runEncode({
+      busyId: 'trim.encode',
+      label: pick('Trim (re-encode)', '剪裁（重編碼）'),
+      argsTemplate: `-ss ${start()} -i {in} -t ${dur()} -c:v libx264 -c:a aac -movflags +faststart {out}`,
+      suffixOrExt: '.trimmed.mp4',
+    });
+
+  // ---- GIF / frame with the fps · width controls. ----
+  const makeGif = () =>
+    runEncode({
+      busyId: 'gif.make',
+      label: pick('Make GIF', '整 GIF'),
+      argsTemplate: `-i {in} -vf "fps=${gifFps},scale=${gifWidth}:-1:flags=lanczos" {out}`,
+      suffixOrExt: '.gif',
+    });
+
+  const grabFrame = () =>
+    runEncode({
+      busyId: 'frame.grab',
+      label: pick('Grab frame', '擷取畫格'),
+      argsTemplate: `-ss ${start()} -i {in} -frames:v 1 {out}`,
+      suffixOrExt: '.frame.png',
+    });
 
   const fileColumns: Column<MediaFile>[] = [
     {
@@ -437,20 +540,113 @@ export function MediaModule() {
         />
       </AsyncState>
 
-      {/* Selected file inspector */}
-      {selected && (
-        <div className="hosts-edit" style={{ marginTop: 12 }}>
-          <p style={{ fontWeight: 600, margin: '0 0 6px' }}>
-            {t('media.selected')}: {selected.name}
-          </p>
-          <p className="count-note" style={{ margin: '0 0 8px', wordBreak: 'break-all' }}>{selected.path}</p>
-          {probing ? (
-            <p className="count-note">{t('modules.loading')}</p>
-          ) : (
-            probeOut && <pre className="cmd-out">{probeOut}</pre>
+      {/* Explicit Input / Output paths (mirrors the C# Open… / Save as… pickers) */}
+      <div className="hosts-edit" style={{ marginTop: 12 }}>
+        <p style={{ fontWeight: 600, margin: '0 0 8px' }}>{t('media.files')}</p>
+        <div className="mod-toolbar" style={{ alignItems: 'center' }}>
+          <span className="count-note" style={{ minWidth: 60 }}>{t('media.inputCap')}</span>
+          <input
+            className="mod-search"
+            style={{ flex: 1, minWidth: 220 }}
+            placeholder={t('media.inputPh')}
+            value={inputPath}
+            onChange={(e) => setInputPath(e.target.value)}
+          />
+          <button className="mini primary" disabled={!inputPath.trim() || probing} onClick={useAsInput}>
+            {t('media.useInput')}
+          </button>
+        </div>
+        <div className="mod-toolbar" style={{ alignItems: 'center', marginTop: 6 }}>
+          <span className="count-note" style={{ minWidth: 60 }}>{t('media.outputCap')}</span>
+          <input
+            className="mod-search"
+            style={{ flex: 1, minWidth: 220 }}
+            placeholder={t('media.outputPh')}
+            value={outputPath}
+            onChange={(e) => setOutputPath(e.target.value)}
+          />
+          {outputPath.trim() && (
+            <button className="mini" onClick={() => setOutputPath('')}>{t('media.clearOutput')}</button>
           )}
         </div>
-      )}
+        <p className="count-note" style={{ margin: '6px 0 0' }}>
+          {activeInput ? `${t('media.active')}: ${activeInput}` : t('media.noActive')}
+        </p>
+        {probing ? (
+          <p className="count-note" style={{ marginBottom: 0 }}>{t('modules.loading')}</p>
+        ) : (
+          probeOut && <pre className="cmd-out" style={{ marginBottom: 0 }}>{probeOut}</pre>
+        )}
+      </div>
+
+      {/* Trim + GIF / frame panels (mirror the C# Trim + GIF/frame chrome-free sections) */}
+      <div className="mod-toolbar" style={{ flexWrap: 'wrap', gap: 16, marginTop: 12, alignItems: 'flex-start' }}>
+        <div style={{ minWidth: 260 }}>
+          <p style={{ fontWeight: 600, margin: '0 0 6px' }}>{t('media.trimLabel')}</p>
+          <div className="mod-toolbar">
+            <input
+              className="mod-search"
+              style={{ width: 110 }}
+              placeholder="00:00:00"
+              value={trimStart}
+              onChange={(e) => setTrimStart(e.target.value)}
+            />
+            <input
+              className="mod-search"
+              style={{ width: 110 }}
+              placeholder="00:00:10"
+              value={trimDuration}
+              onChange={(e) => setTrimDuration(e.target.value)}
+            />
+          </div>
+          <div className="mod-toolbar" style={{ marginTop: 6 }}>
+            <button className="mini" disabled={!activeInput || busyOp === 'trim.copy'} onClick={trimCopy}>
+              {t('media.trimCopy')}
+            </button>
+            <button className="mini" disabled={!activeInput || busyOp === 'trim.encode'} onClick={trimEncode}>
+              {t('media.trimEncode')}
+            </button>
+          </div>
+        </div>
+
+        <div style={{ minWidth: 260 }}>
+          <p style={{ fontWeight: 600, margin: '0 0 6px' }}>{t('media.gifLabel')}</p>
+          <div className="mod-toolbar" style={{ alignItems: 'center' }}>
+            <label className="count-note">
+              {t('media.gifFps')}{' '}
+              <input
+                className="mod-search"
+                type="number"
+                min={1}
+                max={60}
+                style={{ width: 70 }}
+                value={gifFps}
+                onChange={(e) => setGifFps(Math.max(1, Math.min(60, Number(e.target.value) || 12)))}
+              />
+            </label>
+            <label className="count-note">
+              {t('media.gifWidth')}{' '}
+              <input
+                className="mod-search"
+                type="number"
+                min={80}
+                max={3840}
+                style={{ width: 80 }}
+                value={gifWidth}
+                onChange={(e) => setGifWidth(Math.max(80, Math.min(3840, Number(e.target.value) || 480)))}
+              />
+            </label>
+          </div>
+          <div className="mod-toolbar" style={{ marginTop: 6 }}>
+            <button className="mini" disabled={!activeInput || busyOp === 'gif.make'} onClick={makeGif}>
+              {t('media.makeGif')}
+            </button>
+            <button className="mini" disabled={!activeInput || busyOp === 'frame.grab'} onClick={grabFrame}>
+              {t('media.grabFrame')}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Operations catalog */}
       <h3 style={{ marginBottom: 4, marginTop: 16 }}>{t('media.operations', { ops: OPS.length })}</h3>
@@ -465,7 +661,7 @@ export function MediaModule() {
             <button
               key={q.id}
               className="mini"
-              disabled={!selected || busyOp === q.id}
+              disabled={!activeInput || busyOp === q.id}
               onClick={() => runOp({ ...op, id: q.id })}
               title={q.args}
             >
@@ -514,9 +710,9 @@ export function MediaModule() {
             render: (o: Op) => (
               <button
                 className={o.probe ? 'mini primary' : 'mini'}
-                disabled={!selected || busyOp === o.id}
+                disabled={!activeInput || busyOp === o.id}
                 onClick={() => runOp(o)}
-                title={selected ? '' : pick('Pick a file first', '請先揀個檔')}
+                title={activeInput ? '' : pick('Pick a file first', '請先揀個檔')}
               >
                 {o.probe ? t('media.show') : t('media.run')}
               </button>

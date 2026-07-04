@@ -54,3 +54,9 @@ pdftoolkit
 resume
 native
 apiclient
+homeassistant
+media
+hexeditor
+audiotagger
+virtualbox
+proxmox
