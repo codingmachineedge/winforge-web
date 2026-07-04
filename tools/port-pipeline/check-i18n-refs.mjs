@@ -12,7 +12,8 @@ for (const spec of process.argv.slice(2)) {
       ? fs.readFileSync(`${ROOT}/src/i18n/batchB.ts`, 'utf8')
       : fs.readFileSync(`${ROOT}/src/i18n/en.ts`, 'utf8');
   const refs = new Set();
-  const re = new RegExp(`t\\(\\s*['"\`]${ns}\\.([a-zA-Z0-9_]+)['"\`]`, 'g');
+  // \bt\( so lsSet('ns.x')/lsGet('ns.x') don't match on the trailing "t(" of Set(/Get(.
+  const re = new RegExp(`\\bt\\(\\s*['"\`]${ns}\\.([a-zA-Z0-9_]+)['"\`]`, 'g');
   let m;
   while ((m = re.exec(modSrc))) refs.add(m[1]);
   const missing = [...refs].filter((k) => !new RegExp(`^\\s+"?${ident(k)}"?\\s*:`, 'm').test(i18nSrc)).sort();

@@ -30,16 +30,21 @@ function mergeIntoNs(file, ns, keys, indent) {
   let src = fs.readFileSync(file, 'utf8');
   const eol = src.includes('\r\n') ? '\r\n' : '\n';
   const re = new RegExp(`^(${indent}${ns}: \\{)`, 'm');
-  if (!re.test(src)) throw new Error(`namespace block "${ns}" not found in ${file}`);
-  // Drop keys that already exist anywhere in the file's ns block region (cheap textual check
-  // over the whole file is fine: keys are namespaced by position, collisions just skip).
-  const fresh = Object.entries(keys).filter(([k]) => {
-    // Quote-aware: the original port integrator wrote JSON-style quoted keys ("gitOk":).
-    const kRe = new RegExp(`^\\s*"?${ident(k).replace(/[$]/g, '\\$')}"?\\s*:`, 'm');
-    const nsStart = src.search(re);
-    const after = src.slice(nsStart, nsStart + 40000); // ns blocks are < 40k chars
-    return !kRe.test(after.slice(0, after.indexOf(eol + indent.slice(0, indent.length - 2) + '}') + 1 || undefined));
-  });
+  const openIx = src.search(re);
+  if (openIx < 0) throw new Error(`namespace block "${ns}" not found in ${file}`);
+  // Extract EXACTLY this ns block by brace-matching from its opener, so dedup can never see a
+  // same-named key in an adjacent namespace. Doing this identically for EN and ZH is what keeps
+  // the two sides structurally in parity (a loose window deduped them asymmetrically before).
+  const braceStart = src.indexOf('{', openIx);
+  let depth = 0, end = braceStart;
+  for (let i = braceStart; i < src.length; i++) {
+    const c = src[i];
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) { end = i; break; } }
+  }
+  const blockText = src.slice(braceStart, end);
+  const existing = new Set([...blockText.matchAll(/^\s*"?([A-Za-z0-9_$]+)"?\s*:/gm)].map((m) => m[1]));
+  const fresh = Object.entries(keys).filter(([k]) => !existing.has(k));
   if (!fresh.length) return { src: null, added: 0 };
   const block = fresh.map(([k, v]) => `${indent}  ${ident(k)}: ${JSON.stringify(v)},`).join(eol);
   src = src.replace(re, `$1${eol}${block}`);
@@ -120,7 +125,8 @@ for (const r of results) {
   // Light coverage check: every t('ns.key') in the updated module must appear in the merged file.
   const modSrc = fs.readFileSync(`${ROOT}/src/modules/${r.fileName}`, 'utf8');
   const refs = new Set();
-  const re = new RegExp(`t\\(\\s*['"\`]${ns}\\.([a-zA-Z0-9_]+)['"\`]`, 'g');
+  // \bt\( so lsSet('ns.x')/lsGet('ns.x') don't match on the trailing "t(" of Set(/Get(.
+  const re = new RegExp(`\\bt\\(\\s*['"\`]${ns}\\.([a-zA-Z0-9_]+)['"\`]`, 'g');
   let m;
   while ((m = re.exec(modSrc))) refs.add(m[1]);
   const i18nSrc =
