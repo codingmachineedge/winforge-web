@@ -30,8 +30,18 @@ function mergeIntoNs(file, ns, keys, indent) {
   let src = fs.readFileSync(file, 'utf8');
   const eol = src.includes('\r\n') ? '\r\n' : '\n';
   const re = new RegExp(`^(${indent}${ns}: \\{)`, 'm');
-  const openIx = src.search(re);
-  if (openIx < 0) throw new Error(`namespace block "${ns}" not found in ${file}`);
+  let openIx = src.search(re);
+  if (openIx < 0) {
+    // The ns block was never persisted (a historic integrator crash dropped whole namespaces —
+    // terminal, weblogin, sshmod…). Create it right after the object opener so the upgrade can
+    // seed it; any still-missing pre-existing keys get caught by the coverage check + backfill.
+    const opener = /^(export const (?:en|zhHant)[^\n]*\{)/m;
+    if (!opener.test(src)) throw new Error(`ns "${ns}" absent and no en/zhHant opener in ${file}`);
+    src = src.replace(opener, `$1${eol}${indent}${ns}: {${eol}${indent}},`);
+    fs.writeFileSync(file, src);
+    console.log(`  (created missing "${ns}" block in ${file.split('/').pop()})`);
+    openIx = src.search(re);
+  }
   // Extract EXACTLY this ns block by brace-matching from its opener, so dedup can never see a
   // same-named key in an adjacent namespace. Doing this identically for EN and ZH is what keeps
   // the two sides structurally in parity (a loose window deduped them asymmetrically before).
@@ -43,7 +53,9 @@ function mergeIntoNs(file, ns, keys, indent) {
     else if (c === '}') { depth--; if (depth === 0) { end = i; break; } }
   }
   const blockText = src.slice(braceStart, end);
-  const existing = new Set([...blockText.matchAll(/^\s*"?([A-Za-z0-9_$]+)"?\s*:/gm)].map((m) => m[1]));
+  // Keys can be compact (several per line: `repo: 'x', open: 'y'`), so anchor on {/,/newline,
+  // not just line-start, or the trailing keys on a line slip past dedup and get duplicated.
+  const existing = new Set([...blockText.matchAll(/(?:^|[{,])\s*"?([A-Za-z0-9_$]+)"?\s*:/gm)].map((m) => m[1]));
   const fresh = Object.entries(keys).filter(([k]) => !existing.has(k));
   if (!fresh.length) return { src: null, added: 0 };
   const block = fresh.map(([k, v]) => `${indent}  ${ident(k)}: ${JSON.stringify(v)},`).join(eol);
@@ -91,7 +103,8 @@ for (const r of results) {
     const tail = src.slice(yueStart);
     const inject = (part, keys) => {
       const re = new RegExp(`^(  ${ns}: \\{)`, 'm');
-      if (!re.test(part)) {
+      const openIx = part.search(re);
+      if (openIx < 0) {
         // The ns block is missing on this side (a historic integrator crash dropped some EN
         // blocks — weblogin, sshmod). Create the whole block right after the export opener.
         const opener = /^(export const (enB|yueB)[^\n]*\{)/m;
@@ -100,7 +113,17 @@ for (const r of results) {
         console.log(`  (created missing "${ns}" block on this side)`);
         return { part: part.replace(opener, `$1${eol}  ${ns}: {${eol}${block}${eol}  },`), added: Object.keys(keys).length };
       }
-      const fresh = Object.entries(keys).filter(([k]) => !new RegExp(`^\\s{4}"?${ident(k)}"?\\s*:`, 'm').test(part));
+      // Dedup ONLY within this exact block (brace-matched), compact-key-aware — so keys in other
+      // namespaces or trailing keys on a compact line can't cause skips (asymmetry) or dupes.
+      const bStart = part.indexOf('{', openIx);
+      let depth = 0, bEnd = bStart;
+      for (let i = bStart; i < part.length; i++) {
+        const c = part[i];
+        if (c === '{') depth++;
+        else if (c === '}') { depth--; if (depth === 0) { bEnd = i; break; } }
+      }
+      const existing = new Set([...part.slice(bStart, bEnd).matchAll(/(?:^|[{,])\s*"?([A-Za-z0-9_$]+)"?\s*:/gm)].map((m) => m[1]));
+      const fresh = Object.entries(keys).filter(([k]) => !existing.has(k));
       if (!fresh.length) return { part, added: 0 };
       const block = fresh.map(([k, v]) => `    ${ident(k)}: ${JSON.stringify(v)},`).join(eol);
       return { part: part.replace(re, `$1${eol}${block}`), added: fresh.length };
