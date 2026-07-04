@@ -47,13 +47,29 @@ function mergeIntoNs(file, ns, keys, indent) {
   return { src, added: fresh.length };
 }
 
+// Some agents bake the namespace into every returned key ("mcserver.rconOn") and occasionally
+// emit a genuinely-nested key ("tab.world"). Normalize: strip a leading "<ns>." and drop any
+// key that still contains a dot (the flat merger can't place it; if the module truly references
+// it, check-i18n-refs will flag it as missing so we notice).
+function normalizeKeys(ns, keys) {
+  const o = {};
+  let dropped = 0;
+  for (const [rawK, v] of Object.entries(keys || {})) {
+    let k = rawK.startsWith(ns + '.') ? rawK.slice(ns.length + 1) : rawK;
+    if (k.includes('.')) { dropped++; continue; }
+    o[k] = v;
+  }
+  if (dropped) console.log(`  (${ns}: dropped ${dropped} nested key(s) after prefix strip)`);
+  return o;
+}
+
 let totalAdded = 0;
 const files = new Set();
 for (const r of results) {
   if (!r || r.wrote === false) continue;
   const ns = r.namespace;
-  const enKeys = r.newEnKeys || {};
-  const zhKeys = r.newZhKeys || {};
+  const enKeys = normalizeKeys(ns, r.newEnKeys);
+  const zhKeys = normalizeKeys(ns, r.newZhKeys);
   const enSet = new Set(Object.keys(enKeys));
   const zhSet = new Set(Object.keys(zhKeys));
   for (const k of enSet) if (!zhSet.has(k)) throw new Error(`${ns}: EN key "${k}" missing 粵語 twin`);
