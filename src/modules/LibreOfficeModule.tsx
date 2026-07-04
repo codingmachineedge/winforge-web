@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { runCommand, runPowershell, runPowershellJson } from '../tauri/bridge';
 import { AsyncState, Column, DataTable, ModuleToolbar, StatusDot, useAsync } from './common';
+import { ModuleTabs } from './ModuleTabs';
 
 // ===== ported straight from Services/LibreOfficeService.cs =====
 
@@ -35,6 +36,22 @@ const SOURCE_EXTS = [
   '.xls', '.xlsx', '.ods', '.csv',
   '.ppt', '.pptx', '.odp',
   '.pdf', '.fodt', '.fods', '.fodp', '.wps', '.pub',
+];
+
+// LibreOfficeOperations.All() — the "LibreOffice tools" ops panel (Start Center + app launchers).
+// Mirrors Catalog/LibreOfficeOperations.cs: launch each app via its soffice switch.
+interface AppLauncher {
+  id: string;
+  sw: string; // soffice switch ('' = Start Center)
+}
+const APP_LAUNCHERS: AppLauncher[] = [
+  { id: 'start', sw: '' },
+  { id: 'writer', sw: '--writer' },
+  { id: 'calc', sw: '--calc' },
+  { id: 'impress', sw: '--impress' },
+  { id: 'draw', sw: '--draw' },
+  { id: 'math', sw: '--math' },
+  { id: 'base', sw: '--base' },
 ];
 
 function convertArg(fmt: TargetFormat, override: string): string {
@@ -96,14 +113,11 @@ if($vpath){try{$vi=(Get-Item $vpath).VersionInfo;$ver=($vi.ProductName+' '+$vi.P
 [pscustomobject]@{installed=[bool]($com -or $exe);com=[string]$com;exe=[string]$exe;version=$ver}
 `.trim();
 
-export function LibreOfficeModule() {
+// ===================================================================
+//  Convert tab — batch headless soffice --convert-to (matches Convert_Click)
+// ===================================================================
+function ConvertTab({ engine }: { engine: Engine }) {
   const { t } = useTranslation();
-
-  const engineState = useAsync(async () => {
-    const r = await runPowershellJson<Engine>(DETECT_SCRIPT);
-    return r[0] ?? { installed: false, com: '', exe: '', version: '' };
-  }, []);
-  const engine: Engine = engineState.data ?? { installed: false, com: '', exe: '', version: '' };
 
   const [srcDir, setSrcDir] = useState('');
   const [recurse, setRecurse] = useState(false);
@@ -118,6 +132,8 @@ export function LibreOfficeModule() {
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<string[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
+  // Cooperative cancel flag — mirrors CancellationTokenSource in Convert_Click/ConvertBatch.
+  const cancelRef = useRef(false);
 
   const appendLog = (line: string) => setLog((prev) => [...prev, line]);
 
@@ -198,11 +214,29 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
     }
     setBusy(true);
     setMsg(null);
-    setStatuses(Object.fromEntries(files.map((f) => [f.FullName, { state: 'queued' } as RowStatus])));
+    cancelRef.current = false;
+    // Reset states, but keep already-done rows (ConvertBatch skips State==Done on re-run).
+    setStatuses((prev) =>
+      Object.fromEntries(
+        files.map((f) => [
+          f.FullName,
+          prev[f.FullName]?.state === 'done' ? prev[f.FullName]! : ({ state: 'queued' } as RowStatus),
+        ]),
+      ),
+    );
     appendLog(t('libreoffice.startBatch', { total: files.length, ext: fmt.ext }));
     let ok = 0;
     let fail = 0;
     for (const f of files) {
+      if (cancelRef.current) {
+        setStatuses((prev) => ({ ...prev, [f.FullName]: { state: 'failed', detail: t('libreoffice.cancelled') } }));
+        fail++;
+        continue;
+      }
+      if (statuses[f.FullName]?.state === 'done') {
+        ok++;
+        continue;
+      }
       setStatuses((prev) => ({ ...prev, [f.FullName]: { state: 'converting' } }));
       // eslint-disable-next-line no-await-in-loop
       const st = await convertOne(f);
@@ -213,6 +247,13 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
     appendLog(t('libreoffice.finished', { ok, fail }));
     setMsg(t('libreoffice.finished', { ok, fail }));
     setBusy(false);
+  };
+
+  const cancel = () => {
+    if (!busy) return;
+    cancelRef.current = true;
+    appendLog(t('libreoffice.cancelling'));
+    setMsg(t('libreoffice.cancelling'));
   };
 
   const openInLibre = async (target: string) => {
@@ -231,24 +272,6 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
       return;
     }
     await runCommand('explorer', [dir]);
-  };
-
-  const launchApp = async (sw: string) => {
-    if (!engine.exe && !engine.com) {
-      setMsg(t('libreoffice.notFound'));
-      return;
-    }
-    const exe = engine.exe || engine.com;
-    const res = await runCommand(exe, ['--norestore', sw]);
-    setMsg(res.success ? t('libreoffice.launched') : `${t('libreoffice.opFailed')}: ${res.stderr.trim()}`);
-  };
-
-  const killStray = async () => {
-    const res = await runPowershell(
-      "$n=@(Get-Process soffice,soffice.bin -EA SilentlyContinue); $n | Stop-Process -Force -EA SilentlyContinue; $n.Count",
-    );
-    const n = res.stdout.trim() || '0';
-    setMsg(t('libreoffice.killed', { n }));
   };
 
   const stateLabel = (s: RowState): string =>
@@ -307,22 +330,6 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
 
   return (
     <div className="mod">
-      <p className="count-note" style={{ marginTop: 0 }}>{t('libreoffice.blurb')}</p>
-
-      {/* Engine status — mirrors the WinForge EngineBar */}
-      <AsyncState loading={engineState.loading} error={engineState.error}>
-        <div className="mod-toolbar" style={{ alignItems: 'center' }}>
-          <StatusDot
-            ok={engine.installed}
-            label={engine.installed ? t('libreoffice.installed') : t('libreoffice.notFound')}
-          />
-          {engine.version && <span className="count-note">{engine.version}</span>}
-          {engine.com && <span className="count-note" title={engine.com}>soffice.com</span>}
-          <button className="mini" onClick={engineState.reload}>⟳ {t('modules.refresh')}</button>
-        </div>
-        {!engine.installed && <p className="count-note">{t('libreoffice.installHint')}</p>}
-      </AsyncState>
-
       {/* Source folder + scan */}
       <ModuleToolbar>
         <input
@@ -381,12 +388,9 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
         <button className="mini primary" disabled={busy || !engine.installed || files.length === 0} onClick={convertAll}>
           {busy ? t('libreoffice.converting') : t('libreoffice.convert')}
         </button>
+        <button className="mini" disabled={!busy} onClick={cancel}>{t('libreoffice.cancel')}</button>
         <span className="count-note">{doneCount} / {files.length}</span>
-        <button className="mini" disabled={!engine.installed} onClick={() => launchApp('--writer')}>{t('libreoffice.writer')}</button>
-        <button className="mini" disabled={!engine.installed} onClick={() => launchApp('--calc')}>{t('libreoffice.calc')}</button>
-        <button className="mini" disabled={!engine.installed} onClick={() => launchApp('--impress')}>{t('libreoffice.impress')}</button>
         <button className="mini" disabled={!engine.installed} onClick={() => openFolder(outDir.trim() || srcDir.trim())}>{t('libreoffice.openOut')}</button>
-        <button className="mini" onClick={killStray}>{t('libreoffice.killStray')}</button>
       </div>
 
       {msg && <p className="mod-msg">{msg}</p>}
@@ -406,6 +410,142 @@ if(Test-Path -LiteralPath $expected){"OK::$expected"}else{
           <pre className="cmd-out" style={{ maxHeight: 220, overflow: 'auto' }}>{log.join('\n')}</pre>
         </>
       )}
+    </div>
+  );
+}
+
+// ===================================================================
+//  Tools tab — LibreOffice tools ops panel (LibreOfficeOperations.cs)
+//  Start Center + Writer/Calc/Impress/Draw/Math/Base launchers,
+//  version probe, and "kill stray soffice".
+// ===================================================================
+function ToolsTab({ engine, reloadEngine }: { engine: Engine; reloadEngine: () => void }) {
+  const { t } = useTranslation();
+  const [msg, setMsg] = useState<string | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
+  const [probing, setProbing] = useState(false);
+
+  const launchApp = async (sw: string) => {
+    if (!engine.exe && !engine.com) {
+      setMsg(t('libreoffice.notFound'));
+      return;
+    }
+    const exe = engine.exe || engine.com;
+    const args = sw ? ['--norestore', sw] : ['--norestore'];
+    const res = await runCommand(exe, args);
+    setMsg(res.success ? t('libreoffice.launched') : `${t('libreoffice.opFailed')}: ${res.stderr.trim()}`);
+  };
+
+  // Version probe — mirrors LibreOfficeService.Version (soffice --version, isolated profile).
+  const probeVersion = async () => {
+    if (!engine.com && !engine.exe) {
+      setMsg(t('libreoffice.notFound'));
+      return;
+    }
+    setProbing(true);
+    setMsg(null);
+    const exe = engine.com || engine.exe;
+    const script = `
+$prof='file:///' + ($env:TEMP -replace '\\\\','/') + '/winforge_lo_' + [guid]::NewGuid().ToString('N')
+& '${ps(exe)}' --version "-env:UserInstallation=$prof" --norestore --nolockcheck 2>&1 | Out-String
+`.trim();
+    const res = await runPowershell(script);
+    const v = res.stdout.trim().split(/\r?\n/).filter((l) => l.trim())[0] ?? '';
+    setProbing(false);
+    if (v) {
+      setVersion(v);
+      setMsg(v);
+    } else {
+      setMsg(t('libreoffice.notFound'));
+    }
+  };
+
+  // Kill stray soffice / soffice.bin — destructive, so it is click-gated.
+  const killStray = async () => {
+    const res = await runPowershell(
+      '$n=@(Get-Process soffice,soffice.bin -EA SilentlyContinue); $n | Stop-Process -Force -EA SilentlyContinue; $n.Count',
+    );
+    const n = res.stdout.trim() || '0';
+    setMsg(t('libreoffice.killed', { n }));
+  };
+
+  return (
+    <div className="mod">
+      <p className="count-note" style={{ marginTop: 0 }}>{t('libreoffice.toolsBlurb')}</p>
+
+      {/* App launchers — one click each, gated on install */}
+      <div className="mod-toolbar" style={{ flexWrap: 'wrap' }}>
+        {APP_LAUNCHERS.map((a) => (
+          <button
+            key={a.id}
+            className="mini"
+            disabled={!engine.installed}
+            onClick={() => launchApp(a.sw)}
+            title={t(`libreoffice.app_${a.id}_desc`)}
+          >
+            {t(`libreoffice.app_${a.id}`)}
+          </button>
+        ))}
+      </div>
+
+      {/* Version probe + kill stray */}
+      <div className="mod-toolbar" style={{ flexWrap: 'wrap' }}>
+        <button className="mini" disabled={!engine.installed || probing} onClick={probeVersion}>
+          {probing ? t('libreoffice.probing') : t('libreoffice.versionProbe')}
+        </button>
+        <button className="mini" onClick={killStray}>{t('libreoffice.killStray')}</button>
+        <button className="mini" onClick={reloadEngine}>⟳ {t('modules.refresh')}</button>
+        {version && <span className="count-note" title={version}>{version}</span>}
+      </div>
+
+      {msg && <p className="mod-msg">{msg}</p>}
+    </div>
+  );
+}
+
+export function LibreOfficeModule() {
+  const { t } = useTranslation();
+
+  const engineState = useAsync(async () => {
+    const r = await runPowershellJson<Engine>(DETECT_SCRIPT);
+    return r[0] ?? { installed: false, com: '', exe: '', version: '' };
+  }, []);
+  const engine: Engine = engineState.data ?? { installed: false, com: '', exe: '', version: '' };
+
+  return (
+    <div className="mod">
+      <p className="count-note" style={{ marginTop: 0 }}>{t('libreoffice.blurb')}</p>
+
+      {/* Engine status — mirrors the WinForge EngineBar */}
+      <AsyncState loading={engineState.loading} error={engineState.error}>
+        <div className="mod-toolbar" style={{ alignItems: 'center' }}>
+          <StatusDot
+            ok={engine.installed}
+            label={engine.installed ? t('libreoffice.installed') : t('libreoffice.notFound')}
+          />
+          {engine.version && <span className="count-note">{engine.version}</span>}
+          {engine.com && <span className="count-note" title={engine.com}>soffice.com</span>}
+          <button className="mini" onClick={engineState.reload}>⟳ {t('modules.refresh')}</button>
+        </div>
+        {!engine.installed && <p className="count-note">{t('libreoffice.installHint')}</p>}
+      </AsyncState>
+
+      <ModuleTabs
+        tabs={[
+          {
+            id: 'convert',
+            en: 'Convert',
+            zh: '轉換',
+            render: () => <ConvertTab engine={engine} />,
+          },
+          {
+            id: 'tools',
+            en: 'LibreOffice tools',
+            zh: 'LibreOffice 工具',
+            render: () => <ToolsTab engine={engine} reloadEngine={engineState.reload} />,
+          },
+        ]}
+      />
     </div>
   );
 }
