@@ -17,6 +17,31 @@ the ~312 modules.
 Status legend per module: **working** (real interactive port, registered), **partial**
 (read-only live probe only), **stub** (catalog card / not started).
 
+## Feature-parity campaign (2026-07-04)
+
+Every catalog module now renders and works, but the initial ports captured each module's
+**core** function, not the old app's full per-module feature surface. A parallel **upgrade
+pipeline** (`tools/port-pipeline/upgrade-integrate.mjs` — merges new keys into an existing
+i18n namespace; `check-i18n-refs.mjs`) is walking the modules in descending feature-count
+order and bringing each to the C# page's **full** surface. Done so far (**30 modules**,
+~35k lines, all tsc + 211 tests + vite green):
+
+- **Wave 1** — Package Manager (→ 11-manager UniGetUI-style hub), Docker, SSH, Android ADB,
+  Config & Backup, AWS CLI.
+- **Wave 2** — Communications, Media Player, Packer, Audio Editor (Web-Audio DSP editor),
+  Minecraft Server (RCON), Mail.
+- **Wave 3** — Minecraft World Tools, Minecraft Launcher, API Client, Komorebi, Ollama, AI Chat.
+- **Wave 4** — Archives (7-Zip catalog + Contents tab), qBittorrent, Docker-over-SSH,
+  SQLite Browser, Pixel Editor, Cloudflare.
+- **Wave 5** — KeePass (keepassxc-cli), pgAdmin/Postgres, AltSnap, Color Tools, Timer,
+  cURL Generator.
+
+Each wave = one 6-agent Workflow (each agent reads the C# page + current module, adds only
+missing features, returns new i18n keys), then integrate → verify → push. **Next** by
+feature count: Settings Hub, PowerToys Extras, Randomizer, Emulator, Audio Tagger, and the
+remaining native tool launchers (rank objectively with the gap scan in
+`tools/port-pipeline/`).
+
 ## Current winforge-web module status — 226 working / 85 stub (73%)  [updated 2026-07-03, post-merge]
 
 | Bucket | Working | Stub | Total |
