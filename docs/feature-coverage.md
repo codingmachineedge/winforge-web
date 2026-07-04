@@ -37,10 +37,20 @@ order and bringing each to the C# page's **full** surface. Done so far (**30 mod
   cURL Generator.
 
 Each wave = one 6-agent Workflow (each agent reads the C# page + current module, adds only
-missing features, returns new i18n keys), then integrate → verify → push. **Next** by
-feature count: Settings Hub, PowerToys Extras, Randomizer, Emulator, Audio Tagger, and the
-remaining native tool launchers (rank objectively with the gap scan in
-`tools/port-pipeline/`).
+missing features, returns new i18n keys), then integrate → verify → push.
+
+**Campaign complete (10 waves, 60 modules).** Waves 6–10 added: Git/GitHub, Diagram Editor,
+Terminal, VS Code, Image Editor, Nmap; Wireshark, LibreOffice, Peek, FileZilla, Nilesoft
+Shell, Flashcards; FancyZones, Imaging (Pi/USB), Torrent, PDF Toolkit, Resume Writer, Native
+Utilities; Home Assistant, Media, Hex Editor, Audio Tagger, VirtualBox, Proxmox; Process
+Explorer, System Monitor, Windhawk, ViVeTool, Mouse Utilities, Light Switch.
+
+`node tools/port-pipeline/gap-scan.mjs` (reads `parity-done.txt`) now shows **no remaining
+module where the C# page exceeds its TypeScript port by more than ~50 lines** — every other
+catalog module already had a thorough port from the original ultracode batches. Along the way
+the campaign also fixed several latent bugs where whole i18n namespaces had been lost in old
+integrator crashes (weblogin, sshmod, packer, ollama, terminal, git, and others rendered raw
+keys); those are now restored.
 
 ## Current winforge-web module status — 226 working / 85 stub (73%)  [updated 2026-07-03, post-merge]
 

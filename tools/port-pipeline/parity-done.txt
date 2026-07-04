@@ -60,3 +60,9 @@ hexeditor
 audiotagger
 virtualbox
 proxmox
+windhawk
+procexp
+vivetool
+mouseutils
+monitor
+lightswitch
