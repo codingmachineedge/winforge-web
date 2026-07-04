@@ -1,23 +1,37 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isTauri, runCommand, type CommandOutput } from '../tauri/bridge';
+import { isTauri, runCommand, runPowershell, type CommandOutput } from '../tauri/bridge';
+import { resolveTool } from '../tauri/deps';
 import { AsyncState, Column, DataTable, ModuleToolbar, StatusDot, useAsync } from './common';
 
 // ============================================================================
-// Android (ADB) — module.adb — native web port of WinForge's AndroidAdbModule.
+// Android (ADB) — module.adb — full native web port of WinForge's
+// AndroidAdbModule (Pages/AndroidAdbModule.xaml[.cs] + Services/AdbService.cs
+// + Services/ScrcpyService.cs).
 //
-// The desktop original wrapped adb.exe (AdbService.cs). Here we drive the same
-// Google Platform Tools `adb` binary through the Tauri backend via runCommand,
-// so no PowerShell quoting games and clean stdout. Ported features:
-//   • device list (`adb devices -l`, parsed to model / serial / state)
-//   • wireless connect / disconnect (`adb connect|disconnect ip:port`)
-//   • Console: screenshot (screencap → base64 PNG rendered inline), logcat
-//     snapshot, package list, arbitrary `adb shell` command, reboot menu
-//   • Files: browse the device (`ls -1aF`), pull / push / delete (delete gated)
-//   • APK backup: list installed packages (`pm list packages`), resolve + pull APK
-//   • Live logcat: bounded snapshot with level + tag filter
-// Read-only by default; the only mutating actions (reboot / delete / push) are
-// gated behind an explicit confirm and never auto-run.
+// The desktop original wrapped adb.exe / scrcpy.exe. Here we resolve the same
+// binaries through resolveTool (bundled → PATH) and drive them via runCommand
+// (clean argv, no shell quoting) or PowerShell Start-Process for the
+// long-running scrcpy window. Ported surface:
+//   • toolbar — device list with state, wireless connect / disconnect,
+//     Android-11 wireless pairing (adb pair host:port code), restart adb server
+//   • adb engine probe via resolveTool + one-click winget install
+//     (Google.PlatformTools) when missing — mirrors EngineBars.AutoInstallProgress
+//   • per-device property strip: model, Android version + API level, battery
+//   • Console: screenshot (inline preview via exec-out base64) + screencap→pull
+//     to a local file, logcat snapshot, package dump, install APK (gated),
+//     reboot system/bootloader/recovery (confirmed), one-shot `adb shell`
+//   • Files: browse (ls -1aF), pull, push (confirmed), delete rm -rf (confirmed)
+//   • APK backup: pm list packages with third-party / system / all filter,
+//     backup via pm path + pull, uninstall (confirmed)
+//   • Logcat: bounded snapshot with priority + tag filters, follow mode
+//     (3 s auto-recapture — the web equivalent of the C# streaming logcat),
+//     clear output, clear the device log buffer (logcat -c)
+//   • Screen mirror: scrcpy via resolveTool + winget install offer
+//     (Genymobile.scrcpy), resolution cap, bitrate, stay-awake, screen-off,
+//     show-touches, start / record-to-file / stop with a live process probe
+// Reads auto-run; every mutation runs only on explicit click and destructive
+// ones (reboot, delete, push, install, uninstall) confirm first.
 // ============================================================================
 
 interface AdbDevice {
@@ -31,24 +45,77 @@ interface AdbFileEntry {
   isDir: boolean;
 }
 
-const TABS = ['console', 'files', 'apk', 'logcat'] as const;
+interface DeviceInfo {
+  model: string;
+  ver: string;
+  sdk: string;
+  battery: string;
+}
+
+const TABS = ['console', 'files', 'apk', 'logcat', 'mirror'] as const;
 type Tab = (typeof TABS)[number];
 
 const REBOOT_MODES = ['', 'bootloader', 'recovery'] as const;
 const LOG_LEVELS = ['V', 'D', 'I', 'W', 'E'] as const;
+const PKG_MODES = ['third', 'system', 'all'] as const;
+type PkgMode = (typeof PKG_MODES)[number];
 
-// Run adb with an argument list; never throws (returns a failed CommandOutput).
-async function adb(args: string[]): Promise<CommandOutput> {
+// scrcpy option choices — same sets the C# combo boxes offer.
+const MAX_SIZES = ['1920', '1280', '1024', '800'] as const;
+const BITRATES = ['2', '4', '8', '12', '16'] as const;
+
+const REMOTE_SHOT = '/sdcard/winforge_screen.png';
+
+// ── low-level runners (never throw; browser preview returns a no-op stub) ───
+
+async function runCmdSafe(program: string, args: string[]): Promise<CommandOutput> {
   if (!isTauri()) return { stdout: '', stderr: '', code: -1, success: false };
   try {
-    return await runCommand('adb', args);
+    return await runCommand(program, args);
   } catch (e) {
     return { stdout: '', stderr: String(e), code: -1, success: false };
   }
 }
 
+async function pshell(script: string): Promise<CommandOutput> {
+  if (!isTauri()) return { stdout: '', stderr: '', code: -1, success: false };
+  try {
+    return await runPowershell(script);
+  } catch (e) {
+    return { stdout: '', stderr: String(e), code: -1, success: false };
+  }
+}
+
+// Resolve adb once (bundled copy → PATH) and reuse it for every call.
+let adbExeCache: Promise<string> | null = null;
+function adbExe(): Promise<string> {
+  if (!adbExeCache) {
+    adbExeCache = resolveTool('adb')
+      .then((r) => r.path ?? 'adb')
+      .catch(() => 'adb');
+  }
+  return adbExeCache;
+}
+
+async function adb(args: string[]): Promise<CommandOutput> {
+  if (!isTauri()) return { stdout: '', stderr: '', code: -1, success: false };
+  return runCmdSafe(await adbExe(), args);
+}
+
 function combine(dir: string, name: string): string {
   return (dir.endsWith('/') ? dir : dir + '/') + name;
+}
+
+/** PowerShell single-quote escape. */
+function psq(s: string): string {
+  return s.replace(/'/g, "''");
+}
+
+/** Best output text for a result; in the browser preview explain instead of `exit -1`. */
+function resultText(r: CommandOutput, previewFallback: string): string {
+  const s = (r.stdout || r.stderr).trim();
+  if (s) return s;
+  return isTauri() ? `exit ${r.code}` : previewFallback;
 }
 
 export function AndroidAdbModule() {
@@ -56,17 +123,32 @@ export function AndroidAdbModule() {
   const [tab, setTab] = useState<Tab>('console');
   const [serial, setSerial] = useState('');
   const [ip, setIp] = useState('');
+  const [showPair, setShowPair] = useState(false);
+  const [pairHost, setPairHost] = useState('');
+  const [pairCode, setPairCode] = useState('');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // ── adb engine + device list ─────────────────────────────────────────────
-  const engine = useAsync<{ ok: boolean; version: string }>(async () => {
+  const live = isTauri();
+
+  // ── adb engine (resolveTool → version banner) ────────────────────────────
+  const engine = useAsync<{ ok: boolean; version: string; source: string }>(async () => {
+    if (!live) return { ok: false, version: '', source: '' };
+    let source = '';
+    try {
+      const res = await resolveTool('adb');
+      source = res.source;
+      adbExeCache = Promise.resolve(res.path ?? 'adb'); // refresh the cached resolution
+    } catch {
+      adbExeCache = Promise.resolve('adb');
+    }
     const r = await adb(['version']);
     const ok = /Android Debug Bridge/i.test(r.stdout);
     const first = r.stdout.split('\n').find((l) => /version/i.test(l)) ?? '';
-    return { ok, version: first.trim() };
+    return { ok, version: first.trim(), source };
   }, []);
 
+  // ── device list (adb devices -l → serial / state / model) ────────────────
   const devicesQ = useAsync<AdbDevice[]>(async () => {
     const r = await adb(['devices', '-l']);
     const out: AdbDevice[] = [];
@@ -95,11 +177,37 @@ export function AndroidAdbModule() {
     if (serial && devices.some((d) => d.serial === serial)) return serial;
     return devices[0]?.serial ?? '';
   }, [serial, devices]);
+  const activeDevice = devices.find((d) => d.serial === activeSerial) ?? null;
+
+  // ── selected-device property strip (model / Android / battery) — read-only
+  const infoQ = useAsync<DeviceInfo | null>(async () => {
+    if (!live || !activeSerial) return null;
+    const r = await adb([
+      '-s',
+      activeSerial,
+      'shell',
+      'echo WF_MODEL:$(getprop ro.product.model); echo WF_VER:$(getprop ro.build.version.release); echo WF_SDK:$(getprop ro.build.version.sdk); dumpsys battery | grep level:',
+    ]);
+    if (!r.stdout.trim()) return null;
+    const info: DeviceInfo = { model: '', ver: '', sdk: '', battery: '' };
+    for (const raw of r.stdout.replace(/\r/g, '').split('\n')) {
+      const line = raw.trim();
+      if (line.startsWith('WF_MODEL:')) info.model = line.slice('WF_MODEL:'.length).trim();
+      else if (line.startsWith('WF_VER:')) info.ver = line.slice('WF_VER:'.length).trim();
+      else if (line.startsWith('WF_SDK:')) info.sdk = line.slice('WF_SDK:'.length).trim();
+      else {
+        const m = /^level:\s*(\d+)/.exec(line);
+        if (m && m[1]) info.battery = m[1];
+      }
+    }
+    return info;
+  }, [activeSerial]);
 
   const refreshAll = useCallback(() => {
     engine.reload();
     devicesQ.reload();
-  }, [engine, devicesQ]);
+    infoQ.reload();
+  }, [engine, devicesQ, infoQ]);
 
   const requireDevice = (): string | null => {
     if (!activeSerial) {
@@ -109,6 +217,7 @@ export function AndroidAdbModule() {
     return activeSerial;
   };
 
+  // ── wireless connect / disconnect / pair, adb server restart ─────────────
   const connect = async (verb: 'connect' | 'disconnect') => {
     const target = ip.trim();
     if (!target) return;
@@ -116,7 +225,29 @@ export function AndroidAdbModule() {
     setMsg(null);
     const r = await adb([verb, target]);
     setBusy(false);
-    setMsg({ ok: r.success, text: (r.stdout || r.stderr).trim() || `exit ${r.code}` });
+    setMsg({ ok: r.success, text: resultText(r, t('adb.previewNote')) });
+    devicesQ.reload();
+  };
+
+  const pair = async () => {
+    const host = pairHost.trim();
+    const code = pairCode.trim();
+    if (!host || !code) return;
+    setBusy(true);
+    setMsg(null);
+    const r = await adb(['pair', host, code]);
+    setBusy(false);
+    setMsg({ ok: r.success, text: resultText(r, t('adb.previewNote')) });
+    devicesQ.reload();
+  };
+
+  const killServer = async () => {
+    setBusy(true);
+    setMsg(null);
+    await adb(['kill-server']);
+    const r = await adb(['start-server']);
+    setBusy(false);
+    setMsg({ ok: r.success, text: r.success ? t('adb.killServerDone') : resultText(r, t('adb.previewNote')) });
     devicesQ.reload();
   };
 
@@ -131,13 +262,23 @@ export function AndroidAdbModule() {
     if (mode) args.push(mode);
     const r = await adb(args);
     setBusy(false);
-    setMsg({ ok: r.success, text: r.success ? t('adb.rebootSent') : (r.stderr || r.stdout).trim() });
+    setMsg({ ok: r.success, text: r.success ? t('adb.rebootSent') : resultText(r, t('adb.previewNote')) });
   };
+
+  const TAB_LABELS: Record<Tab, string> = {
+    console: t('adb.tab.console'),
+    files: t('adb.tab.files'),
+    apk: t('adb.tab.apk'),
+    logcat: t('adb.tab.logcat'),
+    mirror: t('adb.tabMirror'),
+  };
+
+  const info = infoQ.data;
 
   return (
     <div className="mod">
       <p className="count-note" style={{ marginTop: 0 }}>
-        {t('adb.blurb')}
+        {t('adb.blurbFull')}
       </p>
 
       <ModuleToolbar>
@@ -174,17 +315,85 @@ export function AndroidAdbModule() {
         >
           {t('adb.disconnect')}
         </button>
+        <button className="mini" onClick={() => setShowPair((v) => !v)}>
+          {t('adb.pairToggle')}
+        </button>
+        <button className="mini" onClick={killServer} disabled={busy}>
+          {t('adb.killServer')}
+        </button>
         <span className="count-note">{t('adb.deviceCount', { num: devices.length })}</span>
       </ModuleToolbar>
 
-      {engine.data && !engine.data.ok && (
-        <p className="mod-msg">{t('adb.noAdb')}</p>
+      {showPair && (
+        <>
+          <ModuleToolbar>
+            <input
+              className="mod-search"
+              style={{ minWidth: 240 }}
+              placeholder={t('adb.pairHostPlaceholder')}
+              value={pairHost}
+              onChange={(e) => setPairHost(e.target.value)}
+            />
+            <input
+              className="mod-search"
+              style={{ width: 140 }}
+              placeholder={t('adb.pairCodePlaceholder')}
+              value={pairCode}
+              onChange={(e) => setPairCode(e.target.value)}
+            />
+            <button
+              className="mini primary"
+              onClick={pair}
+              disabled={busy || !pairHost.trim() || !pairCode.trim()}
+            >
+              {t('adb.pairBtn')}
+            </button>
+          </ModuleToolbar>
+          <p className="count-note" style={{ marginTop: 0 }}>
+            {t('adb.pairHint')}
+          </p>
+        </>
+      )}
+
+      {!live && (
+        <p className="count-note" style={{ marginTop: 0 }}>
+          {t('adb.previewNote')}
+        </p>
+      )}
+      {live && engine.data && !engine.data.ok && (
+        <>
+          <p className="mod-msg">{t('adb.noAdb')}</p>
+          <WingetInstall id="Google.PlatformTools" label={t('adb.installAdb')} onDone={refreshAll} />
+        </>
       )}
       {engine.data?.ok && engine.data.version && (
         <p className="count-note" style={{ marginTop: 0 }}>
-          <StatusDot ok label={engine.data.version} />
+          <StatusDot
+            ok
+            label={engine.data.version + (engine.data.source ? ` · ${engine.data.source}` : '')}
+          />
         </p>
       )}
+
+      {activeDevice && (
+        <p className="count-note" style={{ marginTop: 0 }}>
+          <StatusDot
+            ok={activeDevice.state === 'device'}
+            label={`${activeDevice.serial} · ${activeDevice.state}`}
+          />
+          {info && (
+            <>
+              {' · '}
+              {t('adb.infoModel')}: {info.model || activeDevice.model || '—'}
+              {' · '}
+              {t('adb.infoAndroid', { ver: info.ver || '?', sdk: info.sdk || '?' })}
+              {' · '}
+              {t('adb.infoBattery', { pct: info.battery || '?' })}
+            </>
+          )}
+        </p>
+      )}
+
       {msg && (
         <pre className={`cmd-out${msg.ok ? '' : ' error'}`} style={{ whiteSpace: 'pre-wrap' }}>
           {msg.text}
@@ -200,7 +409,7 @@ export function AndroidAdbModule() {
             className={`mod-tab${id === tab ? ' active' : ''}`}
             onClick={() => setTab(id)}
           >
-            {t(`adb.tab.${id}`)}
+            {TAB_LABELS[id]}
           </button>
         ))}
       </div>
@@ -231,6 +440,9 @@ export function AndroidAdbModule() {
         {tab === 'logcat' && (
           <LogcatTab serial={activeSerial} requireDevice={requireDevice} />
         )}
+        {tab === 'mirror' && (
+          <MirrorTab serial={activeSerial} requireDevice={requireDevice} setMsg={setMsg} />
+        )}
       </div>
     </div>
   );
@@ -239,15 +451,13 @@ export function AndroidAdbModule() {
 // ── shared prop shapes ──────────────────────────────────────────────────────
 type SetMsg = (m: { ok: boolean; text: string } | null) => void;
 
-// `serial` drives re-renders/keying at the call site; each tab resolves the live
-// device through requireDevice(), so the sub-components don't read it directly.
 interface TabBase {
   serial: string;
   requireDevice: () => string | null;
   setMsg: SetMsg;
 }
 
-// ── Console tab: screenshot / logcat / packages / shell / reboot ────────────
+// ── Console tab: screenshot / logcat / packages / install APK / shell / reboot
 function ConsoleTab({
   requireDevice,
   reboot,
@@ -263,6 +473,8 @@ function ConsoleTab({
   const [out, setOut] = useState('');
   const [shot, setShot] = useState<string | null>(null);
   const [cmd, setCmd] = useState('');
+  const [apkPath, setApkPath] = useState('');
+  const [savePath, setSavePath] = useState('');
 
   const run = async (label: string, work: () => Promise<CommandOutput>) => {
     if (!requireDevice()) return;
@@ -271,7 +483,7 @@ function ConsoleTab({
     setShot(null);
     const r = await work();
     setBusy(false);
-    setOut(`$ ${label}\n\n${(r.stdout || r.stderr).trim()}`);
+    setOut(`$ ${label}\n\n${resultText(r, t('adb.previewNote'))}`);
   };
 
   const screenshot = async () => {
@@ -292,12 +504,46 @@ function ConsoleTab({
     }
   };
 
+  // C#-parity screenshot: screencap to a device temp file, pull it locally, clean up.
+  const saveShot = async () => {
+    const s = requireDevice();
+    if (!s) return;
+    const local = savePath.trim();
+    if (!local) return;
+    setBusy(true);
+    setMsg(null);
+    const cap = await adb(['-s', s, 'shell', 'screencap', '-p', REMOTE_SHOT]);
+    if (!cap.success) {
+      setBusy(false);
+      setMsg({ ok: false, text: resultText(cap, t('adb.previewNote')) });
+      return;
+    }
+    const pulled = await adb(['-s', s, 'pull', REMOTE_SHOT, local]);
+    void adb(['-s', s, 'shell', 'rm', '-f', REMOTE_SHOT]);
+    setBusy(false);
+    setMsg({
+      ok: pulled.success,
+      text: pulled.success ? t('adb.shotSaved', { path: local }) : resultText(pulled, t('adb.previewNote')),
+    });
+  };
+
+  const installApk = async () => {
+    const s = requireDevice();
+    if (!s) return;
+    const p = apkPath.trim();
+    if (!p) return;
+    if (!confirm(t('adb.confirmInstall', { path: p }))) return;
+    await run(`adb install -r "${p}"`, () => adb(['-s', s, 'install', '-r', p]));
+  };
+
   const shell = async () => {
     const s = requireDevice();
     if (!s) return;
     const c = cmd.trim();
     if (!c) return;
-    await run(`adb shell ${c}`, () => adb(['-s', s, 'shell', ...c.split(/\s+/)]));
+    // Pass the whole command as one argv entry so pipes/quotes reach the device
+    // shell intact — same as the C# `adb -s {serial} shell {command}`.
+    await run(`adb shell ${c}`, () => adb(['-s', s, 'shell', c]));
   };
 
   return (
@@ -346,6 +592,32 @@ function ConsoleTab({
         />
         <button className="mini primary" onClick={shell} disabled={busy || !cmd.trim()}>
           {t('adb.run')}
+        </button>
+      </div>
+
+      <div className="mod-toolbar">
+        <input
+          className="mod-search"
+          style={{ flex: 1 }}
+          placeholder={t('adb.apkPathPlaceholder')}
+          value={apkPath}
+          onChange={(e) => setApkPath(e.target.value)}
+        />
+        <button className="mini" onClick={installApk} disabled={busy || !apkPath.trim()}>
+          {t('adb.installApk')}
+        </button>
+      </div>
+
+      <div className="mod-toolbar">
+        <input
+          className="mod-search"
+          style={{ flex: 1 }}
+          placeholder={t('adb.shotSavePlaceholder')}
+          value={savePath}
+          onChange={(e) => setSavePath(e.target.value)}
+        />
+        <button className="mini" onClick={saveShot} disabled={busy || !savePath.trim()}>
+          {t('adb.saveShot')}
         </button>
       </div>
 
@@ -427,7 +699,7 @@ function FilesTab({
     setMsg(null);
     const r = await adb(['-s', s, 'pull', combine(cwd, selected), local]);
     setBusy(false);
-    setMsg({ ok: r.success, text: (r.stdout || r.stderr).trim() });
+    setMsg({ ok: r.success, text: resultText(r, t('adb.previewNote')) });
   };
 
   const push = async () => {
@@ -444,7 +716,7 @@ function FilesTab({
     const base = local.replace(/[/\\]+$/, '').split(/[/\\]/).pop() ?? 'file';
     const r = await adb(['-s', s, 'push', local, combine(cwd, base)]);
     setBusy(false);
-    setMsg({ ok: r.success, text: (r.stdout || r.stderr).trim() });
+    setMsg({ ok: r.success, text: resultText(r, t('adb.previewNote')) });
     if (r.success) loadDir(cwd);
   };
 
@@ -460,7 +732,7 @@ function FilesTab({
     setMsg(null);
     const r = await adb(['-s', s, 'shell', 'rm', '-rf', remote]);
     setBusy(false);
-    setMsg({ ok: r.success, text: r.success ? t('adb.deleted', { path: remote }) : (r.stderr || r.stdout).trim() });
+    setMsg({ ok: r.success, text: r.success ? t('adb.deleted', { path: remote }) : resultText(r, t('adb.previewNote')) });
     if (r.success) loadDir(cwd);
   };
 
@@ -543,10 +815,11 @@ function FilesTab({
   );
 }
 
-// ── APK backup tab: list packages, resolve APK path + pull ──────────────────
+// ── APK tab: list (third-party / system / all), backup via pm path + pull,
+//    uninstall (confirmed) ───────────────────────────────────────────────────
 function ApkTab({ requireDevice, setMsg }: TabBase) {
   const { t } = useTranslation();
-  const [includeSystem, setIncludeSystem] = useState(false);
+  const [mode, setMode] = useState<PkgMode>('third');
   const [packages, setPackages] = useState<string[]>([]);
   const [filter, setFilter] = useState('');
   const [localDir, setLocalDir] = useState('');
@@ -559,7 +832,8 @@ function ApkTab({ requireDevice, setMsg }: TabBase) {
     setLoading(true);
     setMsg(null);
     const args = ['-s', s, 'shell', 'pm', 'list', 'packages'];
-    if (!includeSystem) args.push('-3');
+    if (mode === 'third') args.push('-3');
+    else if (mode === 'system') args.push('-s');
     const r = await adb(args);
     setLoading(false);
     const list: string[] = [];
@@ -600,7 +874,20 @@ function ApkTab({ requireDevice, setMsg }: TabBase) {
     const local = combine(dir.replace(/[/\\]+$/, ''), `${pkg}.apk`);
     const r = await adb(['-s', s, 'pull', remote, local]);
     setBusy(false);
-    setMsg({ ok: r.success, text: r.success ? local : (r.stderr || r.stdout).trim() });
+    setMsg({ ok: r.success, text: r.success ? local : resultText(r, t('adb.previewNote')) });
+  };
+
+  const uninstall = async (pkg: string) => {
+    const s = requireDevice();
+    if (!s) return;
+    if (!confirm(t('adb.confirmUninstall', { pkg }))) return;
+    setBusy(true);
+    setMsg(null);
+    const r = await adb(['-s', s, 'uninstall', pkg]);
+    setBusy(false);
+    const ok = r.success && /Success/i.test(r.stdout);
+    setMsg({ ok, text: ok ? t('adb.uninstalled', { pkg }) : resultText(r, t('adb.previewNote')) });
+    if (ok) void load();
   };
 
   const rows = useMemo(() => {
@@ -613,11 +900,16 @@ function ApkTab({ requireDevice, setMsg }: TabBase) {
     {
       key: 'act',
       header: '',
-      width: 120,
+      width: 220,
       render: (p) => (
-        <button className="mini" disabled={busy} onClick={() => backup(p)}>
-          {t('adb.backup')}
-        </button>
+        <span className="row-actions">
+          <button className="mini" disabled={busy} onClick={() => backup(p)}>
+            {t('adb.backup')}
+          </button>
+          <button className="mini" disabled={busy} onClick={() => uninstall(p)}>
+            {t('adb.uninstall')}
+          </button>
+        </span>
       ),
     },
   ];
@@ -628,14 +920,15 @@ function ApkTab({ requireDevice, setMsg }: TabBase) {
         <button className="mini" onClick={load} disabled={loading}>
           {t('adb.listApps')}
         </button>
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={includeSystem}
-            onChange={(e) => setIncludeSystem(e.target.checked)}
-          />
-          {t('adb.includeSystem')}
-        </label>
+        <select
+          className="mod-search"
+          value={mode}
+          onChange={(e) => setMode(e.target.value as PkgMode)}
+        >
+          <option value="third">{t('adb.pkgThird')}</option>
+          <option value="system">{t('adb.pkgSystem')}</option>
+          <option value="all">{t('adb.pkgAll')}</option>
+        </select>
         <input
           className="mod-search"
           placeholder={t('adb.filterApps')}
@@ -660,19 +953,26 @@ function ApkTab({ requireDevice, setMsg }: TabBase) {
   );
 }
 
-// ── Live logcat tab: bounded snapshot with level + tag filter ────────────────
-function LogcatTab({ requireDevice }: Omit<TabBase, 'setMsg'>) {
+// ── Logcat tab: snapshot with level + tag filter, follow mode, buffer clear ─
+function LogcatTab({ serial, requireDevice }: Omit<TabBase, 'setMsg'>) {
   const { t } = useTranslation();
   const [level, setLevel] = useState<(typeof LOG_LEVELS)[number]>('I');
   const [tag, setTag] = useState('');
   const [lines, setLines] = useState('400');
   const [out, setOut] = useState('');
   const [busy, setBusy] = useState(false);
+  const [follow, setFollow] = useState(false);
+  const runningRef = useRef(false);
 
-  const snapshot = async () => {
-    const s = requireDevice();
-    if (!s) return;
-    setBusy(true);
+  const snapshot = async (silent = false) => {
+    const s = silent ? serial || null : requireDevice();
+    if (!s) {
+      if (silent) setFollow(false);
+      return;
+    }
+    if (runningRef.current) return;
+    runningRef.current = true;
+    if (!silent) setBusy(true);
     const count = String(Math.max(1, Math.min(5000, parseInt(lines, 10) || 400)));
     const args = ['-s', s, 'logcat', '-d', '-t', count];
     const tagTrim = tag.trim();
@@ -682,8 +982,28 @@ function LogcatTab({ requireDevice }: Omit<TabBase, 'setMsg'>) {
       args.push(`*:${level}`);
     }
     const r = await adb(args);
-    setBusy(false);
+    runningRef.current = false;
+    if (!silent) setBusy(false);
     setOut((r.stdout || r.stderr).trim() || t('adb.logcatEmpty'));
+  };
+
+  // Follow mode — the web equivalent of the C# streaming logcat: re-capture a
+  // bounded snapshot every 3 s while enabled. Started only by explicit click.
+  useEffect(() => {
+    if (!follow) return;
+    void snapshot(true);
+    const id = window.setInterval(() => void snapshot(true), 3000);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [follow, level, tag, lines, serial]);
+
+  const clearBuffer = async () => {
+    const s = requireDevice();
+    if (!s) return;
+    setBusy(true);
+    const r = await adb(['-s', s, 'logcat', '-c']);
+    setBusy(false);
+    setOut(r.success ? t('adb.bufferCleared') : (r.stderr || r.stdout).trim() || t('adb.logcatEmpty'));
   };
 
   return (
@@ -714,16 +1034,226 @@ function LogcatTab({ requireDevice }: Omit<TabBase, 'setMsg'>) {
           onChange={(e) => setLines(e.target.value)}
           placeholder={t('adb.linesPlaceholder')}
         />
-        <button className="mini primary" onClick={snapshot} disabled={busy}>
+        <button className="mini primary" onClick={() => snapshot()} disabled={busy}>
           {t('adb.capture')}
+        </button>
+        <button className="mini" onClick={() => setFollow((f) => !f)} disabled={busy && !follow}>
+          {follow ? t('adb.stopFollow') : t('adb.followBtn')}
         </button>
         <button className="mini" onClick={() => setOut('')} disabled={busy}>
           {t('adb.clear')}
+        </button>
+        <button className="mini" onClick={clearBuffer} disabled={busy}>
+          {t('adb.clearBuffer')}
         </button>
       </div>
       <p className="count-note">{t('adb.logcatHint')}</p>
       {out && (
         <pre className="cmd-out" style={{ maxHeight: 460, overflow: 'auto' }}>
+          {out}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+// ── Screen mirror tab: scrcpy via resolveTool, options, start/record/stop ───
+function MirrorTab({ requireDevice, setMsg }: TabBase) {
+  const { t } = useTranslation();
+  const live = isTauri();
+  const [maxSize, setMaxSize] = useState('0');
+  const [bitrate, setBitrate] = useState('8');
+  const [stayAwake, setStayAwake] = useState(true);
+  const [screenOff, setScreenOff] = useState(false);
+  const [showTouches, setShowTouches] = useState(false);
+  const [recordPath, setRecordPath] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const scrcpyQ = useAsync<{ path: string | null; source: string }>(async () => {
+    if (!live) return { path: null, source: 'missing' };
+    try {
+      const r = await resolveTool('scrcpy');
+      return { path: r.path, source: r.source };
+    } catch {
+      return { path: null, source: 'missing' };
+    }
+  }, []);
+
+  const statusQ = useAsync<boolean>(async () => {
+    if (!live) return false;
+    const r = await pshell('(Get-Process -Name scrcpy -ErrorAction SilentlyContinue | Measure-Object).Count');
+    return parseInt(r.stdout.trim() || '0', 10) > 0;
+  }, []);
+  const running = statusQ.data === true;
+
+  // Mirrors ScrcpyOptions.BuildArgs() from the C# service.
+  const buildArgs = (record: boolean): string[] | null => {
+    const s = requireDevice();
+    if (!s) return null;
+    const args = ['-s', s];
+    if (maxSize !== '0') args.push('--max-size', maxSize);
+    args.push('--video-bit-rate', `${bitrate}M`);
+    if (stayAwake) args.push('--stay-awake');
+    if (screenOff) args.push('--turn-screen-off');
+    if (showTouches) args.push('--show-touches');
+    if (record) args.push('--record', recordPath.trim());
+    return args;
+  };
+
+  const start = async (record: boolean) => {
+    if (record && !recordPath.trim()) {
+      setMsg({ ok: false, text: t('adb.needRecordPath') });
+      return;
+    }
+    const args = buildArgs(record);
+    if (!args) return;
+    const exe = scrcpyQ.data?.path ?? 'scrcpy';
+    setBusy(true);
+    setMsg(null);
+    // Launch detached via Start-Process — scrcpy is long-running and owns its
+    // own window, so we must not block on it. Pre-quote args carrying spaces
+    // (PS 5.1 -ArgumentList joins with spaces without re-quoting).
+    const list = args
+      .map((a) => (a.includes(' ') ? `"${a}"` : a))
+      .map((a) => `'${psq(a)}'`)
+      .join(',');
+    const r = await pshell(`Start-Process -FilePath '${psq(exe)}' -ArgumentList @(${list}); 'ok'`);
+    setBusy(false);
+    setMsg({
+      ok: r.success,
+      text: r.success ? t('adb.mirrorStarted') : resultText(r, t('adb.previewNote')),
+    });
+    window.setTimeout(() => statusQ.reload(), 1200);
+  };
+
+  const stop = async () => {
+    setBusy(true);
+    setMsg(null);
+    const r = await pshell("Stop-Process -Name scrcpy -Force -ErrorAction SilentlyContinue; 'ok'");
+    setBusy(false);
+    setMsg({ ok: r.success, text: r.success ? t('adb.mirrorStopped') : resultText(r, t('adb.previewNote')) });
+    window.setTimeout(() => statusQ.reload(), 600);
+  };
+
+  const checkStyle = { display: 'inline-flex', alignItems: 'center', gap: 6 } as const;
+
+  return (
+    <div>
+      {live && scrcpyQ.data && !scrcpyQ.data.path && (
+        <>
+          <p className="mod-msg">{t('adb.scrcpyMissing')}</p>
+          <WingetInstall id="Genymobile.scrcpy" label={t('adb.installScrcpy')} onDone={scrcpyQ.reload} />
+        </>
+      )}
+      {scrcpyQ.data?.path && (
+        <p className="count-note" style={{ marginTop: 0 }}>
+          <StatusDot ok label={t('adb.scrcpyReady', { path: scrcpyQ.data.path })} />
+        </p>
+      )}
+
+      <div className="mod-toolbar">
+        <span className="count-note">{t('adb.resCap')}</span>
+        <select className="mod-search" value={maxSize} onChange={(e) => setMaxSize(e.target.value)}>
+          <option value="0">{t('adb.native')}</option>
+          {MAX_SIZES.map((s) => (
+            <option key={s} value={s}>
+              {s} px
+            </option>
+          ))}
+        </select>
+        <span className="count-note">{t('adb.bitrate')}</span>
+        <select className="mod-search" value={bitrate} onChange={(e) => setBitrate(e.target.value)}>
+          {BITRATES.map((b) => (
+            <option key={b} value={b}>
+              {b} Mbps
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mod-toolbar">
+        <label style={checkStyle}>
+          <input type="checkbox" checked={stayAwake} onChange={(e) => setStayAwake(e.target.checked)} />
+          {t('adb.stayAwake')}
+        </label>
+        <label style={checkStyle}>
+          <input type="checkbox" checked={screenOff} onChange={(e) => setScreenOff(e.target.checked)} />
+          {t('adb.screenOff')}
+        </label>
+        <label style={checkStyle}>
+          <input type="checkbox" checked={showTouches} onChange={(e) => setShowTouches(e.target.checked)} />
+          {t('adb.showTouches')}
+        </label>
+      </div>
+
+      <div className="mod-toolbar">
+        <button className="mini primary" onClick={() => start(false)} disabled={busy || running}>
+          {t('adb.startMirror')}
+        </button>
+        <button className="mini" onClick={stop} disabled={busy || !running}>
+          {t('adb.stopMirror')}
+        </button>
+        <StatusDot ok={running} label={running ? t('adb.mirrorRunning') : t('adb.mirrorNotRunning')} />
+        <button className="mini" onClick={statusQ.reload} disabled={busy}>
+          ⟳ {t('modules.refresh')}
+        </button>
+      </div>
+
+      <div className="mod-toolbar">
+        <input
+          className="mod-search"
+          style={{ flex: 1 }}
+          placeholder={t('adb.recordPathPlaceholder')}
+          value={recordPath}
+          onChange={(e) => setRecordPath(e.target.value)}
+        />
+        <button
+          className="mini"
+          onClick={() => start(true)}
+          disabled={busy || running || !recordPath.trim()}
+        >
+          {t('adb.recordTo')}
+        </button>
+      </div>
+
+      <p className="count-note">{t('adb.mirrorHint')}</p>
+    </div>
+  );
+}
+
+// ── one-click winget install for a missing engine (adb / scrcpy) ────────────
+function WingetInstall({ id, label, onDone }: { id: string; label: string; onDone: () => void }) {
+  const { t } = useTranslation();
+  const [busyI, setBusyI] = useState(false);
+  const [out, setOut] = useState('');
+
+  const install = async () => {
+    setBusyI(true);
+    setOut(t('adb.installing', { id }));
+    const r = await runCmdSafe('winget', [
+      'install',
+      '--id',
+      id,
+      '-e',
+      '--accept-source-agreements',
+      '--accept-package-agreements',
+      '--disable-interactivity',
+    ]);
+    const tail = (r.stdout || r.stderr).trim().split('\n').slice(-6).join('\n');
+    setOut(tail || `exit ${r.code}`);
+    setBusyI(false);
+    onDone();
+  };
+
+  return (
+    <div>
+      <div className="mod-toolbar">
+        <button className="mini primary" onClick={install} disabled={busyI || !isTauri()}>
+          {label}
+        </button>
+      </div>
+      {out && (
+        <pre className="cmd-out" style={{ whiteSpace: 'pre-wrap' }}>
           {out}
         </pre>
       )}
