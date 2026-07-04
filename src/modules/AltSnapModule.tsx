@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { runPowershell } from '../tauri/bridge';
+import { isTauri, runPowershell } from '../tauri/bridge';
 import { ModuleToolbar, StatusDot } from './common';
 
 /**
  * AltSnap · Alt 拖曳視窗 — native port of WinForge's AltSnapModule.
- * Detects the official RamonUnch.AltSnap binary, drives its lifecycle (launch / quit /
- * restart / reload / advanced settings), toggles run-at-startup (HKCU…\Run), warns about
- * conflicting hook owners, and reads/writes the high-value AltSnap.ini keys plus a raw
- * fallback editor — all live through the Tauri PowerShell bridge. AltSnap is GPL; WinForge
- * only installs and drives the binary, it never relinks its code.
+ * Detects the official RamonUnch.AltSnap binary, installs it via winget when missing, drives its
+ * lifecycle (launch / quit / restart / reload / advanced settings), toggles run-at-startup
+ * (HKCU…\Run), warns about conflicting hook owners, reads/writes the high-value AltSnap.ini keys,
+ * imports / exports the config file, and offers a raw fallback editor — all live through the Tauri
+ * PowerShell bridge. AltSnap is GPL; WinForge only installs and drives the binary, it never relinks
+ * its code.
  */
 
 // ---- curated option catalog (mirrors Catalog/AltSnapOptions.cs) ----
@@ -230,6 +231,7 @@ const OPTIONS: AltSnapOption[] = [
 // ---- PowerShell snippets ----
 
 const RUN_KEY = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
+const WINGET_ID = 'RamonUnch.AltSnap';
 
 // Locate AltSnap.exe (registry uninstall keys → well-known dirs → winget packages → PATH),
 // its running state, version, run-at-startup registry value, and any conflicting hook owner.
@@ -368,10 +370,13 @@ export function AltSnapModule() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [installing, setInstalling] = useState(false);
   const [msg, setMsg] = useState<{ kind: Kind; text: string } | null>(null);
   const [reloadOnSave, setReloadOnSave] = useState(true);
   const [rawText, setRawText] = useState('');
   const [rawOrig, setRawOrig] = useState('');
+  const [importPath, setImportPath] = useState('');
+  const [exportPath, setExportPath] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -403,6 +408,31 @@ export function AltSnapModule() {
   const exe = probe?.Exe ?? null;
 
   const flash = (kind: Kind, text: string) => setMsg({ kind, text });
+
+  // ---- install via winget (RamonUnch.AltSnap) — click-gated, then re-probe ----
+  const install = async () => {
+    if (installing) return;
+    if (!isTauri()) {
+      flash('err', t('altsnap.installNeedsDesktop'));
+      return;
+    }
+    setInstalling(true);
+    setMsg(null);
+    try {
+      const res = await runPowershell(
+        `try { & winget install --id ${WINGET_ID} -e --silent --accept-source-agreements --accept-package-agreements --disable-interactivity 2>&1 | Out-String -Width 300 } catch { $_ | Out-String; exit 1 }; exit $LASTEXITCODE`,
+      );
+      if (!res.success) {
+        throw new Error((res.stderr || res.stdout || `exit ${res.code}`).trim().slice(0, 500));
+      }
+      flash('ok', t('altsnap.installed'));
+      await load();
+    } catch (e) {
+      flash('err', `${t('altsnap.installFailed')}: ${String(e)}`);
+    } finally {
+      setInstalling(false);
+    }
+  };
 
   // Run a lifecycle command against the located exe.
   const lifecycle = async (
@@ -546,6 +576,70 @@ export function AltSnapModule() {
     }
   };
 
+  // ---- import: copy a chosen .ini file over the active AltSnap.ini (click-gated) ----
+  const importIni = async () => {
+    const src = importPath.trim();
+    if (!src) {
+      flash('err', t('altsnap.importNeedPath'));
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    const script = [
+      writeIniPathPs(exe),
+      `$src = '${psq(src)}'`,
+      `if (-not (Test-Path -LiteralPath $src)) { throw 'source not found' }`,
+      `$dir = Split-Path $ini -Parent; if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }`,
+      `Copy-Item -LiteralPath $src -Destination $ini -Force`,
+      `'ok'`,
+    ].join('; ');
+    try {
+      const res = await runPowershell(script);
+      if (!res.success) throw new Error(res.stderr.trim() || res.stdout.trim() || `exit ${res.code}`);
+      if (reloadOnSave && probe?.Running && exe) {
+        await runPowershell(`Start-Process -FilePath '${psq(exe)}' -ArgumentList '-r'`);
+      }
+      flash('ok', t('altsnap.imported'));
+      await load();
+    } catch (e) {
+      flash('err', `${t('altsnap.importFailed')}: ${String(e)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // ---- export: copy the active AltSnap.ini to a chosen path (click-gated) ----
+  const exportIni = async () => {
+    const dest = exportPath.trim();
+    if (!dest) {
+      flash('err', t('altsnap.exportNeedPath'));
+      return;
+    }
+    if (!probe?.IniPath) {
+      flash('err', t('altsnap.exportNothing'));
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    const script = [
+      `$dest = '${psq(dest)}'`,
+      `$srcIni = '${psq(probe.IniPath)}'`,
+      `if (-not (Test-Path -LiteralPath $srcIni)) { throw 'no AltSnap.ini to export' }`,
+      `$dd = Split-Path $dest -Parent; if ($dd -and -not (Test-Path $dd)) { New-Item -ItemType Directory -Path $dd -Force | Out-Null }`,
+      `Copy-Item -LiteralPath $srcIni -Destination $dest -Force`,
+      `'ok'`,
+    ].join('; ');
+    try {
+      const res = await runPowershell(script);
+      if (!res.success) throw new Error(res.stderr.trim() || res.stdout.trim() || `exit ${res.code}`);
+      flash('ok', t('altsnap.exported', { path: dest }));
+    } catch (e) {
+      flash('err', `${t('altsnap.exportFailed')}: ${String(e)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const saveRaw = async () => {
     setBusy(true);
     setMsg(null);
@@ -595,7 +689,7 @@ export function AltSnapModule() {
       <ModuleToolbar>
         <StatusDot ok={running} label={statusLabel} />
         {probe?.Version ? <span className="count-note">{t('altsnap.version', { v: probe.Version })}</span> : null}
-        <button className="mini" disabled={busy} onClick={load}>
+        <button className="mini" disabled={busy || installing} onClick={load}>
           ⟳ {t('modules.refresh')}
         </button>
       </ModuleToolbar>
@@ -603,8 +697,14 @@ export function AltSnapModule() {
       {loading && <p className="count-note">{t('modules.loading')}</p>}
       {error && <pre className="cmd-out error">{error}</pre>}
 
+      {/* ---- install offer when missing ---- */}
       {!loading && !installed && !error && (
-        <p className="mod-msg">{t('altsnap.installHint')}</p>
+        <div className="mod-toolbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
+          <p className="mod-msg" style={{ marginBottom: 0 }}>{t('altsnap.installHint')}</p>
+          <button className="mini primary" disabled={installing} onClick={install}>
+            {installing ? t('altsnap.installing') : t('altsnap.installBtn')}
+          </button>
+        </div>
       )}
 
       {probe?.Conflict && (
@@ -741,6 +841,40 @@ export function AltSnapModule() {
             </div>
           );
         })}
+      </div>
+
+      {/* ---- Import / Export ---- */}
+      <h3 className="mod-h">{t('altsnap.transferHeader')}</h3>
+      <p className="count-note" style={{ marginTop: 0 }}>
+        {t('altsnap.transferBlurb')}
+      </p>
+      <div className="mod-toolbar" style={{ alignItems: 'center' }}>
+        <input
+          className="mod-search"
+          type="text"
+          style={{ minWidth: 320, flex: '1 1 320px' }}
+          disabled={disabled}
+          placeholder={t('altsnap.importPlaceholder')}
+          value={importPath}
+          onChange={(e) => setImportPath(e.target.value)}
+        />
+        <button className="mini" disabled={disabled || !importPath.trim()} onClick={importIni}>
+          {t('altsnap.importBtn')}
+        </button>
+      </div>
+      <div className="mod-toolbar" style={{ alignItems: 'center' }}>
+        <input
+          className="mod-search"
+          type="text"
+          style={{ minWidth: 320, flex: '1 1 320px' }}
+          disabled={disabled}
+          placeholder={t('altsnap.exportPlaceholder')}
+          value={exportPath}
+          onChange={(e) => setExportPath(e.target.value)}
+        />
+        <button className="mini" disabled={disabled || !exportPath.trim() || !probe?.IniPath} onClick={exportIni}>
+          {t('altsnap.exportBtn')}
+        </button>
       </div>
 
       {/* ---- Raw editor ---- */}
