@@ -4,7 +4,9 @@
 //   node tools/port-pipeline/gap-scan.mjs [--skip tag1,tag2,...]
 import fs from 'node:fs';
 
-const ROOT = 'C:/Users/cntow/Documents/GitHub/winforge-web';
+// Derive the repo root from this file's location (<root>/tools/port-pipeline/gap-scan.mjs) so
+// TSLoc is read from the CURRENT checkout/worktree, not a hard-coded (possibly stale) path.
+const ROOT = `${import.meta.dirname}/../..`.replace(/\\/g, '/');
 const CS = 'C:/Users/cntow/Documents/GitHub/WinForge';
 const skipArg = process.argv.indexOf('--skip');
 const SKIP = new Set(skipArg >= 0 ? process.argv[skipArg + 1].split(',') : []);
