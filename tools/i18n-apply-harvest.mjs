@@ -13,8 +13,14 @@
 // Placement: EN → enB (batchB.ts) if the ns lives in enB OR yueB, else en.ts; 粵 → mirrored.
 // Always verify afterwards: npx tsc --noEmit && npx vitest run src/i18n/moduleKeys.test.ts
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const REPO = 'C:/Users/cntow/Documents/GitHub/winforge-web';
+// Target the checkout this script actually lives in (tools/ is directly under the repo root),
+// so it works correctly from a git worktree — not a hardcoded primary path. Override with I18N_REPO.
+const REPO =
+  process.env.I18N_REPO ||
+  path.dirname(path.dirname(fileURLToPath(import.meta.url))).replace(/\\/g, '/');
 const harvestPath = process.argv[2] || 'C:/Users/cntow/AppData/Local/Temp/i18n-harvested.json';
 const harvest = JSON.parse(fs.readFileSync(harvestPath, 'utf8'));
 
