@@ -126,11 +126,15 @@ carries an optional unique `id` applied at most once, so double delivery is alwa
    create/overwrite the file — no other coordination needed.
 4. **Web-root grants file**: drop `power-credits.json` next to the served app — in this repo
    `public/power-credits.json` (git-ignored, machine-local; vite serves `public/` at `/`). The
-   app polls `GET /power-credits.json` read-only every few seconds and never modifies it. It may
-   carry the `grants` array above and/or a cumulative `"totalCredits": <number>` (a monotonic
-   counter — the app grants only the delta above the highest total already consumed, so
-   overwriting the file with a growing total delivers exactly once). Unknown extra fields are
-   ignored.
+   app polls `GET /power-credits.json` read-only every few seconds and never modifies it, so the
+   writer may treat it as an **append-only ledger**: keep every grant ever issued in `grants` and
+   atomically rewrite the whole file — ids keep re-reads exactly-once. In each grant the amount
+   may be spelled `"credits"` or `"amount"` (both in credits); an optional `"unit"` must name a
+   credit unit or the entry is skipped; all other fields (reason strings, timestamps, source
+   labels, counters, …) are ignored. A file **without** a `grants` array may instead carry a
+   cumulative `"totalCredits": <number>` (monotonic counter — only the delta above the highest
+   total already consumed is granted); when a `grants` array is present, `totalCredits` is
+   treated as a redundant summary and ignored, never double-counted.
 
 ## Tech
 

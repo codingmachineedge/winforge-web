@@ -160,18 +160,64 @@ describe('external grant entrypoints', () => {
     expect(reloaded.ingestTotalCounter(4, 'webroot')).toBe(0.5);
   });
 
-  it('ingestInboxPayload handles grants and totalCredits together (extra fields ignored)', () => {
+  it('a grants array is authoritative — a redundant totalCredits summary is never double-counted', () => {
     const l = mkLedger();
     const payload = {
       version: 1,
       note: 'unrelated metadata the app never reads',
       grants: [{ id: 'g-1', credits: 1 }],
-      totalCredits: 2,
+      totalCredits: 1, // ledger-style writers emit the summary alongside the array
     };
-    expect(l.ingestInboxPayload(payload, 'webroot')).toBe(3);
+    expect(l.ingestInboxPayload(payload, 'webroot')).toBe(1);
     expect(l.ingestInboxPayload(payload, 'webroot')).toBe(0); // full re-delivery no-ops
-    expect(l.ingestInboxPayload({ ...payload, totalCredits: 5 }, 'webroot')).toBe(3);
-    expect(l.balance).toBe(6);
+    expect(l.balance).toBe(1);
+    // Without a grants array, totalCredits IS consumed (through the channel high-water mark).
+    expect(l.ingestInboxPayload({ totalCredits: 2 }, 'webroot')).toBe(2);
+    expect(l.balance).toBe(3);
+  });
+
+  it('ingests an append-only external ledger: amount/unit spelling, extra fields, exactly-once growth', () => {
+    const l = mkLedger();
+    // The shape an external ledger-style writer emits: full history on every rewrite, amounts
+    // under `amount` with a credit unit, plus metadata fields the app must ignore.
+    const entry = (n: number) => ({
+      id: `ext-${n}`,
+      amount: 1,
+      unit: 'power_generation_credit',
+      reason: `external.provider.milestone${n}`,
+      grantedAt: '2026-07-05T05:20:56Z',
+      counter: n * 5,
+    });
+    const doc = (n: number) => ({
+      version: 1,
+      source: 'external-provider',
+      target: 'some-store-label',
+      totalCredits: n,
+      grants: Array.from({ length: n }, (_, i) => entry(i + 1)),
+    });
+
+    expect(l.ingestInboxPayload(doc(1), 'webroot')).toBe(1); // first grant
+    expect(l.ingestInboxPayload(doc(1), 'webroot')).toBe(0); // unchanged re-read
+    expect(l.ingestInboxPayload(doc(3), 'webroot')).toBe(2); // ledger grew — only the new ids apply
+    expect(l.balance).toBe(3);
+
+    // A reloaded ledger (fresh app start) re-reads the same full history without re-granting.
+    const reloaded = mkLedger();
+    expect(reloaded.ingestInboxPayload(doc(3), 'webroot')).toBe(0);
+  });
+
+  it('accepts credits/amount spellings, prefers credits, and skips non-credit units', () => {
+    const l = mkLedger();
+    const paid = l.ingestInboxPayload({
+      grants: [
+        { id: 'sp-1', amount: 2 }, // amount spelling, no unit
+        { id: 'sp-2', credits: 1, amount: 9 }, // both present — credits wins
+        { id: 'sp-3', amount: 5, unit: 'watts' }, // wrong unit — not for this ledger
+        { id: 'sp-4', unit: 'credit' }, // no value at all
+      ],
+    });
+    expect(paid).toBe(3);
+    expect(l.balance).toBe(3);
   });
 
   it('grantPowerCredits() and the window global feed the shared ledger', () => {

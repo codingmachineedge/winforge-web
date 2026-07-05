@@ -38,7 +38,10 @@
 //   2. Browser inbox — write the localStorage key `winforge.powerCredits.inbox.v1` (same origin):
 //        { "grants": [ { "id": "<unique-string>", "credits": <positive number> } ] }
 //      The app ingests it on load, on every storage event (cross-tab), and each sim tick. Each
-//      grant id is applied at most once, so re-writing the same inbox is harmless.
+//      grant id is applied at most once, so re-writing the same inbox is harmless. The amount
+//      field may equally be spelled `"amount"`; a `"unit"` field, when present, must name a
+//      credit unit (any string containing "credit") or the entry is skipped; all other fields
+//      on a grant (reasons, timestamps, counters, …) are ignored.
 //   3. Desktop inbox file (Tauri app) — write the SAME JSON shape to
 //        %LOCALAPPDATA%\WinForge\power-credits\inbox.json
 //      The app polls the file every few seconds, atomically claims it (rename), applies every
@@ -46,11 +49,13 @@
 //      the id ledger makes double-delivery safe. See creditInboxDesktop.ts.
 //   4. Web-root grants file — drop `power-credits.json` next to the served app (in this repo:
 //      `public/power-credits.json`, git-ignored and machine-local; vite serves `public/` at `/`).
-//      The app polls `/power-credits.json` read-only every few seconds (creditInboxWeb.ts).
-//      Same `grants` array as above; unknown extra fields are ignored. Alternatively (or in
-//      addition) the file may carry a cumulative `"totalCredits": <number>` — a monotonic
-//      counter; the app grants the delta since the highest total it has already consumed, so
-//      overwriting the file with a growing total also delivers exactly once.
+//      The app polls `/power-credits.json` read-only every few seconds (creditInboxWeb.ts) and
+//      never modifies it, so the writer may treat it as an APPEND-ONLY LEDGER: keep every grant
+//      ever issued in `grants` and atomically rewrite the whole file — ids make re-reads
+//      idempotent. Alternatively the file may carry a cumulative `"totalCredits": <number>`
+//      (a monotonic counter; the delta above the highest consumed total is granted once).
+//      When a payload has a `grants` ARRAY, it is authoritative and `totalCredits` is treated
+//      as a redundant summary and ignored — never double-counted.
 //
 // The ledger itself follows the FuelFactory pattern: plain class, injected persistence key,
 // localStorage when present, silent in-memory fallback (tests / SSR), deterministic — no
@@ -69,8 +74,10 @@ export const CREDIT_SIM_SECONDS = 3600;
 /** Grid supply while credit-powered (MWe): full rated output — 1 credit ≈ 1,150 MWh delivered. */
 export const CREDIT_GRID_SUPPLY_MW = RatedElectricMW;
 
-/** Idempotency ledger cap — oldest applied grant ids are dropped past this. */
-const APPLIED_IDS_CAP = 500;
+// Idempotency ledger cap — oldest applied grant ids are dropped past this. Generous because
+// append-only ledger feeds re-present every id they ever issued on every poll; the cap only
+// bounds pathological storage growth, not normal operation.
+const APPLIED_IDS_CAP = 5000;
 
 const STORAGE_KEY = 'winforge.powerCredits.v1';
 /** Browser-side inbox key an external same-origin script/tab may write (format above). */
@@ -88,15 +95,23 @@ interface PersistShape {
   counters: Record<string, number>;
 }
 
-/** One entry of an inbox payload (browser key or desktop file). */
+/**
+ * One entry of an inbox payload. The amount may be spelled `credits` or `amount` (both in
+ * credits); `unit`, when present, must name a credit unit. Everything else is ignored.
+ */
 export interface CreditGrant {
   id: string;
-  credits: number;
+  credits?: number;
+  amount?: number;
+  unit?: string;
 }
 
 export interface CreditInboxPayload {
   grants?: CreditGrant[];
-  /** Optional cumulative alternative to `grants`: a monotonic total; deltas are granted once. */
+  /**
+   * Cumulative ALTERNATIVE to `grants` (monotonic total; deltas granted once). Ignored whenever
+   * a `grants` array is present — ledger-style writers emit both, and the array wins.
+   */
   totalCredits?: number;
 }
 
@@ -242,24 +257,29 @@ export class PowerCreditLedger {
 
   /**
    * Apply an inbox payload (inbox key / inbox file / web-root grants file — format documented at
-   * the top). Each grant id is applied at most once ever; malformed entries are skipped; an
-   * optional cumulative `totalCredits` is consumed through the channel high-water mark.
-   * Returns credits added.
+   * the top). Each grant id is applied at most once ever; the amount may be spelled `credits` or
+   * `amount`; a non-credit `unit` (or any other malformed entry) is skipped. When the payload has
+   * a `grants` ARRAY it is authoritative and `totalCredits` is ignored (ledger-style writers emit
+   * it as a redundant summary); otherwise a cumulative `totalCredits` is consumed through the
+   * channel high-water mark. Returns credits added.
    */
   ingestInboxPayload(payload: unknown, channel = 'inbox'): number {
     if (typeof payload !== 'object' || payload === null) return 0;
     const { grants, totalCredits } = payload as CreditInboxPayload;
-    let added = 0;
-    if (Array.isArray(grants)) {
-      for (const g of grants) {
-        if (typeof g !== 'object' || g === null) continue;
-        if (typeof g.id !== 'string' || g.id.length === 0 || !finitePos(g.credits)) continue;
-        const before = this._balance;
-        this.grant(g.credits, g.id);
-        added += this._balance - before;
-      }
+    if (!Array.isArray(grants)) {
+      return typeof totalCredits === 'number' ? this.ingestTotalCounter(totalCredits, channel) : 0;
     }
-    if (typeof totalCredits === 'number') added += this.ingestTotalCounter(totalCredits, channel);
+    let added = 0;
+    for (const g of grants) {
+      if (typeof g !== 'object' || g === null) continue;
+      if (typeof g.id !== 'string' || g.id.length === 0) continue;
+      if (typeof g.unit === 'string' && !/credit/i.test(g.unit)) continue; // wrong unit — not for us
+      const value = finitePos(g.credits) ? g.credits : finitePos(g.amount) ? g.amount : null;
+      if (value === null) continue;
+      const before = this._balance;
+      this.grant(value, g.id);
+      added += this._balance - before;
+    }
     return added;
   }
 

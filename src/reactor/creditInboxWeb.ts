@@ -6,14 +6,18 @@
 //
 //   GET /power-credits.json
 //   format  {
-//     "grants":       [ { "id": "<unique-string>", "credits": <positive number> } ],  // and/or
+//     "grants":       [ { "id": "<unique-string>", "credits" | "amount": <positive number>,
+//                         "unit": "<credit unit, optional>" } ],   // OR (only without grants):
 //     "totalCredits": <cumulative number>       // monotonic counter; deltas granted once
 //   }
 //
-// Unknown extra fields are ignored. Delivery is exactly-once either way: grant ids go through
-// the ledger's applied-id set, a cumulative total through the 'webroot' channel high-water mark
-// (see powerCredits.ts). The file is never modified by the app — writers may keep appending
-// grants or bumping the total in place. A 404 simply means no grants file is deployed.
+// Unknown extra fields — on the document and on each grant (reasons, timestamps, source labels,
+// counters, …) — are ignored. Delivery is exactly-once either way: grant ids go through the
+// ledger's applied-id set; a cumulative total (used only when no `grants` array is present, so
+// a redundant summary total is never double-counted) goes through the 'webroot' channel
+// high-water mark (see powerCredits.ts). The file is never modified by the app, so writers may
+// treat it as an append-only ledger: keep every grant ever issued and atomically rewrite the
+// whole file. A 404 simply means no grants file is deployed.
 
 import type { PowerCreditLedger } from './powerCredits';
 
