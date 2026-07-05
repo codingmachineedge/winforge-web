@@ -1,8 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { en } from './en';
-import { zhHant } from './zh-Hant';
-import { enB, yueB } from './batchB';
+import { enShell, yueShell } from './shell';
 import { enShellNav, yueShellNav } from './shellNav';
 import { enShellFeedback, yueShellFeedback } from './shellFeedback';
 import { enShellTheme, yueShellTheme } from './shellTheme';
@@ -10,12 +8,13 @@ import { enShellA11y, yueShellA11y } from './shellA11y';
 import { enShellSettings, yueShellSettings } from './shellSettings';
 import { enReactorUi, yueReactorUi } from './reactorUi';
 
-// batch-B modules (N–Z) keep their strings in a dedicated file to avoid collisions
-// with concurrent edits to en.ts / zh-Hant.ts. Merge them into the base bundles here.
-// Shell UI features (favorites/recents, toasts, theme, a11y) do the same, one file
-// per feature slice, each under its own shell* namespace.
-const enAll = { ...en, ...enB, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi };
-const yueAll = { ...zhHant, ...yueB, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi };
+// Only the SHELL namespaces load eagerly. The ~570 kB of per-module strings in
+// en.ts / zh-Hant.ts / batchB.ts are registered lazily via registerModuleStrings()
+// (below) when the ModuleDetail chunk loads — see src/i18n/moduleStrings.ts — so
+// they stay out of the initial bundle. enShell/yueShell (generated from en.ts /
+// zh-Hant.ts) carry the handful of namespaces the always-loaded shell needs first.
+const enAll = { ...enShell, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi };
+const yueAll = { ...yueShell, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi };
 
 // Three language modes:
 //   en        — English only
@@ -33,8 +32,8 @@ const STORAGE_KEY = 'winforge-web.lang';
 const PAIR = ' · ';
 
 /** Build the bilingual bundle: every leaf string becomes "English · 粵語". */
-type Tree = { [k: string]: string | Tree };
-function mergeBilingual(enT: Tree, yueT: Tree): Tree {
+export type Tree = { [k: string]: string | Tree };
+export function mergeBilingual(enT: Tree, yueT: Tree): Tree {
   const out: Tree = {};
   for (const k of Object.keys(enT)) {
     const ev = enT[k];

@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "gen:catalog": "node tools/gen-catalog.mjs",
     "gen:registry-keys": "node tools/gen-registry-keys.mjs",
+    "gen:i18n-shell": "node tools/gen-i18n-shell.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
