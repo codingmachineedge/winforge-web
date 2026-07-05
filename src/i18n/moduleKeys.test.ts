@@ -26,6 +26,7 @@ import { enReactorCtmt, yueReactorCtmt } from './reactorCtmt';
 import { enReactorCsf, yueReactorCsf } from './reactorCsf';
 import { enReactorReactimeter, yueReactorReactimeter } from './reactorReactimeter';
 import { enFileBrowser, yueFileBrowser } from './fileBrowser';
+import { enReactorCr, yueReactorCr } from './reactorCr';
 import baselineJson from './moduleKeys.baseline.json';
 import { enShell, yueShell } from './shell';
 import { enShellNav, yueShellNav } from './shellNav';
@@ -41,13 +42,13 @@ const enAll: Tree = {
   ...enShell, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y,
   ...enShellSettings, ...enReactorUi, ...en, ...enB, ...enReactorFuel, ...enReactorCredits,
   ...enReactorRods, ...enReactorRelief, ...enReactorPtlim, ...enReactorEsf, ...enReactorCtmt, ...enReactorCsf,
-  ...enReactorReactimeter, ...enFileBrowser,
+  ...enReactorReactimeter, ...enFileBrowser, ...enReactorCr,
 } as unknown as Tree;
 const yueAll: Tree = {
   ...yueShell, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y,
   ...yueShellSettings, ...yueReactorUi, ...zhHant, ...yueB, ...yueReactorFuel, ...yueReactorCredits,
   ...yueReactorRods, ...yueReactorRelief, ...yueReactorPtlim, ...yueReactorEsf, ...yueReactorCtmt, ...yueReactorCsf,
-  ...yueReactorReactimeter, ...yueFileBrowser,
+  ...yueReactorReactimeter, ...yueFileBrowser, ...yueReactorCr,
 } as unknown as Tree;
 
 // Files whose namespaces are not registered yet (work-in-progress integrations).

@@ -20,11 +20,15 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@fontsource/chakra-petch": "^5.2.7",
+    "@fontsource/oxanium": "^5.2.8",
+    "@fontsource/roboto-mono": "^5.2.9",
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-os": "^2.3.2",
     "@tauri-apps/plugin-shell": "^2.3.5",
     "i18next": "^23.16.8",
+    "material-symbols": "^0.45.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.1.3"

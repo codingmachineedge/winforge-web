@@ -1,0 +1,93 @@
+/* Reactor Control Room — CRT-console theme from the Material-design-rewrite handoff
+   (Reactor Control Room.dc.html). Loaded ONLY by the lazy ControlRoom chunk. */
+
+.rcr {
+  position: relative;
+  min-height: 100vh;
+  background: radial-gradient(120% 80% at 50% -10%, #0c161a 0%, #070b0d 55%, #05080a 100%);
+  font-family: 'Chakra Petch', system-ui, 'Noto Sans TC', sans-serif;
+  color: #b8ccc9;
+  --live: #35e08a;
+  --live-dim: #1c6b46;
+  --water: #35c9f0;
+  --steam: #dfeef0;
+  --warn: #ffb62e;
+  --alarm: #ff4438;
+  --panel: #0d1418;
+  --panel2: #101c21;
+  --edge: #1d2c31;
+  --edge2: #263a40;
+  --dim: #6d8480;
+  --grid-line: rgba(53, 224, 138, 0.05);
+}
+
+.rcr .msym {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+}
+.rcr .msym.fill { font-variation-settings: 'FILL' 1; }
+
+@keyframes rcr-flow { to { stroke-dashoffset: -24; } }
+@keyframes rcr-flow-rev { to { stroke-dashoffset: 24; } }
+@keyframes rcr-spin { to { transform: rotate(360deg); } }
+@keyframes rcr-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes rcr-strobe { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.8; } }
+@keyframes rcr-pulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.08); opacity: 1; } }
+
+.rcr input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 22px;
+}
+.rcr input[type='range']::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: #16232a; }
+.rcr input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 22px;
+  border-radius: 3px;
+  background: #35e08a;
+  margin-top: -8px;
+  box-shadow: 0 0 8px rgba(53, 224, 138, 0.7);
+  border: 1px solid #0a1a12;
+}
+.rcr input[type='range']:disabled::-webkit-slider-thumb { background: #4a5a56; box-shadow: none; }
+.rcr input[type='range']::-moz-range-track { height: 6px; border-radius: 3px; background: #16232a; }
+.rcr input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 22px;
+  border-radius: 3px;
+  background: #35e08a;
+  border: 1px solid #0a1a12;
+  box-shadow: 0 0 8px rgba(53, 224, 138, 0.7);
+}
+
+.rcr ::-webkit-scrollbar { width: 10px; height: 10px; }
+.rcr ::-webkit-scrollbar-track { background: #0a0f12; }
+.rcr ::-webkit-scrollbar-thumb { background: #1c2a2f; border-radius: 999px; }
+.rcr ::-webkit-scrollbar-thumb:hover { background: #2a3d43; }
+
+/* hover states the prototype expressed via style-hover attributes */
+.rcr-btn:hover { background: #12202a !important; }
+.rcr-btn-bright:hover { filter: brightness(1.15); }
+.rcr-scrambtn:hover { filter: brightness(1.1); }
+.rcr-scrambtn:active { transform: translateY(2px); }
+
+/* the scanline + vignette overlay */
+.rcr-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0.16) 3px),
+    radial-gradient(130% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcr *, .rcr *::before, .rcr *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

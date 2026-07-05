@@ -23,6 +23,7 @@ import { PtLimitMonitor, type PtLimitsView } from './ptLimits';
 import { EngineeredSafety, type EngineeredSafetyView } from './engineeredSafety';
 import { ContainmentSystem, type ContainmentView } from './containment';
 import { CsfEvaluator, type CsfTreesView } from './csfTrees';
+import { TurbineSecondary, type TurbineSecondaryView } from './turbineSecondary';
 
 const RCS_MIX_VOLUME_GAL = 80000; // source L433 — SI boron-rate reference volume
 const COLD = 35; // °C floor for temperature pulldown clamps (ReactorSim ColdTemp)
@@ -35,6 +36,7 @@ export interface AuxSnapshot {
   esf: EngineeredSafetyView;
   containment: ContainmentView;
   csf: CsfTreesView;
+  turbine: TurbineSecondaryView;
   /** Aux annunciators merged across all subsystems (bilingual parallel arrays). */
   alarmsEn: string[];
   alarmsZh: string[];
@@ -47,6 +49,7 @@ export class ReactorAux {
   readonly esf = new EngineeredSafety();
   readonly containment = new ContainmentSystem();
   readonly csf = new CsfEvaluator();
+  readonly turbine = new TurbineSecondary();
 
   // ---- one-tick-lag couplings between modules (mirror the C# end-of-tick handoffs) ----
   private _ltopArmed = false; // ptLimits (tick N) → pressureRelief (tick N+1)
@@ -61,6 +64,7 @@ export class ReactorAux {
     this.esf.reset();
     this.containment.reset();
     this.csf.reset();
+    this.turbine.reset();
     this._ltopArmed = false;
     this._ltopPorvOpen = false;
     this._prtVentKpa = 0;
@@ -142,6 +146,21 @@ export class ReactorAux {
       sim.scram();
     }
 
+    // 3b) Turbine + secondary balance-of-plant — runs after ESF so it sees the post-MSSV steam
+    //     header. Its gross MWe (breaker-gated) REPLACES the core engine's simple electric
+    //     estimate: credits, Tref turbine-load and the HUD all read sim.electricPowerMW.
+    const tOut = this.turbine.step(
+      {
+        tavgC: sim.tavg,
+        coolantFlowFraction: sim.coolantFlowFraction,
+        feedwaterFlow: sim.feedwaterFlow,
+        steamPressureMPa: sim.steamPressure,
+        meltdown: sim.mode === ReactorMode.Meltdown,
+      },
+      dt,
+    );
+    sim.electricPowerMW = tOut.electricMW;
+
     // 4) Containment — pressure/temperature lump, Hi-1/2/3, spray, sump, RCP seal-LOCA.
     const cOut = this.containment.step(
       {
@@ -203,6 +222,7 @@ export class ReactorAux {
     const esf = this.esf.view();
     const containment = this.containment.view();
     const csf = this.csf.view();
+    const turbine = this.turbine.view();
 
     const alarmsEn: string[] = [];
     const alarmsZh: string[] = [];
@@ -218,7 +238,7 @@ export class ReactorAux {
     push(esf.activeAlarmsEn, esf.activeAlarmsZh);
     push(containment.alarms.map((a) => a.en), containment.alarms.map((a) => a.zh));
 
-    return { rods, relief, ptLimits, esf, containment, csf, alarmsEn, alarmsZh };
+    return { rods, relief, ptLimits, esf, containment, csf, turbine, alarmsEn, alarmsZh };
   }
 
   // ---- operator controls (delegated to the owning module) ----
@@ -251,5 +271,8 @@ export class ReactorAux {
   }
   restoreSealCooling(): void {
     this.containment.restoreSealCooling();
+  }
+  setTurbineLatched(on: boolean): void {
+    this.turbine.setLatched(on);
   }
 }

@@ -69,6 +69,7 @@ export interface UseReactorSim {
   restoreSealCooling: () => void;
   markReactimeter: () => void;
   clearReactimeterMark: () => void;
+  setTurbine: (on: boolean) => void;
   redeemAutoStartHour: () => boolean;
   setRunning: (v: boolean) => void;
   setSpeed: (v: number) => void;
@@ -403,11 +404,20 @@ export function useReactorSim(): UseReactorSim {
     setState(sim.state());
   }, [sim]);
 
+  const setTurbine = useCallback((on: boolean) => {
+    aux.setTurbineLatched(on);
+    setAuxSnap(aux.view());
+  }, [aux]);
+
   const warmStart = useCallback(() => {
     sim.warmStartCritical();
+    // The Control Room's "live plant to walk into": turbine latched so the generator syncs and
+    // the grid sees megawatts within seconds of the warm start (design reference behaviour).
+    aux.setTurbineLatched(true);
     setRunning(true);
     setState(sim.state());
-  }, [sim]);
+    setAuxSnap(aux.view());
+  }, [sim, aux]);
 
   return {
     state,
@@ -431,6 +441,7 @@ export function useReactorSim(): UseReactorSim {
     restoreSealCooling,
     markReactimeter,
     clearReactimeterMark,
+    setTurbine,
     redeemAutoStartHour,
     setRunning,
     setSpeed,

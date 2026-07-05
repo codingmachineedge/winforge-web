@@ -20,6 +20,7 @@ import { enReactorCtmt, yueReactorCtmt } from './reactorCtmt';
 import { enReactorCsf, yueReactorCsf } from './reactorCsf';
 import { enReactorReactimeter, yueReactorReactimeter } from './reactorReactimeter';
 import { enFileBrowser, yueFileBrowser } from './fileBrowser';
+import { enReactorCr, yueReactorCr } from './reactorCr';
 
 let registered = false;
 
@@ -31,12 +32,12 @@ export function registerModuleStrings(): void {
   const enMods = {
     ...en, ...enB, ...enReactorFuel, ...enReactorCredits,
     ...enReactorRods, ...enReactorRelief, ...enReactorPtlim, ...enReactorEsf, ...enReactorCtmt, ...enReactorCsf,
-    ...enReactorReactimeter, ...enFileBrowser,
+    ...enReactorReactimeter, ...enFileBrowser, ...enReactorCr,
   };
   const yueMods = {
     ...zhHant, ...yueB, ...yueReactorFuel, ...yueReactorCredits,
     ...yueReactorRods, ...yueReactorRelief, ...yueReactorPtlim, ...yueReactorEsf, ...yueReactorCtmt, ...yueReactorCsf,
-    ...yueReactorReactimeter, ...yueFileBrowser,
+    ...yueReactorReactimeter, ...yueFileBrowser, ...yueReactorCr,
   };
   const biMods = mergeBilingual(enMods as unknown as Tree, yueMods as unknown as Tree);
 
