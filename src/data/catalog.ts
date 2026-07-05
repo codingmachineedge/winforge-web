@@ -1,19 +1,14 @@
 // AUTO-GENERATED from WinForge MainWindow.xaml nav tree + Services/ModuleRegistry.cs.
-// Do not hand-edit; regenerate with tools/gen-catalog. 314 modules across 4 sections.
+// Regenerate with: node tools/gen-catalog.mjs [path-to-WinForge]
+// 315 modules across 4 sections.
 /* eslint-disable */
 
 export interface CatalogModule {
-  /** WinForge page tag, e.g. "module.reactor" */
   tag: string;
-  /** English title */
   en: string;
-  /** 繁體中文 title */
   zh: string;
-  /** Segoe Fluent Icons glyph (PUA codepoint) */
   glyph: string;
-  /** search keywords (bilingual) */
   keywords: string;
-  /** true when the module needs native OS access and is a web UI stub */
   native: boolean;
 }
 export interface CatalogGroup {
@@ -223,7 +218,7 @@ export const catalog: CatalogSection[] = [
     "id": "categories",
     "en": "Categories",
     "zh": "分類",
-    "native": false,
+    "native": true,
     "directModules": [],
     "groups": [
       {
@@ -237,7 +232,7 @@ export const catalog: CatalogSection[] = [
             "zh": "快速預覽",
             "glyph": "",
             "keywords": "peek preview quick look quicklook file viewer image text code markdown pdf audio video archive metadata previewer prev next folder navigate hotkey 快速預覽 預覽 檔案 圖片 文字 程式碼 影片 音訊 壓縮檔 中繼資料 熱鍵 上一個 下一個",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.newplus",
@@ -245,7 +240,7 @@ export const catalog: CatalogSection[] = [
             "zh": "範本新增",
             "glyph": "",
             "keywords": "new plus newplus powertoys template templates create file folder new menu shellnew context menu date variable substitution scaffold blank boilerplate 範本 新增 範本新增 建立 檔案 資料夾 新增選單 變數 日期 樣板 鷹架",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.archives",
@@ -253,7 +248,7 @@ export const catalog: CatalogSection[] = [
             "zh": "壓縮檔",
             "glyph": "",
             "keywords": "zip 7z rar tar gzip compress extract 解壓 壓縮",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.bulkops",
@@ -261,7 +256,7 @@ export const catalog: CatalogSection[] = [
             "zh": "批次檔案操作",
             "glyph": "",
             "keywords": "bulk file move copy delete attributes 批次 檔案",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.rename",
@@ -269,7 +264,7 @@ export const catalog: CatalogSection[] = [
             "zh": "批次改名",
             "glyph": "",
             "keywords": "rename bulk powerrename regex 改名 批次",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.duplicates",
@@ -277,7 +272,7 @@ export const catalog: CatalogSection[] = [
             "zh": "重複檔案搜尋",
             "glyph": "",
             "keywords": "duplicate hash find dedupe 重複",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.everything",
@@ -285,7 +280,7 @@ export const catalog: CatalogSection[] = [
             "zh": "即時檔案搜尋",
             "glyph": "",
             "keywords": "everything voidtools instant file search find filename ntfs mft master file table usn journal index locate substring wildcard regex fast search box open folder copy path 即時 檔案搜尋 搜尋 搵檔案 檔名 索引 萬用字元 正規表示式 主檔案表 開啟資料夾 複製路徑",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.filelocksmith",
@@ -293,7 +288,7 @@ export const catalog: CatalogSection[] = [
             "zh": "檔案鎖偵測",
             "glyph": "",
             "keywords": "file locksmith locked file folder which process is locking handle open handle restart manager rstrtmgr in use cannot delete cannot move being used by another program end task unlock who is using whatslocking lockedfile powertoys 檔案鎖 鎖住 邊個程序 鎖定 控制代碼 佔用 刪唔到 移動唔到 解鎖 結束工作 開啟中",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.diffmerge",
@@ -366,6 +361,14 @@ export const catalog: CatalogSection[] = [
             "glyph": "",
             "keywords": "rich preview preview pane peek file explorer add-ons handlers svg markdown md pdf source code json xml yaml toml gcode g-code 3d print qoi image thumbnail metadata render viewer webview2 monaco powertoys file preview drop open prev next 預覽 預覽窗格 檔案 渲染 縮圖 圖片 原始碼 開發 拖放",
             "native": true
+          },
+          {
+            "tag": "module.filebrowser",
+            "en": "File Browser",
+            "zh": "檔案瀏覽器",
+            "glyph": "",
+            "keywords": "file browser explorer folder directory drive navigate open rename copy move cut paste delete recycle bin new folder hidden read-only attributes size modified date preview text breadcrumbs path this pc my computer 檔案 瀏覽器 資料夾 磁碟 導覽 開啟 改名 複製 移動 刪除 回收筒 隱藏 預覽 路徑",
+            "native": false
           }
         ],
         "subgroups": []
@@ -781,7 +784,7 @@ export const catalog: CatalogSection[] = [
             "zh": "指令面板",
             "glyph": "",
             "keywords": "command palette powertoys run launcher quick launch alt space search box global hotkey app launcher calculator run command open url system action lock sleep shutdown restart web search fuzzy spotlight wox flow 指令面板 快速啟動 啟動器 搜尋框 全域熱鍵 計算機 執行 開網址 系統動作 鎖定 睡眠 關機 重啟 網絡搜尋 模糊搜尋",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.contextmenu",
@@ -893,7 +896,7 @@ export const catalog: CatalogSection[] = [
             "zh": "進階貼上",
             "glyph": "",
             "keywords": "advanced paste transform smart paste plain text markdown json uppercase lowercase title case base64 url encode html ocr image to text csv transpose sort unique lines ai win+shift+v 進階 貼上 轉換 純文字 大小寫 編碼 解碼 排序 去重複 圖片轉文字",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.powertoys",
@@ -925,7 +928,7 @@ export const catalog: CatalogSection[] = [
             "zh": "喇叭語音廣播",
             "glyph": "",
             "keywords": "announce announcements pa public address speaker tannoy intercom broadcast loudspeaker chime tone ding dong tts speak voice queue urgent priority alarm alert reactor evacuate countdown attention all personnel sapi 廣播 喇叭 公共廣播 語音廣播 對講 警報 警示 叮咚 排隊 緊急 優先 反應堆 撤離 倒數 注意",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.rainmeter",
@@ -1029,7 +1032,7 @@ export const catalog: CatalogSection[] = [
             "zh": "圖表編輯器",
             "glyph": "",
             "keywords": "diagram drawio draw.io diagrams.net flowchart flow chart shapes shape rectangle rounded ellipse circle diamond text node connector arrow edge link canvas whiteboard mind map mindmap org chart graph vector editor zoom snap grid duplicate z-order bring front send back png export json save load 圖表 流程圖 圖 形狀 矩形 圓角 橢圓 菱形 文字 節點 連線 箭咀 畫布 白板 心智圖 組織圖 向量 縮放 貼齊 格線 複製 層次 匯出 儲存",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.flashcards",
@@ -1037,7 +1040,7 @@ export const catalog: CatalogSection[] = [
             "zh": "間隔重複記憶卡",
             "glyph": "",
             "keywords": "flashcards flash cards anki srs spaced repetition study deck decks card front back review grade again hard good easy sm-2 sm2 ease interval due new mature memorize memorise learn quiz vocabulary csv import export 記憶卡 閃卡 間隔重複 學習 牌組 卡片 正面 背面 複習 評分 到期 成熟 背誦 記憶 默書 詞彙 匯入 匯出",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.rustdesk",
@@ -1237,7 +1240,7 @@ export const catalog: CatalogSection[] = [
             "zh": "REST API 用戶端",
             "glyph": "",
             "keywords": "api client rest http postman insomnia request response get post put patch delete head options url query params headers body json raw form url encoded x-www-form-urlencoded bearer token basic auth authorization collections environment variables substitute send httpclient status code response time size pretty print curl endpoint webhook REST 用戶端 客戶端 請求 回應 標頭 內文 查詢參數 驗證 權杖 基本驗證 集合 環境 變數 發送 狀態碼 美化 端點",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.connectors",
@@ -1261,7 +1264,7 @@ export const catalog: CatalogSection[] = [
             "zh": "世界監察",
             "glyph": "",
             "keywords": "world monitor worldmonitor news geopolitics finance commodity energy happy instability index intelligence dashboard globe map webview variant 世界 監察 新聞 地緣政治 金融 商品 能源 情報 儀表板 地球 不穩定指數",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.webcloner",
@@ -1325,7 +1328,7 @@ export const catalog: CatalogSection[] = [
             "zh": "RSS 閱讀器",
             "glyph": "",
             "keywords": "feed reader rss atom quiterss fluent reader news subscriptions articles summary xml httpclient local json offline in-app native 閱讀器 RSS Atom Feed 訂閱 新聞 文章 摘要 原生 app內 本機",
-            "native": false
+            "native": true
           },
           {
             "tag": "module.quicktype",
@@ -2925,7 +2928,7 @@ export const allModules: CatalogModule[] = [
     "zh": "快速預覽",
     "glyph": "",
     "keywords": "peek preview quick look quicklook file viewer image text code markdown pdf audio video archive metadata previewer prev next folder navigate hotkey 快速預覽 預覽 檔案 圖片 文字 程式碼 影片 音訊 壓縮檔 中繼資料 熱鍵 上一個 下一個",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.newplus",
@@ -2933,7 +2936,7 @@ export const allModules: CatalogModule[] = [
     "zh": "範本新增",
     "glyph": "",
     "keywords": "new plus newplus powertoys template templates create file folder new menu shellnew context menu date variable substitution scaffold blank boilerplate 範本 新增 範本新增 建立 檔案 資料夾 新增選單 變數 日期 樣板 鷹架",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.archives",
@@ -2941,7 +2944,7 @@ export const allModules: CatalogModule[] = [
     "zh": "壓縮檔",
     "glyph": "",
     "keywords": "zip 7z rar tar gzip compress extract 解壓 壓縮",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.bulkops",
@@ -2949,7 +2952,7 @@ export const allModules: CatalogModule[] = [
     "zh": "批次檔案操作",
     "glyph": "",
     "keywords": "bulk file move copy delete attributes 批次 檔案",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.rename",
@@ -2957,7 +2960,7 @@ export const allModules: CatalogModule[] = [
     "zh": "批次改名",
     "glyph": "",
     "keywords": "rename bulk powerrename regex 改名 批次",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.duplicates",
@@ -2965,7 +2968,7 @@ export const allModules: CatalogModule[] = [
     "zh": "重複檔案搜尋",
     "glyph": "",
     "keywords": "duplicate hash find dedupe 重複",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.everything",
@@ -2973,7 +2976,7 @@ export const allModules: CatalogModule[] = [
     "zh": "即時檔案搜尋",
     "glyph": "",
     "keywords": "everything voidtools instant file search find filename ntfs mft master file table usn journal index locate substring wildcard regex fast search box open folder copy path 即時 檔案搜尋 搜尋 搵檔案 檔名 索引 萬用字元 正規表示式 主檔案表 開啟資料夾 複製路徑",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.filelocksmith",
@@ -2981,7 +2984,7 @@ export const allModules: CatalogModule[] = [
     "zh": "檔案鎖偵測",
     "glyph": "",
     "keywords": "file locksmith locked file folder which process is locking handle open handle restart manager rstrtmgr in use cannot delete cannot move being used by another program end task unlock who is using whatslocking lockedfile powertoys 檔案鎖 鎖住 邊個程序 鎖定 控制代碼 佔用 刪唔到 移動唔到 解鎖 結束工作 開啟中",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.diffmerge",
@@ -2989,7 +2992,7 @@ export const allModules: CatalogModule[] = [
     "zh": "比對與合併",
     "glyph": "",
     "keywords": "diff merge winmerge compare comparison file folder directory side by side three way two way text line word intra-line myers lcs hash content sha256 only left only right different identical changed added removed unchanged synchronized scroll ignore whitespace next previous difference copy left right save patch beyond compare meld kdiff 比對 合併 比較 差異 檔案 資料夾 並排 逐行 逐字 雜湊 內容 相同 不同 只在左邊 只在右邊 新增 刪除 改動 忽略空白 下一處 上一處 抄左 抄右 儲存",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.hexeditor",
@@ -3054,6 +3057,14 @@ export const allModules: CatalogModule[] = [
     "glyph": "",
     "keywords": "rich preview preview pane peek file explorer add-ons handlers svg markdown md pdf source code json xml yaml toml gcode g-code 3d print qoi image thumbnail metadata render viewer webview2 monaco powertoys file preview drop open prev next 預覽 預覽窗格 檔案 渲染 縮圖 圖片 原始碼 開發 拖放",
     "native": true
+  },
+  {
+    "tag": "module.filebrowser",
+    "en": "File Browser",
+    "zh": "檔案瀏覽器",
+    "glyph": "",
+    "keywords": "file browser explorer folder directory drive navigate open rename copy move cut paste delete recycle bin new folder hidden read-only attributes size modified date preview text breadcrumbs path this pc my computer 檔案 瀏覽器 資料夾 磁碟 導覽 開啟 改名 複製 移動 刪除 回收筒 隱藏 預覽 路徑",
+    "native": false
   },
   {
     "tag": "module.doctors",
@@ -3445,7 +3456,7 @@ export const allModules: CatalogModule[] = [
     "zh": "指令面板",
     "glyph": "",
     "keywords": "command palette powertoys run launcher quick launch alt space search box global hotkey app launcher calculator run command open url system action lock sleep shutdown restart web search fuzzy spotlight wox flow 指令面板 快速啟動 啟動器 搜尋框 全域熱鍵 計算機 執行 開網址 系統動作 鎖定 睡眠 關機 重啟 網絡搜尋 模糊搜尋",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.contextmenu",
@@ -3557,7 +3568,7 @@ export const allModules: CatalogModule[] = [
     "zh": "進階貼上",
     "glyph": "",
     "keywords": "advanced paste transform smart paste plain text markdown json uppercase lowercase title case base64 url encode html ocr image to text csv transpose sort unique lines ai win+shift+v 進階 貼上 轉換 純文字 大小寫 編碼 解碼 排序 去重複 圖片轉文字",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.powertoys",
@@ -3589,7 +3600,7 @@ export const allModules: CatalogModule[] = [
     "zh": "喇叭語音廣播",
     "glyph": "",
     "keywords": "announce announcements pa public address speaker tannoy intercom broadcast loudspeaker chime tone ding dong tts speak voice queue urgent priority alarm alert reactor evacuate countdown attention all personnel sapi 廣播 喇叭 公共廣播 語音廣播 對講 警報 警示 叮咚 排隊 緊急 優先 反應堆 撤離 倒數 注意",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.rainmeter",
@@ -3685,7 +3696,7 @@ export const allModules: CatalogModule[] = [
     "zh": "圖表編輯器",
     "glyph": "",
     "keywords": "diagram drawio draw.io diagrams.net flowchart flow chart shapes shape rectangle rounded ellipse circle diamond text node connector arrow edge link canvas whiteboard mind map mindmap org chart graph vector editor zoom snap grid duplicate z-order bring front send back png export json save load 圖表 流程圖 圖 形狀 矩形 圓角 橢圓 菱形 文字 節點 連線 箭咀 畫布 白板 心智圖 組織圖 向量 縮放 貼齊 格線 複製 層次 匯出 儲存",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.flashcards",
@@ -3693,7 +3704,7 @@ export const allModules: CatalogModule[] = [
     "zh": "間隔重複記憶卡",
     "glyph": "",
     "keywords": "flashcards flash cards anki srs spaced repetition study deck decks card front back review grade again hard good easy sm-2 sm2 ease interval due new mature memorize memorise learn quiz vocabulary csv import export 記憶卡 閃卡 間隔重複 學習 牌組 卡片 正面 背面 複習 評分 到期 成熟 背誦 記憶 默書 詞彙 匯入 匯出",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.rustdesk",
@@ -3893,7 +3904,7 @@ export const allModules: CatalogModule[] = [
     "zh": "REST API 用戶端",
     "glyph": "",
     "keywords": "api client rest http postman insomnia request response get post put patch delete head options url query params headers body json raw form url encoded x-www-form-urlencoded bearer token basic auth authorization collections environment variables substitute send httpclient status code response time size pretty print curl endpoint webhook REST 用戶端 客戶端 請求 回應 標頭 內文 查詢參數 驗證 權杖 基本驗證 集合 環境 變數 發送 狀態碼 美化 端點",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.connectors",
@@ -3917,7 +3928,7 @@ export const allModules: CatalogModule[] = [
     "zh": "世界監察",
     "glyph": "",
     "keywords": "world monitor worldmonitor news geopolitics finance commodity energy happy instability index intelligence dashboard globe map webview variant 世界 監察 新聞 地緣政治 金融 商品 能源 情報 儀表板 地球 不穩定指數",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.webcloner",
@@ -3981,7 +3992,7 @@ export const allModules: CatalogModule[] = [
     "zh": "RSS 閱讀器",
     "glyph": "",
     "keywords": "feed reader rss atom quiterss fluent reader news subscriptions articles summary xml httpclient local json offline in-app native 閱讀器 RSS Atom Feed 訂閱 新聞 文章 摘要 原生 app內 本機",
-    "native": false
+    "native": true
   },
   {
     "tag": "module.quicktype",
@@ -5265,4 +5276,4 @@ export const allModules: CatalogModule[] = [
   }
 ];
 
-export const moduleCount = 314;
+export const moduleCount = 315;

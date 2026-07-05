@@ -12,6 +12,14 @@ import { zhHant } from './zh-Hant';
 import { enB, yueB } from './batchB';
 import { enReactorFuel, yueReactorFuel } from './reactorFuel';
 import { enReactorCredits, yueReactorCredits } from './reactorCredits';
+import { enReactorRods, yueReactorRods } from './reactorRods';
+import { enReactorRelief, yueReactorRelief } from './reactorRelief';
+import { enReactorPtlim, yueReactorPtlim } from './reactorPtlim';
+import { enReactorEsf, yueReactorEsf } from './reactorEsf';
+import { enReactorCtmt, yueReactorCtmt } from './reactorCtmt';
+import { enReactorCsf, yueReactorCsf } from './reactorCsf';
+import { enReactorReactimeter, yueReactorReactimeter } from './reactorReactimeter';
+import { enFileBrowser, yueFileBrowser } from './fileBrowser';
 
 let registered = false;
 
@@ -20,8 +28,16 @@ export function registerModuleStrings(): void {
   if (registered) return;
   registered = true;
 
-  const enMods = { ...en, ...enB, ...enReactorFuel, ...enReactorCredits };
-  const yueMods = { ...zhHant, ...yueB, ...yueReactorFuel, ...yueReactorCredits };
+  const enMods = {
+    ...en, ...enB, ...enReactorFuel, ...enReactorCredits,
+    ...enReactorRods, ...enReactorRelief, ...enReactorPtlim, ...enReactorEsf, ...enReactorCtmt, ...enReactorCsf,
+    ...enReactorReactimeter, ...enFileBrowser,
+  };
+  const yueMods = {
+    ...zhHant, ...yueB, ...yueReactorFuel, ...yueReactorCredits,
+    ...yueReactorRods, ...yueReactorRelief, ...yueReactorPtlim, ...yueReactorEsf, ...yueReactorCtmt, ...yueReactorCsf,
+    ...yueReactorReactimeter, ...yueFileBrowser,
+  };
   const biMods = mergeBilingual(enMods as unknown as Tree, yueMods as unknown as Tree);
 
   // deep=true (merge into the existing shell namespaces), overwrite=true.

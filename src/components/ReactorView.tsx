@@ -8,8 +8,22 @@ import { PermissiveLamps } from './reactor/PermissiveLamps';
 import { ModeAnnunciator } from './reactor/ModeAnnunciator';
 import { FuelCvcsPanel } from './reactor/FuelCvcsPanel';
 import { PowerCreditsPanel } from './reactor/PowerCreditsPanel';
+import { RodControlPanel } from './reactor/RodControlPanel';
+import { PressureReliefPanel } from './reactor/PressureReliefPanel';
+import { PtLimitsPanel } from './reactor/PtLimitsPanel';
+import { EsfPanel } from './reactor/EsfPanel';
+import { ContainmentPanel } from './reactor/ContainmentPanel';
+import { CsfPanel } from './reactor/CsfPanel';
+import { ReactimeterPanel } from './reactor/ReactimeterPanel';
 import { useNumberFmt, type NumberFmt } from './reactor/format';
+import { registerModuleStrings } from '../i18n/moduleStrings';
 import '../styles/reactor-panels.css';
+
+// ReactorView is its own lazy route (App opens it via the `reactor` view kind, not always through
+// ModuleDetail), so it must register the per-module i18n namespaces itself — reactorfuel,
+// reactorcredits and the six protection/ESF panels + reactimeter live in the lazy string bundle.
+// Idempotent: a no-op if ModuleDetail already registered them.
+registerModuleStrings();
 
 // ---- small presentational helpers ----
 
@@ -285,12 +299,64 @@ export function ReactorView() {
         <PermissiveLamps p6={st.p6} p7={st.p7} p8={st.p8} p9={st.p9} p10={st.p10} />
 
         <ModeAnnunciator tsMode={st.tsMode} />
+
+        <ReactimeterPanel
+          measuredReactivityPcm={st.measuredReactivityPcm}
+          measuredReactivityDollars={st.measuredReactivityDollars}
+          measuredPeriodSeconds={st.measuredPeriodSeconds}
+          measuredStartupRateDpm={st.measuredStartupRateDpm}
+          measuredWorthPcm={st.measuredWorthPcm}
+          hasMark={st.reactimeterHasMark}
+          positiveRateAlarm={st.positiveRateAlarm}
+          fmt={nf}
+          onMark={sim.markReactimeter}
+          onClearMark={sim.clearReactimeterMark}
+        />
       </div>
 
       {/* ---- fuel factory + CVCS blender + power credits ---- */}
       <div className="reactor-grid reactor-grid-fuel">
         <FuelCvcsPanel sim={sim} fmt={nf} />
         <PowerCreditsPanel sim={sim} fmt={nf} />
+      </div>
+
+      {/* ---- Critical Safety Function status board (the F-0 six-tree monitor) ---- */}
+      <div className="reactor-grid">
+        <CsfPanel v={sim.aux.csf} fmt={nf} />
+      </div>
+
+      {/* ---- rod-control program + Appendix-G P/T limits ---- */}
+      <div className="reactor-grid reactor-grid-fuel">
+        <RodControlPanel
+          v={sim.aux.rods}
+          fmt={nf}
+          onSetMode={sim.setRodControlMode}
+          onDrive={sim.driveRods}
+          onSetDemandTarget={sim.setRodDemandTarget}
+        />
+        <PtLimitsPanel v={sim.aux.ptLimits} fmt={nf} />
+      </div>
+
+      {/* ---- pressurizer relief / PRT + engineered safety features ---- */}
+      <div className="reactor-grid reactor-grid-fuel">
+        <PressureReliefPanel
+          v={sim.aux.relief}
+          fmt={nf}
+          onTriggerStuckPorv={sim.triggerStuckPorv}
+          onCloseBlockValve={sim.closeBlockValve}
+          onOpenBlockValve={sim.openBlockValve}
+        />
+        <EsfPanel v={sim.aux.esf} fmt={nf} onActuateSi={sim.actuateSi} onResetSi={sim.resetSi} />
+      </div>
+
+      {/* ---- containment + RCP seal-LOCA ---- */}
+      <div className="reactor-grid">
+        <ContainmentPanel
+          v={sim.aux.containment}
+          fmt={nf}
+          onSealCoolingLoss={sim.triggerSealCoolingLoss}
+          onRestoreSealCooling={sim.restoreSealCooling}
+        />
       </div>
 
       <div className="reactor-grid">

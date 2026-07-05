@@ -1,0 +1,170 @@
+/* 穩壓器釋壓面板 · Pressurizer relief panel (PORV / block valve / code safeties / PRT).
+   Imported ONLY by PressureReliefPanel.tsx. Shared chrome (.panel, .panel-title, .badge, .mini)
+   comes from global.css / reactor-panels.css; this file only adds the lamp row + mini gauges. */
+
+.relief-lamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.relief-lamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 5.2rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.relief-lamp-name {
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+}
+
+.relief-lamp-state {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.relief-lamp.lit .relief-lamp-state {
+  color: #ff5c49;
+}
+
+.relief-lamp.ok .relief-lamp-state {
+  color: #37c871;
+}
+
+.relief-lamp.warn .relief-lamp-state {
+  color: #f0b429;
+}
+
+/* Per-valve safety dots (SV-1..3) */
+.relief-sv-dots {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.relief-sv-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 1px solid rgba(127, 127, 127, 0.5);
+  background: transparent;
+}
+
+.relief-sv-dot.open {
+  background: #ff5c49;
+  border-color: #ff5c49;
+  box-shadow: 0 0 6px rgba(255, 92, 73, 0.7);
+}
+
+/* PRT mini gauges */
+.relief-prt-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.85;
+  margin: 0.4rem 0 0.3rem;
+}
+
+.relief-gauge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+}
+
+.relief-gauge-val {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.relief-gauge-val.warn {
+  color: #f0b429;
+}
+
+.relief-gauge-val.danger {
+  color: #ff5c49;
+}
+
+.relief-bar {
+  position: relative;
+  height: 0.45rem;
+  border-radius: 3px;
+  background: rgba(127, 127, 127, 0.18);
+  overflow: hidden;
+  margin-top: 0.15rem;
+}
+
+.relief-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #3a86ff, #64a7ff);
+  border-radius: 3px;
+}
+
+.relief-bar-fill.warn {
+  background: linear-gradient(90deg, #f0b429, #f7cf5e);
+}
+
+.relief-bar-fill.danger {
+  background: linear-gradient(90deg, #d64533, #ff5c49);
+}
+
+/* alarm-setpoint tick on a bar (e.g. 8 psig / 100 psig marks) */
+.relief-bar-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.relief-note {
+  font-size: 0.72rem;
+  opacity: 0.7;
+  margin: 0.45rem 0;
+  line-height: 1.35;
+}
+
+.relief-status-line {
+  font-size: 0.78rem;
+  margin: 0.3rem 0;
+}
+
+.relief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.relief-alarms {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.relief-alarm {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 92, 73, 0.15);
+  color: #ff5c49;
+  border: 1px solid rgba(255, 92, 73, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.relief-no-alarms {
+  font-size: 0.72rem;
+  opacity: 0.6;
+}

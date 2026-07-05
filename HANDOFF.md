@@ -1,8 +1,61 @@
 # winforge-web — Session Handoff
 
-_Last updated: 2026-07-03 (recovery session). The four 2026-07-02/03 parallel sessions
-(bootstrap, batch-A, batch-B, reactor-fidelity) all hit the usage limit mid-shutdown; this
-snapshot is the state after their work was recovered, merged and pushed._
+_Last updated: 2026-07-05 (reactor-protection + File Browser session). See the section
+"Session 2026-07-05" below for the latest work; the 2026-07-03 recovery notes follow it._
+
+## Session 2026-07-05 (feature/reactor-protection-wave)
+
+Three deliverables, all shipped GREEN (`tsc` 0 errors, `vite build` OK, `cargo check` OK,
+**vitest 375 passing / 28 files**):
+
+1. **Reactor protection/ESF wave (315th-and-fidelity).** Ported the six remaining
+   `ReactorSimService.cs` subsystems as pure engines + vitest suites + control-room panels +
+   trilingual i18n slices, wired onto the live `ReactorSim` by a single-writer coordinator
+   `src/reactor/reactorAux.ts` (11 integration tests). Also added the Reactimeter panel.
+   Systems: rod-bank overlap + Tavg/Tref auto control (`rodControl.ts`), PORV/code-safeties/PRT
+   + TMI stuck-PORV drill (`pressureRelief.ts`), App-G P/T limits + LTOP + PTS (`ptLimits.ts`),
+   SI + accumulators + MSSV bank (`engineeredSafety.ts`), containment + RCP seal-LOCA
+   (`containment.ts`), six CSF status trees (`csfTrees.ts`). Full ✅/🟡/❌ vs the C# source is in
+   **`docs/reactor-parity.md`**. Panels mounted in `ReactorView`; the view now calls
+   `registerModuleStrings()` itself (it's a lazy route separate from ModuleDetail).
+2. **File Browser module** (`module.filebrowser`, 315th module). New Rust backend commands
+   (`fs_list/rename/mkdir/copy/move/delete_permanent/read_text` in `commands.rs`), a full
+   front-end (`FileBrowserModule.tsx`: drives, breadcrumbs, listing with size/date/attrs, new
+   folder, rename, copy/move, delete-to-Recycle-Bin via in-process .NET, hidden toggle, text
+   preview), trilingual slice `fileBrowser.ts`. **No separate C/C# sidecar needed** — the only
+   thing Rust `std::fs` can't do (Recycle-Bin delete) is handled by an in-process
+   `Microsoft.VisualBasic.FileIO` call through `run_powershell`, matching the FileLocksmith
+   pattern. Marked `native: false` so the live UI renders in the browser preview too.
+   Web-only modules now survive catalog regen via a `WEB_EXTRAS` list in `tools/gen-catalog.mjs`.
+3. **i18n regression guard + qbt fix.** The user hit raw `qbt.*` keys in the desktop app — a
+   feature-parity wave had replaced the enB `qbt` block instead of merging, dropping 48 EN keys
+   (the whole connection form). Re-authored them (yue side was intact). Added
+   **`src/i18n/moduleKeys.test.ts`** — scans every `t('ns.key')` in modules+components and
+   asserts it resolves in EN and 粵. It surfaced **2,082 pre-existing orphans across 74
+   namespaces** (same root cause). Those are recorded in **`src/i18n/moduleKeys.baseline.json`**
+   as tracked debt; the guard fails only on NEW orphans + flags a stale baseline when you fix
+   some. **Burn the baseline down** — an author workflow + `tools/i18n-apply-harvest.mjs` are the
+   groundwork (the harvest run hung after ~24 namespaces; the apply tool has known limits, see its
+   header). This is the top open item.
+
+### Gotchas learned 2026-07-05 (keep these)
+- A **lazy route that isn't ModuleDetail** (e.g. `ReactorView` via the `reactor` view kind) must
+  call `registerModuleStrings()` itself or its lazy namespaces render as raw keys.
+- Bulk-inserting i18n keys into the big **CRLF** slice files (en.ts/zh-Hant.ts/batchB.ts) is
+  fragile: match the owning EN-vs-粵 block by a sample VALUE (not just the first `qbt: {`), insert
+  at the block OPEN with exact 4-space indent, and normalize keys to their leaf (`ns.key`→`key`).
+  Verify with `tsc` + the moduleKeys guard after every batch.
+- New reactor subsystems stay **framework-free**; the coordinator `reactorAux.ts` is the only
+  bridge that reads/writes `ReactorSim`. Inter-module couplings (LTOP↔PORV, PRT→containment) use
+  one-tick lags exactly like the C# end-of-tick handoffs.
+
+---
+
+_2026-07-03 recovery session notes follow._
+
+_The four 2026-07-02/03 parallel sessions (bootstrap, batch-A, batch-B, reactor-fidelity) all hit
+the usage limit mid-shutdown; this snapshot is the state after their work was recovered, merged
+and pushed._
 
 ## TL;DR
 

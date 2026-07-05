@@ -67,3 +67,43 @@ export function listDir(path: string): Promise<DirEntry[]> {
 export function getEnv(name: string): Promise<string> {
   return invoke<string>('get_env', { name });
 }
+
+// ---- File Browser (module.filebrowser) native backend ----
+export interface FsEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size: number;
+  modified_ms: number;
+  readonly: boolean;
+  hidden: boolean;
+  ext: string;
+}
+export interface FsListing {
+  path: string;
+  parent: string | null;
+  entries: FsEntry[];
+  truncated: boolean;
+}
+
+export function fsList(path: string, showHidden: boolean): Promise<FsListing> {
+  return invoke<FsListing>('fs_list', { path, showHidden });
+}
+export function fsRename(from: string, to: string): Promise<void> {
+  return invoke<void>('fs_rename', { from, to });
+}
+export function fsMkdir(path: string): Promise<void> {
+  return invoke<void>('fs_mkdir', { path });
+}
+export function fsCopy(from: string, to: string): Promise<void> {
+  return invoke<void>('fs_copy', { from, to });
+}
+export function fsMove(from: string, to: string): Promise<void> {
+  return invoke<void>('fs_move', { from, to });
+}
+export function fsDeletePermanent(path: string): Promise<void> {
+  return invoke<void>('fs_delete_permanent', { path });
+}
+export function fsReadText(path: string, maxBytes?: number): Promise<string> {
+  return invoke<string>('fs_read_text', { path, maxBytes });
+}

@@ -187,3 +187,190 @@ pub fn resource_bin_dir(app: tauri::AppHandle) -> Option<String> {
         .ok()
         .map(|d| d.join("bin").display().to_string())
 }
+
+// ---------------------------------------------------------------------------
+// File Browser backend (module.filebrowser): fast native directory listing with
+// Windows attributes + timestamps, plus the small set of mutating file ops the
+// UI offers. Recycle-bin delete stays in the frontend via run_powershell
+// (Microsoft.VisualBasic FileIO → SHFileOperation with FOF_ALLOWUNDO), matching
+// the FileLocksmith in-process-.NET pattern — no separate helper process.
+
+#[derive(Serialize)]
+pub struct FsEntry {
+    pub name: String,
+    pub path: String,
+    pub is_dir: bool,
+    pub size: u64,
+    pub modified_ms: i64,
+    pub readonly: bool,
+    pub hidden: bool,
+    pub ext: String,
+}
+
+#[derive(Serialize)]
+pub struct FsListing {
+    pub path: String,
+    pub parent: Option<String>,
+    pub entries: Vec<FsEntry>,
+    pub truncated: bool,
+}
+
+/// Hard cap per listing so a directory with hundreds of thousands of files
+/// can't stall the IPC bridge; the UI shows a "truncated" note past this.
+const FS_LIST_CAP: usize = 5000;
+
+#[tauri::command]
+pub fn fs_list(path: String, show_hidden: bool) -> Result<FsListing, String> {
+    let dir = std::path::Path::new(&path);
+    let rd = std::fs::read_dir(dir).map_err(|e| e.to_string())?;
+    let mut entries = Vec::new();
+    let mut truncated = false;
+    for entry in rd.flatten() {
+        if entries.len() >= FS_LIST_CAP {
+            truncated = true;
+            break;
+        }
+        let meta = match entry.metadata() {
+            Ok(m) => m,
+            Err(_) => continue, // unreadable entry (broken reparse point etc.)
+        };
+        #[cfg(windows)]
+        let attrs = {
+            use std::os::windows::fs::MetadataExt;
+            meta.file_attributes()
+        };
+        #[cfg(not(windows))]
+        let attrs = 0u32;
+        let hidden = attrs & 0x2 != 0; // FILE_ATTRIBUTE_HIDDEN
+        if hidden && !show_hidden {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        let is_dir = meta.is_dir();
+        let modified_ms = meta
+            .modified()
+            .ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0);
+        let ext = if is_dir {
+            String::new()
+        } else {
+            std::path::Path::new(&name)
+                .extension()
+                .map(|e| e.to_string_lossy().to_lowercase())
+                .unwrap_or_default()
+        };
+        entries.push(FsEntry {
+            path: entry.path().display().to_string(),
+            name,
+            is_dir,
+            size: if is_dir { 0 } else { meta.len() },
+            modified_ms,
+            readonly: attrs & 0x1 != 0 || meta.permissions().readonly(), // FILE_ATTRIBUTE_READONLY
+            hidden,
+            ext,
+        });
+    }
+    entries.sort_by(|a, b| {
+        b.is_dir
+            .cmp(&a.is_dir)
+            .then(a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+    });
+    let parent = dir
+        .parent()
+        .map(|p| p.display().to_string())
+        .filter(|p| !p.is_empty());
+    Ok(FsListing {
+        path: dir.display().to_string(),
+        parent,
+        entries,
+        truncated,
+    })
+}
+
+/// Refuse mutating operations on a bare drive root ("C:\", "D:") — the same
+/// spirit as ops::denylist_reason, applied to the typed fs commands.
+fn deny_fs_root(p: &str) -> Result<(), String> {
+    let t = p.trim().trim_end_matches(['\\', '/']);
+    if t.len() <= 2 {
+        return Err("refusing to operate on a drive root".into());
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn fs_rename(from: String, to: String) -> Result<(), String> {
+    deny_fs_root(&from)?;
+    std::fs::rename(&from, &to).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn fs_mkdir(path: String) -> Result<(), String> {
+    std::fs::create_dir(&path).map_err(|e| e.to_string())
+}
+
+fn copy_recursive(from: &std::path::Path, to: &std::path::Path) -> Result<(), String> {
+    if from.is_dir() {
+        std::fs::create_dir_all(to).map_err(|e| e.to_string())?;
+        for entry in std::fs::read_dir(from).map_err(|e| e.to_string())?.flatten() {
+            copy_recursive(&entry.path(), &to.join(entry.file_name()))?;
+        }
+        Ok(())
+    } else {
+        if let Some(dir) = to.parent() {
+            std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+        }
+        std::fs::copy(from, to).map(|_| ()).map_err(|e| e.to_string())
+    }
+}
+
+#[tauri::command]
+pub fn fs_copy(from: String, to: String) -> Result<(), String> {
+    let from_dir = format!("{}\\", from.trim_end_matches(['\\', '/']));
+    if to.starts_with(&from_dir) {
+        return Err("cannot copy a folder into itself".into());
+    }
+    copy_recursive(std::path::Path::new(&from), std::path::Path::new(&to))
+}
+
+#[tauri::command]
+pub fn fs_move(from: String, to: String) -> Result<(), String> {
+    deny_fs_root(&from)?;
+    let from_dir = format!("{}\\", from.trim_end_matches(['\\', '/']));
+    if to.starts_with(&from_dir) {
+        return Err("cannot move a folder into itself".into());
+    }
+    // Same-volume: a rename is atomic and instant. Cross-volume: copy then delete.
+    if std::fs::rename(&from, &to).is_ok() {
+        return Ok(());
+    }
+    copy_recursive(std::path::Path::new(&from), std::path::Path::new(&to))?;
+    let p = std::path::Path::new(&from);
+    if p.is_dir() {
+        std::fs::remove_dir_all(p).map_err(|e| e.to_string())
+    } else {
+        std::fs::remove_file(p).map_err(|e| e.to_string())
+    }
+}
+
+/// Permanent delete (bypasses the Recycle Bin) — the UI double-confirms first.
+#[tauri::command]
+pub fn fs_delete_permanent(path: String) -> Result<(), String> {
+    deny_fs_root(&path)?;
+    let p = std::path::Path::new(&path);
+    if p.is_dir() {
+        std::fs::remove_dir_all(p).map_err(|e| e.to_string())
+    } else {
+        std::fs::remove_file(p).map_err(|e| e.to_string())
+    }
+}
+
+/// Bounded text read for the preview pane (lossy UTF-8; caller caps the bytes).
+#[tauri::command]
+pub fn fs_read_text(path: String, max_bytes: Option<u64>) -> Result<String, String> {
+    let cap = max_bytes.unwrap_or(262_144) as usize;
+    let data = std::fs::read(&path).map_err(|e| e.to_string())?;
+    let end = data.len().min(cap);
+    Ok(String::from_utf8_lossy(&data[..end]).to_string())
+}

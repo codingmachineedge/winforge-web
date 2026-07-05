@@ -1,0 +1,133 @@
+/* 控制棒面板 · Rod-control panel — bank position bars, group-demand counter, motion lamps.
+   Imported ONLY by src/components/reactor/RodControlPanel.tsx. Reuses the shared .panel /
+   .panel-title / .badge / .mini chrome from global.css; these classes cover only what the
+   shared sheets do not. */
+
+.rods-mode-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.rods-drive-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.rods-drive-row input[type='range'] {
+  flex: 1 1 8rem;
+  min-width: 6rem;
+}
+
+.rods-spm {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.rods-bank-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 9.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.2rem 0;
+  font-size: 0.9em;
+}
+
+.rods-bank-steps {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rods-bar {
+  position: relative;
+  height: 0.55rem;
+  border-radius: 0.3rem;
+  background: rgba(127, 127, 127, 0.25);
+  overflow: hidden;
+}
+
+.rods-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #4f8fd8;
+  border-radius: inherit;
+}
+
+.rods-bar-fill.demand {
+  background: #d8a24f;
+}
+
+.rods-demand {
+  margin: 0.6rem 0 0.4rem;
+}
+
+.rods-demand-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  margin-bottom: 0.2rem;
+}
+
+.rods-temps {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0;
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rods-lamps {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0;
+}
+
+.rods-lamp {
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.72em;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(127, 127, 127, 0.4);
+  opacity: 0.45;
+}
+
+.rods-lamp.lit {
+  opacity: 1;
+  border-color: currentColor;
+}
+
+.rods-lamp.lit.out {
+  color: #e6c34a;
+  background: rgba(230, 195, 74, 0.12);
+}
+
+.rods-lamp.lit.in {
+  color: #6db2ff;
+  background: rgba(109, 178, 255, 0.12);
+}
+
+.rods-lamp.lit.ok {
+  color: #58c473;
+  background: rgba(88, 196, 115, 0.12);
+}
+
+.rods-lamp.lit.warn {
+  color: #e0684b;
+  background: rgba(224, 104, 75, 0.12);
+}
+
+.rods-status {
+  font-size: 0.85em;
+  opacity: 0.9;
+  margin-top: 0.4rem;
+}

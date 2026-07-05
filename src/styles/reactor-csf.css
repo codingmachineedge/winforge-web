@@ -1,0 +1,129 @@
+/* 關鍵安全功能狀態板 · CSF status-tree board — the classic 6-tile F-0 wall display.
+   Imported ONLY by CsfPanel.tsx. Tiles are colour-filled by status with High-Contrast-safe
+   text pairings (dark text on yellow/orange, white on green/red/grey — all ≥ 4.5:1). */
+
+.csf-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.csf-tile {
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+}
+
+.csf-tile-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.csf-mnemonic {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: 'Consolas', 'Menlo', monospace;
+  line-height: 1;
+}
+
+.csf-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.csf-status-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.csf-fr {
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.csf-condition {
+  margin-top: auto;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  opacity: 0.95;
+}
+
+/* ---- status colours (High-Contrast-safe text) ---- */
+.csf-invalid {
+  background: #4b5563; /* grey — sensor invalid */
+  color: #f9fafb;
+}
+.csf-green {
+  background: #14532d;
+  color: #f0fdf4;
+}
+.csf-yellow {
+  background: #facc15;
+  color: #1c1400; /* dark text on yellow */
+}
+.csf-orange {
+  background: #ea760c;
+  color: #1a0d00; /* dark text on orange */
+}
+.csf-red {
+  background: #991b1b;
+  color: #fef2f2;
+  animation: csf-red-pulse 1s steps(2, jump-none) infinite;
+}
+
+@keyframes csf-red-pulse {
+  0% {
+    background: #991b1b;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  100% {
+    background: #dc2626;
+    box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .csf-red {
+    animation: none;
+    box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.55);
+  }
+}
+
+/* ---- board footer: worst-status summary / master challenge line ---- */
+.csf-summary {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.csf-summary-alarm {
+  color: #ef4444;
+}
+
+.csf-summary-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.csf-summary-dot.csf-invalid { background: #4b5563; animation: none; }
+.csf-summary-dot.csf-green { background: #16a34a; animation: none; }
+.csf-summary-dot.csf-yellow { background: #facc15; animation: none; }
+.csf-summary-dot.csf-orange { background: #ea760c; animation: none; }
+.csf-summary-dot.csf-red { background: #dc2626; animation: none; }

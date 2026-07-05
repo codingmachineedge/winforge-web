@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CvcsBlenderMode, ReactorSim, ReactorMode, type ReactorState } from './physics';
+import { ReactorAux, type AuxSnapshot } from './reactorAux';
+import type { RodControlMode, RodDirection } from './rodControl';
 import { FuelFactory, type FuelAssembly, type LoadResult } from './fuelFactory';
 import {
   INBOX_STORAGE_KEY,
@@ -46,6 +48,7 @@ export interface FuelSnapshot {
 
 export interface UseReactorSim {
   state: ReactorState;
+  aux: AuxSnapshot;
   history: TrendPoint[];
   running: boolean;
   speed: number;
@@ -53,6 +56,19 @@ export interface UseReactorSim {
   fuel: FuelSnapshot;
   credits: CreditSnapshot;
   setCreditMode: (m: CreditRedemptionMode) => void;
+  // ---- auxiliary-system operator controls ----
+  setRodControlMode: (m: RodControlMode) => void;
+  driveRods: (direction: RodDirection, spm?: number) => void;
+  setRodDemandTarget: (steps: number) => void;
+  triggerStuckPorv: () => void;
+  closeBlockValve: () => void;
+  openBlockValve: () => void;
+  actuateSi: () => void;
+  resetSi: () => void;
+  triggerSealCoolingLoss: () => void;
+  restoreSealCooling: () => void;
+  markReactimeter: () => void;
+  clearReactimeterMark: () => void;
   redeemAutoStartHour: () => boolean;
   setRunning: (v: boolean) => void;
   setSpeed: (v: number) => void;
@@ -84,6 +100,13 @@ export function useReactorSim(): UseReactorSim {
   const simRef = useRef<ReactorSim | null>(null);
   if (simRef.current === null) simRef.current = new ReactorSim();
   const sim = simRef.current;
+
+  // Auxiliary protection / ESF / monitor subsystems (rod control, PORV/PRT, App-G/LTOP/PTS,
+  // SI/accumulators/MSSV, containment, CSF trees). The coordinator is the single writer that
+  // steps them around sim.update() each tick.
+  const auxRef = useRef<ReactorAux | null>(null);
+  if (auxRef.current === null) auxRef.current = new ReactorAux();
+  const aux = auxRef.current;
 
   // Fuel factory: persisted inventory (localStorage in the browser, memory in tests).
   // The reactor consumes what the factory has loaded; the factory gates the reactor.
@@ -124,6 +147,7 @@ export function useReactorSim(): UseReactorSim {
     sim.fuelAvailable = factory.canReactorRun(); // gate reflects the persisted inventory from tick 0
     return sim.state();
   });
+  const [auxSnap, setAuxSnap] = useState<AuxSnapshot>(() => aux.view());
   const [fuel, setFuel] = useState<FuelSnapshot>(() => takeFuelSnapshot());
   const [credits, setCredits] = useState<CreditSnapshot>(() => takeCreditSnapshot(0));
   const [history, setHistory] = useState<TrendPoint[]>([]);
@@ -142,7 +166,9 @@ export function useReactorSim(): UseReactorSim {
     const id = window.setInterval(() => {
       if (!runningRef.current) return;
       const dt = (TICK_MS / 1000) * speedRef.current; // simulated seconds this tick
+      aux.stepBefore(sim, dt); // rod-control program owns the banks when engaged
       sim.update(dt);
+      aux.stepAfter(sim, dt); // relief → P/T limits → ESF → containment → CSF
       clockRef.current += dt;
 
       // Fuel cycle coupling: the loaded assemblies absorb this tick's thermal energy
@@ -159,6 +185,14 @@ export function useReactorSim(): UseReactorSim {
       creditPowerRef.current = tickCreditGridSupply(ledger, dt, sim.mode);
 
       const snap = sim.state();
+      // Merge the auxiliary-subsystem annunciators into the core alarm list so the single
+      // Annunciator panel shows protection / ESF / containment / rod-control alarms too.
+      const auxView = aux.view();
+      if (auxView.alarmsEn.length) {
+        snap.alarms = [...snap.alarms, ...auxView.alarmsEn];
+        snap.alarmsZh = [...snap.alarmsZh, ...auxView.alarmsZh];
+      }
+      setAuxSnap(auxView);
       setCredits(takeCreditSnapshot(snap.electricPowerMW));
       setFuel(takeFuelSnapshot(newlySpent));
       const pt: TrendPoint = {
@@ -176,7 +210,7 @@ export function useReactorSim(): UseReactorSim {
       setSimClock(clockRef.current);
     }, TICK_MS);
     return () => window.clearInterval(id);
-  }, [sim, factory, ledger, takeFuelSnapshot, takeCreditSnapshot]);
+  }, [sim, aux, factory, ledger, takeFuelSnapshot, takeCreditSnapshot]);
 
   // Credit intake: expose the public grant global, drain the browser inbox key (on mount and on
   // cross-tab writes), poll the desktop inbox file (Tauri only) and the web-root grants file,
@@ -306,10 +340,66 @@ export function useReactorSim(): UseReactorSim {
 
   const doReset = useCallback(() => {
     sim.reset();
+    aux.reset();
     clockRef.current = 0;
     histRef.current = [];
     setHistory([]);
     setSimClock(0);
+    setState(sim.state());
+    setAuxSnap(aux.view());
+  }, [sim, aux]);
+
+  // ---- auxiliary-system operator controls. Each delegates to the coordinator and refreshes the
+  // aux snapshot so the panel reacts immediately even while the sim is paused. ----
+  const setRodControlMode = useCallback((m: RodControlMode) => {
+    aux.setRodControlMode(m);
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const driveRods = useCallback((direction: RodDirection, spm?: number) => {
+    aux.driveRods(direction, spm);
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const setRodDemandTarget = useCallback((steps: number) => {
+    aux.setRodDemandTarget(steps);
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const triggerStuckPorv = useCallback(() => {
+    aux.triggerStuckPorv();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const closeBlockValve = useCallback(() => {
+    aux.closeBlockValve();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const openBlockValve = useCallback(() => {
+    aux.openBlockValve();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const actuateSi = useCallback(() => {
+    aux.actuateSi();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const resetSi = useCallback(() => {
+    aux.resetSi();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const triggerSealCoolingLoss = useCallback(() => {
+    aux.triggerSealCoolingLoss();
+    setAuxSnap(aux.view());
+  }, [aux]);
+  const restoreSealCooling = useCallback(() => {
+    aux.restoreSealCooling();
+    setAuxSnap(aux.view());
+  }, [aux]);
+
+  // Reactimeter mark/clear (inverse-kinetics rod-worth measurement — mark a reference, read the
+  // integrated worth swing). The measured state is already mirrored in ReactorState each tick.
+  const markReactimeter = useCallback(() => {
+    sim.markReactimeter();
+    setState(sim.state());
+  }, [sim]);
+  const clearReactimeterMark = useCallback(() => {
+    sim.clearReactimeterMark();
     setState(sim.state());
   }, [sim]);
 
@@ -321,6 +411,7 @@ export function useReactorSim(): UseReactorSim {
 
   return {
     state,
+    aux: auxSnap,
     history,
     running,
     speed,
@@ -328,6 +419,18 @@ export function useReactorSim(): UseReactorSim {
     fuel,
     credits,
     setCreditMode,
+    setRodControlMode,
+    driveRods,
+    setRodDemandTarget,
+    triggerStuckPorv,
+    closeBlockValve,
+    openBlockValve,
+    actuateSi,
+    resetSi,
+    triggerSealCoolingLoss,
+    restoreSealCooling,
+    markReactimeter,
+    clearReactimeterMark,
     redeemAutoStartHour,
     setRunning,
     setSpeed,

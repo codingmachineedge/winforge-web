@@ -1,0 +1,219 @@
+/* 工程安全設施面板樣式 · Engineered Safety Features (ESF) panel styles.
+   Imported ONLY by src/components/reactor/EsfPanel.tsx. Builds on the shared
+   .panel / .panel-title / .btn chrome from global.css + reactor-panels.css. */
+
+.esf-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.esf-block {
+  border: 1px solid var(--border, #2a2f3a);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.esf-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.esf-block-title {
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+/* ---- lamps ---- */
+.esf-lamp {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border, #2a2f3a);
+  color: var(--muted, #8b93a3);
+  background: transparent;
+  white-space: nowrap;
+}
+.esf-lamp.small {
+  font-size: 0.65rem;
+}
+.esf-lamp.lit-danger {
+  color: #fff;
+  background: #b3261e;
+  border-color: #b3261e;
+  animation: esf-blink 1s steps(2, start) infinite;
+}
+.esf-lamp.lit-warn {
+  color: #1a1a1a;
+  background: #e6a817;
+  border-color: #e6a817;
+}
+.esf-lamp.lit-ok {
+  color: #dff5e1;
+  background: #1d6b33;
+  border-color: #1d6b33;
+}
+@keyframes esf-blink {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.esf-si-status {
+  font-size: 0.78rem;
+  color: var(--muted, #8b93a3);
+}
+
+/* ---- readouts + bars ---- */
+.esf-readouts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.esf-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.esf-readout-label {
+  font-size: 0.7rem;
+  color: var(--muted, #8b93a3);
+}
+.esf-readout-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.esf-readout-sub {
+  font-size: 0.68rem;
+  color: var(--muted, #8b93a3);
+}
+
+.esf-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border, #2a2f3a);
+  overflow: hidden;
+}
+.esf-bar.tall {
+  height: 10px;
+  border-radius: 5px;
+}
+.esf-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.2s linear;
+}
+.esf-bar-fill.si {
+  background: #2f7fd1;
+}
+.esf-bar-fill.accum {
+  background: #1d6b33;
+}
+.esf-bar-fill.accum.dumping {
+  background: #e6a817;
+}
+.esf-bar-fill.mssv {
+  background: #c25a1f;
+}
+
+.esf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.esf-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+.esf-btn {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+}
+.esf-btn.danger {
+  background: #7a1f1a;
+  border-color: #7a1f1a;
+  color: #fff;
+}
+.esf-btn.danger:disabled {
+  opacity: 0.5;
+}
+
+/* ---- MSSV valve row ---- */
+.esf-mssv-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+}
+.esf-mssv-valve {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  border: 1px solid var(--border, #2a2f3a);
+  border-radius: 5px;
+  padding: 0.3rem 0.15rem;
+}
+.esf-mssv-valve.open {
+  border-color: #e6a817;
+}
+.esf-mssv-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+.esf-mssv-lamp {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.08rem 0.35rem;
+  border-radius: 3px;
+  color: var(--muted, #8b93a3);
+  background: var(--border, #2a2f3a);
+}
+.esf-mssv-lamp.lit {
+  color: #1a1a1a;
+  background: #e6a817;
+}
+.esf-mssv-set {
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #8b93a3);
+  white-space: nowrap;
+}
+.esf-mssv-set.sub {
+  opacity: 0.75;
+}
+
+/* ---- annunciator strip ---- */
+.esf-alarms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.esf-alarm-tile {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  color: #fff;
+  background: #8a2b23;
+}
+
+@media (max-width: 560px) {
+  .esf-readouts {
+    grid-template-columns: 1fr;
+  }
+  .esf-mssv-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

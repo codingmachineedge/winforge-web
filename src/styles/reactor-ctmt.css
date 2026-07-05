@@ -1,0 +1,207 @@
+/* ============================================================================
+   Containment panel — pressure/temp gauges, Hi-1/2/3 bistable ladder, ESF status
+   lamps, sump level bar, per-RCP seal-leakoff grid. Imported ONLY by
+   components/reactor/ContainmentPanel.tsx. Colors use the global design tokens.
+   ============================================================================ */
+
+.ctmt-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- gauges ---- */
+.ctmt-gauges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ctmt-gauge {
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ctmt-gauge-label {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+.ctmt-gauge-value {
+  font-size: 20px;
+  font-weight: 600;
+}
+.ctmt-gauge-sub,
+.ctmt-note {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.ctmt-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+/* ---- level / flow bars ---- */
+.ctmt-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-inset, rgba(128, 128, 128, 0.15));
+  border: 1px solid var(--stroke-subtle);
+  overflow: hidden;
+}
+.ctmt-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px 0 0 4px;
+}
+.ctmt-bar-mark {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: var(--danger);
+  opacity: 0.8;
+}
+
+/* ---- Hi-1/2/3 ladder ---- */
+.ctmt-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.ctmt-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ctmt-ladder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  color: var(--text-tertiary);
+}
+.ctmt-ladder-row.on {
+  color: var(--text-primary);
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+.ctmt-ladder-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--stroke);
+  flex: none;
+}
+.ctmt-ladder-row.on .ctmt-ladder-dot {
+  background: var(--danger);
+}
+.ctmt-ladder-name {
+  flex: 1;
+  font-size: 12.5px;
+}
+.ctmt-ladder-set {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- status lamps ---- */
+.ctmt-lamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ctmt-lamp {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke-subtle);
+  color: var(--text-tertiary);
+}
+.ctmt-lamp.on {
+  color: var(--text-primary);
+}
+.ctmt-lamp.on.tone-danger {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 18%, transparent);
+}
+.ctmt-lamp.on.tone-warn {
+  border-color: var(--native);
+  background: color-mix(in srgb, var(--native) 18%, transparent);
+}
+.ctmt-lamp.on.tone-ok {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ---- sump + seals ---- */
+.ctmt-sump,
+.ctmt-seals {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ctmt-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.ctmt-val {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.ctmt-seal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .ctmt-seal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.ctmt-seal-cell {
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ctmt-seal-name {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+.ctmt-seal-val {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ctmt-drill {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---- engine alarm strip ---- */
+.ctmt-alarms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ctmt-alarm {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+}

@@ -1,7 +1,13 @@
 # Reactor simulator — fidelity checklist vs `WinForge/Services/ReactorSimService.cs`
 
-_Status as of 2026-07-03 (feature/reactor-cvcs). The C# source is ~6,500 lines + 2,900 lines of
-headless tests; this tracks which of its systems the TypeScript engine (`src/reactor/`) has._
+_Status as of 2026-07-05 (feature/reactor-protection-wave). The C# source is ~6,500 lines + 2,900
+lines of headless tests; this tracks which of its systems the TypeScript engine (`src/reactor/`) has._
+
+The 2026-07-05 wave ported six protection/ESF subsystems as standalone pure engines, each with its
+own vitest suite and control-room panel, wired onto the live `ReactorSim` by the single-writer
+coordinator `src/reactor/reactorAux.ts` (steps them in the C# tick order — rod control before
+`update()`; relief → P/T limits → ESF → containment → CSF after — honouring the one-tick-lag
+couplings LTOP↔PORV, PRT→containment, containment→relief). 191 reactor tests green.
 
 Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 
@@ -31,11 +37,13 @@ Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 | RPS trips: PR high flux, IR high flux, SR (via P-6 gating), short period, hot-leg T, pressure, low flow | ✅ | exercised by the startup-sequence test |
 | Alarms (EN/粵語) incl. dilution doubling + action window | ✅ | |
 | Subcooling margin | ✅ | |
-| CSF status trees | ❌ | source L~2600 |
-| Appendix-G P/T limits, LTOP, PTS | ❌ | source `UpdatePtLimits` |
-| PORV / code safeties / PRT, MSSV banks | ❌ | |
-| RCP seal-LOCA model, containment, AVR | ❌ | |
+| CSF status trees | ✅ | `csfTrees.ts` — six F-0 trees (S/C/H/P/Z/I), Green/Yellow/Orange/Red, FR ids, bilingual conditions; `CsfPanel` board |
+| Appendix-G P/T limits, LTOP, PTS | ✅ | `ptLimits.ts` — App-G envelope + heatup/cooldown rate + LTOP arm (135 °C, 5 °C hyst) + PTS (RT_PTS vs EFPY); `PtLimitsPanel` P/T diagram |
+| PORV / code safeties / PRT, MSSV banks | ✅ | PORV+3 safeties+PRT+stuck-PORV drill in `pressureRelief.ts`; MSSV bank in `engineeredSafety.ts` |
+| RCP seal-LOCA model, containment | ✅ | `containment.ts` — pressure lump, Hi-1/2/3, spray, sump, WOG-2000 seal-LOCA on CCW loss |
+| Safety Injection (SI) + accumulators | ✅ | `engineeredSafety.ts` — lo-press/lo-steamline/manual SI, 2000 ppm borated HHSI, passive accumulators < 4.5 MPa |
 | Calorimetric power (net-cal bias) | 🟡 | bias folded into pump-heat constant |
+| AVR / turbine-first-stage load signal | 🟡 | rod-control Tref uses electric-power/rated as the load proxy until a turbine module exists |
 
 ## CVCS / chemistry
 
@@ -72,8 +80,8 @@ Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 | Criticality > 15 sim-minutes from cold, only after hot standby | ✅ | |
 | MODE 2 power ascension (multi-decade, tame SUR) | ✅ | |
 | MODE 1 / P-10 full-power ascension from cold | 🟡 | engine's lumped Doppler-vs-conductance scale settles low; `warmStartCritical` covers the at-power regime |
-| Rod bank A–D overlap program (228 steps, 128 overlap, 8–72 spm) | ❌ | port uses per-bank % + uniform demand |
-| Tavg/Tref automatic rod controller | ❌ | |
+| Rod bank A–D overlap program (228 steps, 128 overlap, 8–72 spm) | ✅ | `rodControl.ts` — demand counter 0..528, bank sequencing, speed-limited drive; `RodControlPanel` |
+| Tavg/Tref automatic rod controller | ✅ | `rodControl.ts` AUTO mode — Tref program (289.6→305 °C), ±1.5 °F deadband, 57.6 spm/°C |
 
 ## UI
 
@@ -82,13 +90,39 @@ Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 | Analog gauges, annunciator (latching/ACK), NIS, permissive lamps, MODE annunciator | ✅ | prior wave |
 | **Fuel factory screens** (inventory, fabricate, load/discharge, spent pool) | ✅ | `FuelCvcsPanel`, trilingual |
 | **CVCS blender lineup + dilution drill/terminate + time-to-crit readout** | ✅ | |
-| Reactimeter panel (mark/worth) | 🟡 | state exposed; dedicated panel not yet |
+| Reactimeter panel (mark/worth) | ✅ | `ReactimeterPanel` — measured ρ/period/SUR + mark/clear worth swing |
+| Rod control panel (overlap program, Tavg/Tref, drive) | ✅ | `RodControlPanel` |
+| P/T-limits panel (App-G diagram, LTOP, PTS) | ✅ | `PtLimitsPanel` |
+| Pressurizer-relief panel (PORV/safeties/PRT, TMI drill) | ✅ | `PressureReliefPanel` |
+| ESF panel (SI / accumulators / MSSV bank) | ✅ | `EsfPanel` |
+| Containment panel (Hi-1/2/3, spray, sump, seal-LOCA) | ✅ | `ContainmentPanel` |
+| CSF status board (six F-0 trees) | ✅ | `CsfPanel` |
 | Trends: full strip-chart suite (source has multi-pen recorders) | 🟡 | two sparklines |
 
 ## Next (in rough order)
 
-1. Rod bank overlap program + withdrawal speed limits (steps/min) + Tavg/Tref auto controller.
-2. App-G P/T limits + LTOP + PORV/safeties (heatup/cooldown protection envelope).
-3. SI model (2000 ppm boron, accumulators) + CSF status trees.
-4. Reactimeter panel + estimated-critical-boron worksheet UI.
-5. Containment / PRT / MSSV / seal-LOCA scenario set.
+1. Estimated-critical-boron worksheet UI + multi-pen strip-chart recorder suite.
+2. Turbine / secondary module → real Tavg/Tref load signal + AVR + steam-dump program.
+3. Containment combustible-H₂ model (10 CFR 50.44) — deliberately skipped this wave (see
+   `containment.ts` notes); LOCA / MSLB / SGTR break scenarios feeding containment + ESF.
+4. Calorimetric net-cal bias as a first-class channel (currently folded into the pump-heat constant).
+5. Full MODE 1 / P-10 cold-to-full-power ascension (lumped Doppler-vs-conductance scale tuning).
+
+## Ported 2026-07-05 (feature/reactor-protection-wave)
+
+Six new pure-engine modules under `src/reactor/`, each with a vitest suite, a control-room panel
+under `src/components/reactor/`, and a trilingual i18n slice under `src/i18n/`:
+
+| Module | Engine | Panel | i18n ns |
+|---|---|---|---|
+| Rod overlap + Tavg/Tref auto control | `rodControl.ts` | `RodControlPanel` | `reactorrods` |
+| PORV / code safeties / PRT (+ TMI drill) | `pressureRelief.ts` | `PressureReliefPanel` | `reactorrelief` |
+| App-G P/T limits + LTOP + PTS | `ptLimits.ts` | `PtLimitsPanel` | `reactorptlim` |
+| SI + accumulators + MSSV bank | `engineeredSafety.ts` | `EsfPanel` | `reactoresf` |
+| Containment + RCP seal-LOCA | `containment.ts` | `ContainmentPanel` | `reactorctmt` |
+| Six CSF status trees (F-0) | `csfTrees.ts` | `CsfPanel` | `reactorcsf` |
+| Reactimeter (mark/worth) UI | (engine already present) | `ReactimeterPanel` | `reactorrmtr` |
+
+Wired by `src/reactor/reactorAux.ts` (coordinator) into `useReactorSim` / `ReactorView`. Coordinator
+integration is covered by `src/reactor/reactorAux.test.ts` (11 scenario tests: LTOP arming, PORV
+relief, stuck-PORV isolation, SI boration, AUTO rod engagement, CSF evaluation, seal-LOCA, reset).

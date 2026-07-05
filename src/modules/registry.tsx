@@ -126,6 +126,7 @@ import { ArchivesModule } from './ArchivesModule';
 import { BulkOpsModule } from './BulkOpsModule';
 import { EverythingSearchModule } from './EverythingSearchModule';
 import { FileLocksmithModule } from './FileLocksmithModule';
+import { FileBrowserModule } from './FileBrowserModule';
 import { HexEditorModule } from './HexEditorModule';
 import { DiskBenchmarkModule } from './DiskBenchmarkModule';
 import { MouseModule } from './MouseModule';
@@ -338,6 +339,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.bulkops': BulkOpsModule,
   'module.everything': EverythingSearchModule,
   'module.filelocksmith': FileLocksmithModule,
+  'module.filebrowser': FileBrowserModule,
   'module.hexeditor': HexEditorModule,
   'module.diskbench': DiskBenchmarkModule,
   'module.mouse': MouseModule,

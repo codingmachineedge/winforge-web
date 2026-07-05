@@ -1,0 +1,200 @@
+/* ============================================================================
+   P/T limits · vessel integrity panel (PtLimitsPanel). Imported ONLY by
+   src/components/reactor/PtLimitsPanel.tsx. Shares the global design tokens
+   (--accent, --danger, --native, --stroke, …) with reactor-panels.css; motion
+   is auto-disabled by the global prefers-reduced-motion reset.
+   ============================================================================ */
+
+/* ---- P/T diagram ---- */
+.ptlim-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 4px;
+}
+.ptlim-grid {
+  stroke: var(--stroke-subtle);
+  stroke-width: 0.5;
+}
+.ptlim-tick {
+  fill: var(--text-tertiary);
+  font-size: 7.5px;
+}
+.ptlim-axis {
+  fill: var(--text-tertiary);
+  font-size: 8px;
+  letter-spacing: 0.02em;
+}
+.ptlim-forbidden {
+  fill: color-mix(in srgb, var(--danger) 12%, transparent);
+  stroke: none;
+}
+.ptlim-forbidden-label {
+  fill: color-mix(in srgb, var(--danger) 70%, var(--text-tertiary));
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.ptlim-curve {
+  stroke: var(--danger);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  fill: none;
+}
+.ptlim-ltop {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+  fill: none;
+}
+.ptlim-ltop.faint {
+  opacity: 0.45;
+  stroke-dasharray: 2 3;
+}
+.ptlim-trail {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0.55;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  fill: none;
+}
+.ptlim-dot {
+  fill: var(--accent-strong, var(--accent));
+  stroke: var(--bg-card);
+  stroke-width: 1.5;
+}
+.ptlim-dot.danger {
+  fill: var(--danger);
+}
+.ptlim-legend text {
+  fill: var(--text-secondary);
+  font-size: 8px;
+}
+
+/* ---- readouts ---- */
+.ptlim-readouts {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ptlim-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.ptlim-key {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.ptlim-val {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ptlim-val.warn {
+  color: var(--native);
+}
+.ptlim-val.danger {
+  color: var(--danger);
+}
+.ptlim-note {
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+  line-height: 1.35;
+}
+
+/* ---- lamps ---- */
+.ptlim-lamps {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 6px;
+}
+.ptlim-lamp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--stroke-subtle);
+  border-radius: var(--radius);
+  background: var(--bg-card-hover);
+  opacity: 0.65;
+}
+.ptlim-lamp.on {
+  opacity: 1;
+}
+.ptlim-lamp-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--stroke);
+  border: 1px solid var(--stroke);
+}
+.ptlim-lamp.ok.on .ptlim-lamp-dot {
+  background: var(--web, var(--accent));
+  border-color: var(--web, var(--accent));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--web, var(--accent)) 70%, transparent);
+}
+.ptlim-lamp.warn.on .ptlim-lamp-dot {
+  background: var(--native);
+  border-color: var(--native);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--native) 70%, transparent);
+}
+.ptlim-lamp.danger.on .ptlim-lamp-dot {
+  background: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--danger) 75%, transparent);
+}
+.ptlim-lamp-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+.ptlim-lamp.on.warn .ptlim-lamp-label {
+  color: var(--native);
+}
+.ptlim-lamp.on.danger .ptlim-lamp-label {
+  color: var(--danger);
+}
+
+/* ---- PTS monitor block ---- */
+.ptlim-pts {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--stroke-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ptlim-subtitle {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+.ptlim-advisory {
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid var(--stroke-subtle);
+  background: var(--bg-card-hover);
+  color: var(--text-secondary);
+}
+.ptlim-advisory.warn {
+  color: var(--native);
+  border-color: color-mix(in srgb, var(--native) 50%, var(--stroke));
+  background: color-mix(in srgb, var(--native) 12%, var(--bg-card));
+}
+.ptlim-advisory.danger {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, var(--bg-card));
+}

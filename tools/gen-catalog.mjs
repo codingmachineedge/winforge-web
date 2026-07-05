@@ -73,6 +73,27 @@ for (const line of lines) {
 
 const NATIVE_SECTIONS = new Set(['Categories', 'Windows 11']);
 const NATIVE_TAGS = new Set(['module.native']);
+
+// Web-only modules that have no WinForge desktop counterpart (so they aren't in MainWindow.xaml).
+// They are appended into an existing section/group by id after the nav tree is parsed, and survive
+// every regeneration. `native: false` lets the live UI render in the browser preview too (it
+// degrades gracefully to a backend-required note), matching the FileLocksmith precedent for
+// Tauri-backed tools.
+const WEB_EXTRAS = [
+  {
+    sectionId: 'categories',
+    groupId: 'files-disks',
+    module: {
+      tag: 'module.filebrowser',
+      en: 'File Browser',
+      zh: '檔案瀏覽器',
+      glyph: '',
+      keywords:
+        'file browser explorer folder directory drive navigate open rename copy move cut paste delete recycle bin new folder hidden read-only attributes size modified date preview text breadcrumbs path this pc my computer 檔案 瀏覽器 資料夾 磁碟 導覽 開啟 改名 複製 移動 刪除 回收筒 隱藏 預覽 路徑',
+      native: false,
+    },
+  },
+];
 let idc = 0;
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `s${idc++}`;
 const mkMod = (x, sn) => ({
@@ -106,6 +127,20 @@ const sections = sectionsRaw.map((s) => {
     })),
   };
 });
+
+// Splice in the web-only extras (no WinForge counterpart) so they survive regeneration.
+for (const extra of WEB_EXTRAS) {
+  const sec = sections.find((s) => s.id === extra.sectionId);
+  if (!sec) {
+    console.warn(`WEB_EXTRAS: section '${extra.sectionId}' not found for ${extra.module.tag}`);
+    continue;
+  }
+  const grp = extra.groupId ? sec.groups.find((g) => g.id === extra.groupId) : null;
+  if (extra.groupId && !grp) {
+    console.warn(`WEB_EXTRAS: group '${extra.groupId}' not found in '${extra.sectionId}' for ${extra.module.tag}`);
+  }
+  (grp ? grp.modules : sec.directModules).push({ ...extra.module });
+}
 
 const all = [];
 for (const s of sections) {

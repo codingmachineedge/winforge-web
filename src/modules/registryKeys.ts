@@ -108,6 +108,7 @@ export const registeredModuleTags: ReadonlySet<string> = new Set([
   'module.fancyzones',
   'module.fastboot',
   'module.feedreader',
+  'module.filebrowser',
   'module.filelocksmith',
   'module.fileserver',
   'module.filesplit',
