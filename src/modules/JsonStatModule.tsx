@@ -133,7 +133,7 @@ const SAMPLE = `{
   "version": 3,
   "active": true,
   "tags": ["tools", "bilingual", "win11"],
-  "author": { "name": "Hui", "roles": ["admin", "dev"] },
+  "author": { "name": "Kei", "roles": ["admin", "dev"] },
   "settings": { "theme": "dark", "notify": null }
 }`;
 

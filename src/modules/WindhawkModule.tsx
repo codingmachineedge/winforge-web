@@ -977,7 +977,7 @@ function EngineTab({ desktop, exe }: { desktop: boolean; exe: string | null }) {
               </button>
             )}
             <button className="mini" disabled={!desktop || !!busy} onClick={relaunch}>
-              {busy === 'launch' ? t('windhawk.working') : t('windhawk.relaunchUi')}
+              {busy === 'launch' ? t('windhawk.working') : t('windhawk.relaunchApp')}
             </button>
             <button className="mini" disabled={busy === 'recheck'} onClick={reload}>
               ⟳ {t('windhawk.refresh')}
