@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CvcsBlenderMode, ReactorSim, ReactorMode, type ReactorState } from './physics';
 import { FuelFactory, type FuelAssembly, type LoadResult } from './fuelFactory';
+import {
+  INBOX_STORAGE_KEY,
+  getPowerCreditLedger,
+  installCreditGrantGlobal,
+  redeemAutoStart,
+  tickAutoRun,
+  tickCreditGridSupply,
+  type CreditRedemptionMode,
+} from './powerCredits';
+import { startDesktopCreditInboxPoll } from './creditInboxDesktop';
+import { startWebCreditInboxPoll } from './creditInboxWeb';
 
 export interface TrendPoint {
   t: number;
@@ -12,6 +23,16 @@ export interface TrendPoint {
 
 const HISTORY_SECONDS = 120;
 const TICK_MS = 100; // wall-clock cadence
+
+/** Power-credit snapshot mirrored into React each tick and on every ledger change. */
+export interface CreditSnapshot {
+  balance: number;
+  mode: CreditRedemptionMode;
+  creditPowerMW: number; // MWe the credit supply is delivering (grid mode)
+  gridPowerMW: number; // reactor electric output + credit supply
+  autoRunActive: boolean;
+  autoRunRemainingS: number; // paid auto-start sim-seconds left
+}
 
 /** Fuel-inventory snapshot mirrored into React each tick (cheap; assemblies are few). */
 export interface FuelSnapshot {
@@ -30,6 +51,9 @@ export interface UseReactorSim {
   speed: number;
   simClock: number;
   fuel: FuelSnapshot;
+  credits: CreditSnapshot;
+  setCreditMode: (m: CreditRedemptionMode) => void;
+  redeemAutoStartHour: () => boolean;
   setRunning: (v: boolean) => void;
   setSpeed: (v: number) => void;
   setMode: (m: ReactorMode) => void;
@@ -67,6 +91,23 @@ export function useReactorSim(): UseReactorSim {
   if (factoryRef.current === null) factoryRef.current = new FuelFactory({ persist: true });
   const factory = factoryRef.current;
 
+  // Power-generation credits: the shared persisted ledger + the public grant hook. Credits are
+  // awarded from OUTSIDE the app (window global / inbox key / inbox file — see powerCredits.ts).
+  const ledger = getPowerCreditLedger();
+  const creditPowerRef = useRef(0);
+
+  const takeCreditSnapshot = useCallback(
+    (electricMW: number): CreditSnapshot => ({
+      balance: ledger.balance,
+      mode: ledger.mode,
+      creditPowerMW: creditPowerRef.current,
+      gridPowerMW: electricMW + creditPowerRef.current,
+      autoRunActive: ledger.autoRunActive,
+      autoRunRemainingS: ledger.autoRunRemainingS,
+    }),
+    [ledger],
+  );
+
   const takeFuelSnapshot = useCallback(
     (newlySpent: string[] = []): FuelSnapshot => ({
       fresh: factory.listFresh(),
@@ -84,6 +125,7 @@ export function useReactorSim(): UseReactorSim {
     return sim.state();
   });
   const [fuel, setFuel] = useState<FuelSnapshot>(() => takeFuelSnapshot());
+  const [credits, setCredits] = useState<CreditSnapshot>(() => takeCreditSnapshot(0));
   const [history, setHistory] = useState<TrendPoint[]>([]);
   const [running, setRunning] = useState(false);
   const [speed, setSpeed] = useState(2);
@@ -109,7 +151,15 @@ export function useReactorSim(): UseReactorSim {
       const newlySpent = factory.accrueBurnup(sim.thermalPowerMW * sim.fuelConsumptionMultiplier, dt);
       sim.fuelAvailable = factory.canReactorRun();
 
+      // Power credits: drain any freshly-written inbox grants, advance the paid auto-start hour
+      // (shuts the reactor down on expiry) and, in grid mode, let the credit balance carry the
+      // grid while the reactor is off.
+      ledger.ingestBrowserInbox();
+      tickAutoRun(ledger, sim, dt);
+      creditPowerRef.current = tickCreditGridSupply(ledger, dt, sim.mode);
+
       const snap = sim.state();
+      setCredits(takeCreditSnapshot(snap.electricPowerMW));
       setFuel(takeFuelSnapshot(newlySpent));
       const pt: TrendPoint = {
         t: clockRef.current,
@@ -126,7 +176,41 @@ export function useReactorSim(): UseReactorSim {
       setSimClock(clockRef.current);
     }, TICK_MS);
     return () => window.clearInterval(id);
-  }, [sim, factory, takeFuelSnapshot]);
+  }, [sim, factory, ledger, takeFuelSnapshot, takeCreditSnapshot]);
+
+  // Credit intake: expose the public grant global, drain the browser inbox key (on mount and on
+  // cross-tab writes), poll the desktop inbox file (Tauri only) and the web-root grants file,
+  // and mirror every ledger change into React immediately — grants land live even while the sim
+  // is paused.
+  useEffect(() => {
+    installCreditGrantGlobal();
+    ledger.ingestBrowserInbox();
+    const unsub = ledger.subscribe(() => setCredits(takeCreditSnapshot(sim.state().electricPowerMW)));
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null || e.key === INBOX_STORAGE_KEY) ledger.ingestBrowserInbox();
+    };
+    window.addEventListener('storage', onStorage);
+    const stopDesktopPoll = startDesktopCreditInboxPoll(ledger);
+    const stopWebPoll = startWebCreditInboxPoll(ledger);
+    return () => {
+      unsub();
+      window.removeEventListener('storage', onStorage);
+      stopDesktopPoll();
+      stopWebPoll();
+    };
+  }, [sim, ledger, takeCreditSnapshot]);
+
+  const setCreditMode = useCallback((m: CreditRedemptionMode) => {
+    ledger.setMode(m);
+  }, [ledger]);
+
+  // Mode B: 1 whole credit ⇒ assisted start now + self-shutdown in exactly one simulated hour.
+  const redeemAutoStartHour = useCallback((): boolean => {
+    if (!redeemAutoStart(ledger, sim)) return false;
+    setRunning(true);
+    setState(sim.state());
+    return true;
+  }, [ledger, sim]);
 
   const setMode = useCallback((m: ReactorMode) => {
     sim.setMode(m);
@@ -242,6 +326,9 @@ export function useReactorSim(): UseReactorSim {
     speed,
     simClock,
     fuel,
+    credits,
+    setCreditMode,
+    redeemAutoStartHour,
     setRunning,
     setSpeed,
     setMode,

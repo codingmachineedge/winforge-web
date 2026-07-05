@@ -28,3 +28,6 @@ tools/.cache
 # Ralph loop runtime state (arm/disarm marker + iteration counter)
 .ralph-loop-active
 .ralph-loop-count
+
+# External power-credit grants drop-file (machine-local runtime data, never committed)
+/public/power-credits.json

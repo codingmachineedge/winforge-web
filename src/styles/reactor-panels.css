@@ -329,3 +329,11 @@
 .cvcs-readouts { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 0.9em; }
 .cvcs-drill { display: flex; align-items: center; gap: 10px; }
 .cvcs-drill-btn { align-self: start; }
+
+/* ---- power-credits panel ---- */
+.credits-panel { display: flex; flex-direction: column; gap: 8px; }
+.credits-balance { display: flex; align-items: baseline; gap: 10px; }
+.credits-balance-label { color: var(--text-secondary); font-size: 0.9em; }
+.credits-balance-value { font-size: 1.3em; font-weight: 700; font-variant-numeric: tabular-nums; }
+.credits-note { margin: 0; }
+.credits-grid-row, .credits-auto-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.9em; }

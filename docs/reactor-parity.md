@@ -57,7 +57,7 @@ Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 | **Fuel gate** (no fuel → rod withdrawal + Startup/Run blocked, note) | ✅ | enforced in the engine controls |
 | **Burnup accrual into loaded assemblies** (mass-share, 50 GWd/t auto-discharge) | ✅ | wired per-tick in `useReactorSim` |
 | Easy-mode burn penalty (1.75×) | ✅ | `fuelConsumptionMultiplier` |
-| Auto-start penalty (2.5×) | ❌ | no auto-start mode in the port |
+| Auto-start penalty (2.5×) | ✅ | `autoStartMode` (SCRAM suppression + 2.5× burn), redeemed via power credits (`powerCredits.ts`) |
 | Counterfeit-harm injection | ✅ | `injectFuelHarm` ↔ `LoadResult.harmful` |
 
 ## Startup sequence (the "not instant" guarantee)

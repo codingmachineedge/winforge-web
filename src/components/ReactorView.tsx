@@ -7,6 +7,7 @@ import { NisPanel } from './reactor/NisPanel';
 import { PermissiveLamps } from './reactor/PermissiveLamps';
 import { ModeAnnunciator } from './reactor/ModeAnnunciator';
 import { FuelCvcsPanel } from './reactor/FuelCvcsPanel';
+import { PowerCreditsPanel } from './reactor/PowerCreditsPanel';
 import { useNumberFmt, type NumberFmt } from './reactor/format';
 import '../styles/reactor-panels.css';
 
@@ -246,7 +247,12 @@ export function ReactorView() {
 
       {/* ---- supporting readouts (text, locale-formatted) ---- */}
       <div className="gauges gauges-sm">
-        <Gauge label={t('reactor.electricPower')} value={nf.fmt(st.electricPowerMW, 0)} unit="MWe" />
+        <Gauge
+          label={t('reactor.electricPower')}
+          value={nf.fmt(sim.credits.gridPowerMW, 0)}
+          unit="MWe"
+          sub={sim.credits.creditPowerMW > 0 ? t('reactorcredits.creditSupply', { mw: nf.fmt(sim.credits.creditPowerMW, 0) }) : undefined}
+        />
         <Gauge label={t('reactor.period')} value={fmtPeriod(st.reactorPeriodSeconds, t('reactor.stable'), nf)} unit="s" />
         <Gauge label={t('reactor.primaryPressure')} value={nf.fmt(st.primaryPressure, 2)} unit="MPa" />
         <Gauge label={t('reactor.coolantFlow')} value={nf.fmt(st.coolantFlowFraction * 100, 0)} unit="%" />
@@ -281,9 +287,10 @@ export function ReactorView() {
         <ModeAnnunciator tsMode={st.tsMode} />
       </div>
 
-      {/* ---- fuel factory + CVCS blender ---- */}
+      {/* ---- fuel factory + CVCS blender + power credits ---- */}
       <div className="reactor-grid reactor-grid-fuel">
         <FuelCvcsPanel sim={sim} fmt={nf} />
+        <PowerCreditsPanel sim={sim} fmt={nf} />
       </div>
 
       <div className="reactor-grid">

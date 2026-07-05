@@ -123,6 +123,10 @@ const EasyStartupAssistPcm = 500.0; // +0.005 dk/k
 const EasyStartupPowerLimit = 0.05; // assist only below 5% RTP
 const EasyStartupBurnFactor = 1.75; // explicit fuel penalty for the beginner startup assist
 
+// Assisted auto-start (source: AutoStartMode / AutoStartFuelWasteFactor). Like Easy Mode it
+// suppresses automatic SCRAMs, but carries a steeper explicit fuel penalty for the assist.
+const AutoStartFuelWasteFactor = 2.5;
+
 // Limits / trip setpoints.
 export const FuelMeltTemp = 2800.0; // °C
 export const FuelDamageTemp = 1200.0; // °C — clad/fuel damage onset (sustained)
@@ -262,6 +266,7 @@ export interface ReactorState {
   rcpFlowDemand: number;
   feedwaterFlow: number;
   easyStartupMode: boolean;
+  autoStartMode: boolean;
   rodBankInsertion: number[]; // % inserted per bank (A,B,C,D)
   decayHeatFraction: number;
   xenon: number;
@@ -385,6 +390,7 @@ export class ReactorSim {
   meltdownTriggered = false;
   damageAccumulation = 0;
   easyStartupMode = false;
+  autoStartMode = false; // assisted auto-start (SCRAM suppression + 2.5× fuel penalty)
 
   // feedwater / secondary (minimal)
   feedwaterFlow = 0;
@@ -498,7 +504,8 @@ export class ReactorSim {
       : 0.0;
   }
   get fuelConsumptionMultiplier(): number {
-    return this.easyStartupMode ? EasyStartupBurnFactor : 1.0;
+    // Both assists stack multiplicatively, exactly like the source's FuelConsumptionMultiplier.
+    return (this.easyStartupMode ? EasyStartupBurnFactor : 1.0) * (this.autoStartMode ? AutoStartFuelWasteFactor : 1.0);
   }
 
   // ----------------------------------------------------------------- controls ----
@@ -616,9 +623,9 @@ export class ReactorSim {
     if (this.mode !== ReactorMode.Meltdown) this.mode = ReactorMode.Tripped;
   }
 
-  /** Auto-scram entry used by the RPS; suppressed by the beginner easy-startup mode. */
+  /** Auto-scram entry used by the RPS; suppressed by easy-startup AND assisted auto-start (source L2194). */
   private tryAutoScram(en: string, zh: string): boolean {
-    if (this.easyStartupMode) return false;
+    if (this.easyStartupMode || this.autoStartMode) return false;
     this.lastTripFunctionEn = en;
     this.lastTripFunctionZh = zh;
     this.scram();
@@ -673,6 +680,7 @@ export class ReactorSim {
     this.damageAccumulation = 0;
     this.isScrammed = false;
     this.meltdownTriggered = false;
+    this.autoStartMode = false;
     this.burnupMwdPerTonne = 0;
     this.depletionAccel = 1.0;
     this.mode = ReactorMode.Shutdown;
@@ -1328,6 +1336,7 @@ export class ReactorSim {
       rcpFlowDemand: this.rcpFlowDemand,
       feedwaterFlow: this.feedwaterFlow,
       easyStartupMode: this.easyStartupMode,
+      autoStartMode: this.autoStartMode,
       rodBankInsertion: [...this.rodBankInsertion],
       decayHeatFraction: this.decayHeatFraction,
       xenon: this.xenon,

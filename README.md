@@ -94,6 +94,44 @@ classifies each module web-portable vs native-only, and emits the typed catalog.
    thermal feedback, control rods, SCRAM) from WinForge's `ReactorSimService`.
 4. 🚧 Deeper native module ports (mutating operations, richer UIs) and the Toolbox utilities.
 
+## Power-generation credits
+
+The reactor simulator has a persisted **power-credit** system: credits are awarded by
+**external systems** (the app has no knowledge of how they are earned) and redeemed in-app for
+power. **1 credit = 1 simulated hour**, in one of two selectable redemption modes (persisted;
+default `grid`, set by `DEFAULT_CREDIT_MODE` in `src/reactor/powerCredits.ts`):
+
+- **`grid` — credit-powered grid.** With the reactor off (Shutdown / Tripped / Meltdown) the grid
+  is fed at full rated output (≈ 1,150 MWe, i.e. ≈ 1,150 MWh per credit), draining 1 credit per
+  simulated hour. At zero balance the grid goes dark unless the reactor is started normally.
+- **`autostart` — auto-start reactor.** Spend exactly 1 whole credit to auto-start the reactor for
+  exactly 1 simulated hour, after which it shuts itself down (rods in, mode Shutdown). The paid
+  hour runs with the assisted-start behaviour of the original engine: automatic SCRAMs suppressed
+  and a 2.5× fuel-consumption penalty.
+
+**Balance store** (persists across sessions): localStorage key `winforge.powerCredits.v1` —
+`{"version":1,"balance":<number>,"mode":"grid"|"autostart","autoRunRemainingS":<number>,"appliedGrantIds":[...]}`.
+
+**Granting credits from outside the app** — three equivalent generic entrypoints; every grant
+carries an optional unique `id` applied at most once, so double delivery is always safe:
+
+1. **Window hook:** `window.winforgeGrantPowerCredits(n, id?)` (any script context with access to
+   the app window), or import `grantPowerCredits(n, id?)` from `src/reactor/powerCredits.ts`.
+2. **Browser inbox key** (same origin): write localStorage key `winforge.powerCredits.inbox.v1`
+   with `{"grants":[{"id":"<unique-string>","credits":<positive number>}]}` — ingested on load,
+   on cross-tab storage events, and each sim tick, then consumed.
+3. **Desktop inbox file** (installed Tauri app): write the same JSON shape to
+   `%LOCALAPPDATA%\WinForge\power-credits\inbox.json`. The app polls every few seconds,
+   atomically claims the file (rename), applies unseen grant ids, and deletes it. Writers just
+   create/overwrite the file — no other coordination needed.
+4. **Web-root grants file**: drop `power-credits.json` next to the served app — in this repo
+   `public/power-credits.json` (git-ignored, machine-local; vite serves `public/` at `/`). The
+   app polls `GET /power-credits.json` read-only every few seconds and never modifies it. It may
+   carry the `grants` array above and/or a cumulative `"totalCredits": <number>` (a monotonic
+   counter — the app grants only the delta above the highest total already consumed, so
+   overwriting the file with a growing total delivers exactly once). Unknown extra fields are
+   ignored.
+
 ## Tech
 
 React 18 · TypeScript (strict) · Vite · react-i18next · **Tauri v2** (Rust backend). Ships as a
