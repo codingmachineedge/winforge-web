@@ -32,11 +32,15 @@ Three deliverables, all shipped GREEN (`tsc` 0 errors, `vite build` OK, `cargo c
    (the whole connection form). Re-authored them (yue side was intact). Added
    **`src/i18n/moduleKeys.test.ts`** — scans every `t('ns.key')` in modules+components and
    asserts it resolves in EN and 粵. It surfaced **2,082 pre-existing orphans across 74
-   namespaces** (same root cause). Those are recorded in **`src/i18n/moduleKeys.baseline.json`**
-   as tracked debt; the guard fails only on NEW orphans + flags a stale baseline when you fix
-   some. **Burn the baseline down** — an author workflow + `tools/i18n-apply-harvest.mjs` are the
-   groundwork (the harvest run hung after ~24 namespaces; the apply tool has known limits, see its
-   header). This is the top open item.
+   namespaces** (same root cause). Same-day burn-down: **1,123 fixed** (24 authored namespaces
+   applied via the hardened `tools/i18n-apply-harvest.mjs`, plus the cloudflare nesting-mismatch —
+   the module read `cloudflare.api.*` while the strings were flat; call sites repointed, the API
+   blurb split off as `apiBlurb` per the flat-vs-nested-collision gotcha). **959 orphans remain**
+   across ~50 namespaces (doctors, headerscore, disk, rainmeter, regedit, zoomit, …) recorded in
+   **`src/i18n/moduleKeys.baseline.json`**; the guard fails only on NEW orphans + flags a stale
+   baseline when you fix some. Burning the rest down is the top open item — author the missing
+   EN+粵 strings per namespace (module source + sibling-language block give full context), apply
+   with the harvest tool, then shrink the baseline (the guard tells you exactly which entries).
 
 ### Gotchas learned 2026-07-05 (keep these)
 - A **lazy route that isn't ModuleDetail** (e.g. `ReactorView` via the `reactor` view kind) must

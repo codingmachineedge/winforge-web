@@ -527,11 +527,11 @@ function ApiTab() {
 
   const guardTauri = (): boolean => {
     if (!tauri) {
-      flash(t('cloudflare.api.previewNotice'), true);
+      flash(t('cloudflare.previewNotice'), true);
       return false;
     }
     if (!token.trim()) {
-      flash(t('cloudflare.api.needToken'), true);
+      flash(t('cloudflare.needToken'), true);
       return false;
     }
     return true;
@@ -559,7 +559,7 @@ function ApiTab() {
       setTokenActive(true);
       const firstAcc = accs[0]?.id ?? '';
       setAccountId(firstAcc);
-      flash(t('cloudflare.api.verified', { status: verify.result?.status ?? 'active' }), false);
+      flash(t('cloudflare.verified', { status: verify.result?.status ?? 'active' }), false);
       await loadZones(firstAcc);
     } catch (e) {
       setTokenActive(false);
@@ -638,7 +638,7 @@ function ApiTab() {
     const name = draft.name.trim();
     const content = draft.content.trim();
     if (!name || !content) {
-      flash(t('cloudflare.api.needNameContent'), true);
+      flash(t('cloudflare.needNameContent'), true);
       return;
     }
     const ttlNum = Number.parseInt(draft.ttl, 10);
@@ -659,7 +659,7 @@ function ApiTab() {
         flash(cfErrText(env), true);
         return;
       }
-      flash(editId ? t('cloudflare.api.dnsUpdated', { name }) : t('cloudflare.api.dnsCreated', { name }), false);
+      flash(editId ? t('cloudflare.dnsUpdated', { name }) : t('cloudflare.dnsCreated', { name }), false);
       setDraft(emptyDraft());
       setEditId(null);
       await loadZoneData(zoneId);
@@ -682,7 +682,7 @@ function ApiTab() {
 
   const deleteRecord = async (r: CfDns) => {
     if (!guardTauri() || !zoneId) return;
-    if (!window.confirm(t('cloudflare.api.confirmDeleteDns', { name: r.name }))) return;
+    if (!window.confirm(t('cloudflare.confirmDeleteDns', { name: r.name }))) return;
     setBusy(`del-${r.id}`);
     setMsg(null);
     try {
@@ -691,7 +691,7 @@ function ApiTab() {
         flash(cfErrText(env), true);
         return;
       }
-      flash(t('cloudflare.api.dnsDeleted', { name: r.name }), false);
+      flash(t('cloudflare.dnsDeleted', { name: r.name }), false);
       await loadZoneData(zoneId);
     } catch (e) {
       flash(String(e instanceof Error ? e.message : e), true);
@@ -703,7 +703,7 @@ function ApiTab() {
   const purgeCache = async () => {
     if (!guardTauri() || !zoneId) return;
     const zn = selectedZone?.name ?? zoneId;
-    if (!window.confirm(t('cloudflare.api.confirmPurge', { name: zn }))) return;
+    if (!window.confirm(t('cloudflare.confirmPurge', { name: zn }))) return;
     setBusy('purge');
     setMsg(null);
     try {
@@ -714,7 +714,7 @@ function ApiTab() {
         flash(cfErrText(env), true);
         return;
       }
-      flash(t('cloudflare.api.purged', { name: zn }), false);
+      flash(t('cloudflare.purged', { name: zn }), false);
     } catch (e) {
       flash(String(e instanceof Error ? e.message : e), true);
     } finally {
@@ -723,16 +723,16 @@ function ApiTab() {
   };
 
   const dnsCols: Column<CfDns>[] = [
-    { key: 'type', header: t('cloudflare.api.colType'), width: 70, render: (r) => <span style={{ fontWeight: 600 }}>{r.type}</span> },
-    { key: 'name', header: t('cloudflare.api.colName'), render: (r) => <span style={{ wordBreak: 'break-all' }}>{r.name}</span> },
-    { key: 'content', header: t('cloudflare.api.colContent'), render: (r) => <span style={{ wordBreak: 'break-all', fontSize: 12 }}>{r.content}</span> },
-    { key: 'ttl', header: t('cloudflare.api.colTtl'), width: 80, align: 'center', render: (r) => (r.ttl === 1 ? t('cloudflare.api.ttlAuto') : String(r.ttl)) },
+    { key: 'type', header: t('cloudflare.colType'), width: 70, render: (r) => <span style={{ fontWeight: 600 }}>{r.type}</span> },
+    { key: 'name', header: t('cloudflare.colName'), render: (r) => <span style={{ wordBreak: 'break-all' }}>{r.name}</span> },
+    { key: 'content', header: t('cloudflare.colContent'), render: (r) => <span style={{ wordBreak: 'break-all', fontSize: 12 }}>{r.content}</span> },
+    { key: 'ttl', header: t('cloudflare.colTtl'), width: 80, align: 'center', render: (r) => (r.ttl === 1 ? t('cloudflare.ttlAuto') : String(r.ttl)) },
     {
       key: 'proxied',
-      header: t('cloudflare.api.colProxied'),
+      header: t('cloudflare.colProxied'),
       width: 90,
       align: 'center',
-      render: (r) => <StatusDot ok={r.proxied} label={r.proxied ? t('cloudflare.api.proxied') : t('cloudflare.api.dnsOnly')} />,
+      render: (r) => <StatusDot ok={r.proxied} label={r.proxied ? t('cloudflare.proxied') : t('cloudflare.dnsOnly')} />,
     },
     {
       key: 'actions',
@@ -741,10 +741,10 @@ function ApiTab() {
       render: (r) => (
         <span className="row-actions">
           <button className="mini" disabled={!!busy} onClick={() => startEdit(r)}>
-            {t('cloudflare.api.edit')}
+            {t('cloudflare.edit')}
           </button>
           <button className="mini danger" disabled={busy === `del-${r.id}`} onClick={() => deleteRecord(r)}>
-            {t('cloudflare.api.delete')}
+            {t('cloudflare.delete')}
           </button>
         </span>
       ),
@@ -753,20 +753,20 @@ function ApiTab() {
 
   return (
     <div className="mod" style={{ paddingTop: 4 }}>
-      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.api.blurb')}</p>
+      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.apiBlurb')}</p>
 
-      {!tauri && <p className="mod-msg">{t('cloudflare.api.previewNotice')}</p>}
+      {!tauri && <p className="mod-msg">{t('cloudflare.previewNotice')}</p>}
 
       {/* Credentials — masked, never persisted. */}
       <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-        <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.tokenLabel')}</label>
+        <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.tokenLabel')}</label>
         <input
           className="mod-search"
           type="password"
           autoComplete="off"
           spellCheck={false}
           style={{ minWidth: 280, flex: 1, fontFamily: 'Consolas, monospace' }}
-          placeholder={t('cloudflare.api.tokenPlaceholder')}
+          placeholder={t('cloudflare.tokenPlaceholder')}
           value={token}
           onChange={(e) => {
             setToken(e.target.value);
@@ -774,25 +774,25 @@ function ApiTab() {
           }}
         />
         <button className="mini primary" disabled={busy === 'connect'} onClick={connect}>
-          {busy === 'connect' ? t('cloudflare.api.verifying') : t('cloudflare.api.connect')}
+          {busy === 'connect' ? t('cloudflare.verifying') : t('cloudflare.connect')}
         </button>
-        <StatusDot ok={tokenActive} label={tokenActive ? t('cloudflare.api.connected') : t('cloudflare.api.notConnected')} />
+        <StatusDot ok={tokenActive} label={tokenActive ? t('cloudflare.connected') : t('cloudflare.notConnected')} />
       </div>
-      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.api.tokenNote')}</p>
+      <p className="count-note" style={{ marginTop: 0 }}>{t('cloudflare.tokenNote')}</p>
 
       {/* Account + zone pickers */}
       {tokenActive && (
         <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.account')}</label>
+          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.account')}</label>
           <select className="mod-select" value={accountId} onChange={(e) => void onAccountChange(e.target.value)} disabled={!!busy}>
-            {accounts.length === 0 && <option value="">{t('cloudflare.api.noAccounts')}</option>}
+            {accounts.length === 0 && <option value="">{t('cloudflare.noAccounts')}</option>}
             {accounts.map((a) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </select>
-          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.zone')}</label>
+          <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.zone')}</label>
           <select className="mod-select" value={zoneId} onChange={(e) => void onZoneChange(e.target.value)} disabled={!!busy || zones.length === 0}>
-            {zones.length === 0 && <option value="">{t('cloudflare.api.noZones')}</option>}
+            {zones.length === 0 && <option value="">{t('cloudflare.noZones')}</option>}
             {zones.map((z) => (
               <option key={z.id} value={z.id}>{z.name}</option>
             ))}
@@ -813,23 +813,23 @@ function ApiTab() {
           <table className="dt">
             <tbody>
               <tr>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zoneStatus')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.zoneStatus')}</td>
                 <td>
                   <StatusDot ok={selectedZone.status === 'active'} label={selectedZone.status} />
                 </td>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zonePlan')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.zonePlan')}</td>
                 <td>{selectedZone.plan?.name ?? '—'}</td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.sslMode')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.sslMode')}</td>
                 <td>{settings?.ssl ?? '…'}</td>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.devMode')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.devMode')}</td>
                 <td>{settings?.dev ?? '…'}</td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.alwaysHttps')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.alwaysHttps')}</td>
                 <td>{settings?.https ?? '…'}</td>
-                <td style={{ fontWeight: 600 }}>{t('cloudflare.api.zoneId')}</td>
+                <td style={{ fontWeight: 600 }}>{t('cloudflare.zoneId')}</td>
                 <td style={{ fontSize: 12, wordBreak: 'break-all' }}>{selectedZone.id}</td>
               </tr>
             </tbody>
@@ -840,18 +840,18 @@ function ApiTab() {
       {/* Cache purge (gated) */}
       {tokenActive && zoneId && (
         <div className="mod-form" style={{ gap: 8, marginTop: 8, alignItems: 'center' }}>
-          <strong>{t('cloudflare.api.cacheTitle')}</strong>
+          <strong>{t('cloudflare.cacheTitle')}</strong>
           <button className="mini danger" disabled={busy === 'purge'} onClick={purgeCache}>
-            {busy === 'purge' ? t('cloudflare.api.purging') : t('cloudflare.api.purgeEverything')}
+            {busy === 'purge' ? t('cloudflare.purging') : t('cloudflare.purgeEverything')}
           </button>
-          <span className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.purgeNote')}</span>
+          <span className="count-note" style={{ margin: 0 }}>{t('cloudflare.purgeNote')}</span>
         </div>
       )}
 
       {/* DNS create / edit form (gated) */}
       {tokenActive && zoneId && (
         <div style={{ marginTop: 12 }}>
-          <strong>{editId ? t('cloudflare.api.editRecord') : t('cloudflare.api.addRecord')}</strong>
+          <strong>{editId ? t('cloudflare.editRecord') : t('cloudflare.addRecord')}</strong>
           <div className="mod-form" style={{ flexWrap: 'wrap', gap: 8, marginTop: 4, alignItems: 'center' }}>
             <select className="mod-select" value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })}>
               {DNS_TYPES.map((ty) => (
@@ -861,18 +861,18 @@ function ApiTab() {
             <input
               className="mod-search"
               style={{ maxWidth: 200 }}
-              placeholder={t('cloudflare.api.namePlaceholder')}
+              placeholder={t('cloudflare.namePlaceholder')}
               value={draft.name}
               onChange={(e) => setDraft({ ...draft, name: e.target.value })}
             />
             <input
               className="mod-search"
               style={{ maxWidth: 240 }}
-              placeholder={t('cloudflare.api.contentPlaceholder')}
+              placeholder={t('cloudflare.contentPlaceholder')}
               value={draft.content}
               onChange={(e) => setDraft({ ...draft, content: e.target.value })}
             />
-            <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.api.ttl')}</label>
+            <label className="count-note" style={{ margin: 0 }}>{t('cloudflare.ttl')}</label>
             <input
               className="mod-search"
               style={{ maxWidth: 90 }}
@@ -881,18 +881,18 @@ function ApiTab() {
             />
             <label className="count-note" style={{ margin: 0, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
               <input type="checkbox" checked={draft.proxied} onChange={(e) => setDraft({ ...draft, proxied: e.target.checked })} />
-              {t('cloudflare.api.proxy')}
+              {t('cloudflare.proxy')}
             </label>
             <button className="mini primary" disabled={busy === 'dns-save'} onClick={submitDraft}>
               {busy === 'dns-save'
-                ? t('cloudflare.api.saving')
+                ? t('cloudflare.saving')
                 : editId
-                  ? t('cloudflare.api.saveEdit')
-                  : t('cloudflare.api.create')}
+                  ? t('cloudflare.saveEdit')
+                  : t('cloudflare.create')}
             </button>
             {editId && (
               <button className="mini" disabled={busy === 'dns-save'} onClick={cancelEdit}>
-                {t('cloudflare.api.cancel')}
+                {t('cloudflare.cancel')}
               </button>
             )}
           </div>
@@ -903,12 +903,12 @@ function ApiTab() {
       {tokenActive && zoneId && (
         <div style={{ marginTop: 12 }}>
           <div className="count-note" style={{ margin: '0 0 4px', fontWeight: 600 }}>
-            {t('cloudflare.api.recordsTitle', { total: records.length })}
+            {t('cloudflare.recordsTitle', { total: records.length })}
           </div>
           {busy === 'records' ? (
             <p className="count-note">{t('modules.loading')}</p>
           ) : (
-            <DataTable columns={dnsCols} rows={records} rowKey={(r) => r.id} empty={t('cloudflare.api.noRecords')} />
+            <DataTable columns={dnsCols} rows={records} rowKey={(r) => r.id} empty={t('cloudflare.noRecords')} />
           )}
         </div>
       )}
