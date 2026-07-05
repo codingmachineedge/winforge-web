@@ -42,6 +42,23 @@ Three deliverables, all shipped GREEN (`tsc` 0 errors, `vite build` OK, `cargo c
    EN+粵 strings per namespace (module source + sibling-language block give full context), apply
    with the harvest tool, then shrink the baseline (the guard tells you exactly which entries).
 
+### Later the same day (Material-design-rewrite handoff + docs)
+
+4. **Reactor Control Room** (design handoff phase 1): the CRT console now IS the reactor screen
+   (`src/components/reactor/controlRoom/`), bound to the real engine; new `turbineSecondary.ts`
+   (governor/auto-sync/steam-dump/SG-level, breaker-gated MWe). Engineering panels are unmounted
+   (engines still run; alarms surface on the annunciator board).
+5. **Material 3 shell** (phase 2): `src/styles/m3.css` md-* tokens (light/dark/system on the
+   existing data-theme), nav rail + modal drawer + top bar (`src/components/m3/`), all shell
+   surfaces restyled in place, legacy-token remap so all 315 module UIs inherit the palette.
+   `Sidebar.tsx`/`ThemeToggle.tsx` deleted. New eager slice `shellM3.ts`.
+6. **i18n debt is GONE**: the burn-down session finished all 2,082 orphans; the baseline is `[]`
+   and the guard now enforces ZERO missing keys — never re-grow the baseline.
+7. **Docs/screenshots**: README rewritten (Control Room flagship, 315 modules, M3 shell),
+   GitHub wiki authored (Home / Reactor-Control-Room / Modules / Development),
+   `docs/screenshots/` captured headlessly via `node tools/capture-screens.mjs` (uses the
+   shareable URL params `?view=reactor|settings|about`, `?module=<tag>`, `&warm=1`, `&core=1`).
+
 ### Gotchas learned 2026-07-05 (keep these)
 - A **lazy route that isn't ModuleDetail** (e.g. `ReactorView` via the `reactor` view kind) must
   call `registerModuleStrings()` itself or its lazy namespaces render as raw keys.

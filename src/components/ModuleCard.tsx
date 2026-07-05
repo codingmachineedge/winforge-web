@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { CatalogModule } from '../data/catalog';
 import { pick, sub } from '../i18n';
 import { moduleStatus } from '../modules/status';
+import { MSym, moduleSymbol, STATUS_SYMBOLS } from './m3/MSym';
 
 interface Props {
   module: CatalogModule;
@@ -19,17 +20,20 @@ export function ModuleCard({ module, lang, onOpen, className }: Props) {
   return (
     <button className={className ? `card ${className}` : 'card'} onClick={() => onOpen(module.tag)}>
       <div className="card-top">
-        <span className="card-icon glyph">{module.glyph || '▢'}</span>
-        <span>
+        <span className={`card-icon${module.native ? ' native' : ''}`}>
+          <MSym name={moduleSymbol(module)} size={22} />
+        </span>
+        <span className="card-text">
           <div className="card-title">{title}</div>
           {subtitle && subtitle !== title && <div className="card-sub">{subtitle}</div>}
         </span>
       </div>
       <div className="card-badges">
-        <span className={`status-pill ${status}`}>{t(`status.${status}`)}</span>
-        <span className={`tag-pill ${module.native ? 'native' : 'web'}`}>
-          {module.native ? t('catalog.native') : t('catalog.web')}
+        <span className={`m3-status ${status}`}>
+          <MSym name={STATUS_SYMBOLS[status] ?? 'schedule'} size={13} />
+          {t(`status.${status}`)}
         </span>
+        <span className="m3-type">{module.native ? t('catalog.native') : t('catalog.web')}</span>
       </div>
     </button>
   );

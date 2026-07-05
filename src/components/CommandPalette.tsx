@@ -6,6 +6,7 @@ import { moduleStatus, type ModuleStatus } from '../modules/status';
 import { pick, sub } from '../i18n';
 import { fuzzyScore, fuzzyRanges, mergeRanges, type Range } from '../data/fuzzy';
 import { Highlight } from './Highlight';
+import { MSym, moduleSymbol, STATUS_SYMBOLS } from './m3/MSym';
 
 // The feature-text search index flattens every module's i18n strings (~570 kB), so
 // it is loaded lazily the first time the palette opens rather than shipped eagerly.
@@ -191,7 +192,9 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
     <div className="cp-backdrop" onMouseDown={onClose}>
       <div className="cp-panel" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKey} role="dialog" aria-modal="true">
         <div className="cp-searchrow">
-          <span className="cp-search-icon glyph">⌕</span>
+          <span className="cp-search-icon">
+            <MSym name="search" size={24} />
+          </span>
           <input
             ref={inputRef}
             className="cp-input"
@@ -200,22 +203,25 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
             onChange={(e) => { setQuery(e.target.value); setActive(0); }}
             aria-label={t('palette.placeholder')}
           />
-          <kbd className="cp-esc">Esc</kbd>
+          <button type="button" className="cp-close" onClick={onClose} aria-label={t('palette.hintClose')}>
+            <MSym name="close" size={22} />
+          </button>
         </div>
 
         <div className="cp-controls">
           <div className="cp-toggle-group" role="group" aria-label={t('palette.capability')}>
-            <span className="cp-toggle-label">{t('palette.capability')}</span>
             {capOpts.map((o) => (
               <button key={o.k} className={`cp-chip${capability === o.k ? ' on' : ''}`} onClick={() => setCapability(o.k)}>
+                {capability === o.k && <MSym name="check" size={15} />}
                 {o.label}
               </button>
             ))}
           </div>
+          <span className="cp-divider" aria-hidden="true" />
           <div className="cp-toggle-group" role="group" aria-label={t('palette.status')}>
-            <span className="cp-toggle-label">{t('palette.status')}</span>
             {statusOpts.map((o) => (
               <button key={o.k} className={`cp-chip${statusFilter === o.k ? ' on' : ''}`} onClick={() => setStatusFilter(o.k)}>
+                {statusFilter === o.k && <MSym name="check" size={15} />}
                 {o.label}
               </button>
             ))}
@@ -241,7 +247,9 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
                   onMouseEnter={() => setActive(i)}
                   onClick={() => choose(h.m.tag)}
                 >
-                  <span className="cp-glyph glyph">{h.m.glyph || '▢'}</span>
+                  <span className={`cp-icon${h.m.native ? ' native' : ''}`}>
+                    <MSym name={moduleSymbol(h.m)} size={22} />
+                  </span>
                   <span className="cp-main">
                     <span className="cp-title">
                       <Highlight text={title} ranges={titleRanges} />
@@ -257,8 +265,11 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
                     )}
                   </span>
                   <span className="cp-badges">
-                    <span className={`status-pill ${h.status}`}>{t(`status.${h.status}`)}</span>
-                    <span className={`tag-pill ${h.m.native ? 'native' : 'web'}`}>
+                    <span className={`m3-status ${h.status}`}>
+                      <MSym name={STATUS_SYMBOLS[h.status] ?? 'schedule'} size={13} />
+                      {t(`status.${h.status}`)}
+                    </span>
+                    <span className="m3-type">
                       {h.m.native ? t('catalog.native') : t('catalog.web')}
                     </span>
                   </span>

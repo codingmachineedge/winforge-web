@@ -9,6 +9,7 @@ import { RecentStrip } from './RecentStrip';
 import { useLayoutPref } from '../state/prefs';
 import { catalogMatches } from '../data/fuzzy';
 import { useRovingGrid } from '../state/rovingGrid';
+import { MSym, sectionSymbol } from './m3/MSym';
 import '../styles/settings.css';
 import '../styles/catalog-perf.css';
 
@@ -120,6 +121,9 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
           <section key={s.id} className="cv-auto-section">
             {!sectionId && (
               <div className="section-title">
+                <span className="section-icon">
+                  <MSym name={sectionSymbol(s.id)} size={18} />
+                </span>
                 {pick(s.en, s.zh, lang)}
                 <span className="rule" />
               </div>
@@ -150,9 +154,7 @@ export function ModuleCatalog({ sectionId, query, lang, onOpen }: Props) {
                   {subs.map(({ sg, mods: sm }) =>
                     sm.length === 0 ? null : (
                       <div key={sg.id} className="cv-auto-group">
-                        <h3 className="group-title" style={{ fontSize: 13.5, opacity: 0.8 }}>
-                          {pick(sg.en, sg.zh, lang)}
-                        </h3>
+                        <h3 className="group-title subgroup">{pick(sg.en, sg.zh, lang)}</h3>
                         <div className={gridClass}>
                           {sm.map((m) => (
                             <ModuleCard key={m.tag} module={m} lang={lang} onOpen={onOpen} />
@@ -196,29 +198,30 @@ function FilterChips({
           className={`chip${filter === o.key ? ' active' : ''}`}
           onClick={() => setFilter(o.key)}
         >
+          {filter === o.key && <MSym name="check" size={18} />}
           {o.label}
         </button>
       ))}
       <div className="view-toggle" role="group" aria-label={t('shellsettings.viewModeLabel')}>
         <button
           type="button"
-          className={`view-toggle-btn glyph${viewMode === 'grid' ? ' active' : ''}`}
+          className={`view-toggle-btn${viewMode === 'grid' ? ' active' : ''}`}
           aria-pressed={viewMode === 'grid'}
           title={t('shellsettings.viewModeGrid')}
           aria-label={t('shellsettings.viewModeGrid')}
           onClick={() => setViewMode('grid')}
         >
-          ▦
+          <MSym name="grid_view" size={20} />
         </button>
         <button
           type="button"
-          className={`view-toggle-btn glyph${viewMode === 'list' ? ' active' : ''}`}
+          className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
           aria-pressed={viewMode === 'list'}
           title={t('shellsettings.viewModeList')}
           aria-label={t('shellsettings.viewModeList')}
           onClick={() => setViewMode('list')}
         >
-          ▤
+          <MSym name="view_agenda" size={20} />
         </button>
       </div>
     </div>

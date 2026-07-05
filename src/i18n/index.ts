@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { enShell, yueShell } from './shell';
 import { enShellNav, yueShellNav } from './shellNav';
+import { enShellM3, yueShellM3 } from './shellM3';
 import { enShellFeedback, yueShellFeedback } from './shellFeedback';
 import { enShellTheme, yueShellTheme } from './shellTheme';
 import { enShellA11y, yueShellA11y } from './shellA11y';
@@ -13,8 +14,8 @@ import { enReactorUi, yueReactorUi } from './reactorUi';
 // (below) when the ModuleDetail chunk loads — see src/i18n/moduleStrings.ts — so
 // they stay out of the initial bundle. enShell/yueShell (generated from en.ts /
 // zh-Hant.ts) carry the handful of namespaces the always-loaded shell needs first.
-const enAll = { ...enShell, ...enShellNav, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi };
-const yueAll = { ...yueShell, ...yueShellNav, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi };
+const enAll = { ...enShell, ...enShellNav, ...enShellM3, ...enShellFeedback, ...enShellTheme, ...enShellA11y, ...enShellSettings, ...enReactorUi };
+const yueAll = { ...yueShell, ...yueShellNav, ...yueShellM3, ...yueShellFeedback, ...yueShellTheme, ...yueShellA11y, ...yueShellSettings, ...yueReactorUi };
 
 // Three language modes:
 //   en        — English only

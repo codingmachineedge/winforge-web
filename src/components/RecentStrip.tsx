@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { allModules } from '../data/catalog';
 import { pick } from '../i18n';
 import { clearRecents, useRecents } from '../state/recents';
+import { MSym, moduleSymbol } from './m3/MSym';
 import '../styles/favorites.css';
 
 interface Props {
@@ -47,7 +48,7 @@ export function RecentStrip({ lang, onOpen }: Props) {
               aria-label={t('shellnav.openAria', { name })}
               title={name}
             >
-              <span className="glyph">{m.glyph || '▢'}</span>
+              <MSym name={moduleSymbol(m)} size={20} />
               <span className="rail-chip-label">{name}</span>
             </button>
           );

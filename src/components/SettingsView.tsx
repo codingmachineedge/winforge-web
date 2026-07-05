@@ -11,6 +11,7 @@ import {
 // change (whether changed here, from the command palette, or another tab).
 import { useLayoutPref } from '../state/prefs';
 import { useThemeMode } from '../state/theme';
+import { MSym } from './m3/MSym';
 import '../styles/settings.css';
 
 // Full settings page. Zero required props — reads/writes the real stores through
@@ -53,8 +54,8 @@ export function SettingsView() {
       </div>
 
       <div className="settings-search">
-        <span className="glyph settings-search-icon" aria-hidden="true">
-          ⌕
+        <span className="settings-search-icon" aria-hidden="true">
+          <MSym name="search" size={20} />
         </span>
         <input
           type="search"
@@ -89,13 +90,28 @@ export function SettingsView() {
   );
 }
 
+// Per-setting leading icon (M3 list-item style), keyed by the registry id.
+const SETTING_ICONS: Record<string, string> = {
+  theme: 'contrast',
+  uiScale: 'zoom_in',
+  lang: 'translate',
+  viewMode: 'grid_view',
+  density: 'density_medium',
+  sidebarCollapsed: 'side_navigation',
+};
+
 function SettingRow({ def }: { def: SettingDef }) {
   const { t } = useTranslation();
   return (
     <div className="setting-row">
       <div className="setting-text">
-        <div className="setting-label">{t(def.labelKey)}</div>
-        <div className="setting-desc">{t(def.descKey)}</div>
+        <span className="setting-icon" aria-hidden="true">
+          <MSym name={SETTING_ICONS[def.id] ?? 'tune'} size={22} />
+        </span>
+        <div>
+          <div className="setting-label">{t(def.labelKey)}</div>
+          <div className="setting-desc">{t(def.descKey)}</div>
+        </div>
       </div>
       <div className="setting-control">
         <SettingControl def={def} />

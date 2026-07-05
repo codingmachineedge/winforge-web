@@ -108,6 +108,16 @@ Legend: ✅ ported (tested) · 🟡 partial · ❌ not yet
 4. Calorimetric net-cal bias as a first-class channel (currently folded into the pump-heat constant).
 5. Full MODE 1 / P-10 cold-to-full-power ascension (lumped Doppler-vs-conductance scale tuning).
 
+## UI surface change 2026-07-05 (Material-design-rewrite handoff)
+
+The reactor route is now the **Control Room console** (`src/components/reactor/controlRoom/`,
+design: the handoff's "Reactor Control Room.dc.html") — a full replace per the user's decision.
+The engineering panels listed below are **unmounted from the UI** but their components remain in
+the repo and ALL engines keep running via `reactorAux` (their annunciators surface on the
+control-room alarm board). A turbine/secondary balance-of-plant module (`turbineSecondary.ts`)
+was added for the console: governor roll to 1800 rpm, generator auto-sync, steam dump, SG level,
+breaker-gated gross MWe (now the sim's electric output).
+
 ## Ported 2026-07-05 (feature/reactor-protection-wave)
 
 Six new pure-engine modules under `src/reactor/`, each with a vitest suite, a control-room panel

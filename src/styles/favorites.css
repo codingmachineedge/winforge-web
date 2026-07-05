@@ -1,5 +1,7 @@
-/* Pinned favorites rail + recently-viewed strip. Uses the shared token set
-   from global.css (--bg-card, --stroke, --accent, --radius, etc.). */
+/* Pinned favorites rail + recently-viewed strip + detail pin toggle — Material 3
+   restyle (design handoff "WinForge Material 3.dc.html"). Uses the --md-* token
+   set from styles/m3.css. Imported by FavoritesRail/RecentStrip (loads AFTER
+   m3.css in the module graph, so rules here are the final word for chips). */
 
 .rail {
   margin: 0 0 18px;
@@ -8,33 +10,33 @@
 .rail-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin: 4px 0 10px;
 }
 
 .rail-title {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--md-on-surface-variant);
 }
 
 .rail-clear {
-  margin-left: auto;
-  background: none;
   border: none;
-  padding: 2px 6px;
+  background: none;
+  padding: 4px 8px;
   font: inherit;
-  font-size: 12px;
-  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--md-primary);
   cursor: pointer;
-  border-radius: var(--radius);
+  border-radius: 999px;
 }
 
 .rail-clear:hover {
-  color: var(--accent);
-  background: var(--bg-card-hover);
+  color: var(--md-primary);
+  background: color-mix(in srgb, var(--md-primary) 10%, transparent);
 }
 
 /* Favorites rail — wraps; supports drag-and-drop reorder. */
@@ -42,14 +44,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 4px;
 }
 
-/* Recents strip — single horizontal scroll row. */
+/* Recents strip — single horizontal scroll row of outlined chips. */
 .recent-strip {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
   scrollbar-width: thin;
 }
 
@@ -58,27 +61,28 @@
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
-  max-width: 220px;
-  padding: 6px 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  color: var(--text);
+  max-width: 260px;
+  height: 40px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 20px;
+  color: var(--md-on-surface);
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+  transition: background 0.12s;
 }
 
 .rail-chip:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent);
+  background: var(--md-surface-container-high);
+  border-color: var(--md-outline-variant);
 }
 
-.rail-chip .glyph {
-  font-size: 15px;
-  color: var(--accent);
-  flex: 0 0 auto;
+.rail-chip .msym {
+  font-size: 20px;
+  color: var(--md-primary);
 }
 
 .rail-chip-label {
@@ -87,9 +91,20 @@
   white-space: nowrap;
 }
 
-/* A favorite chip carries an inline unpin control, so it's a wrapper, not a button. */
-.fav-chip {
-  padding-right: 4px;
+/* A favorite chip carries an inline unpin control, so it's a wrapper, not a
+   button — filled secondary-container per the design's pinned chips. */
+.fav-chip,
+.fav-chip:hover {
+  background: var(--md-secondary-container);
+  border-color: transparent;
+  color: var(--md-on-secondary-container);
+  font-weight: 500;
+  padding: 0 6px 0 14px;
+  cursor: default;
+}
+
+.fav-chip .msym {
+  color: inherit;
 }
 
 .fav-chip.dragging {
@@ -97,8 +112,7 @@
 }
 
 .fav-chip.drop-target {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+  box-shadow: inset 0 0 0 2px var(--md-primary);
 }
 
 .fav-chip-open {
@@ -117,50 +131,57 @@
 
 .fav-unpin {
   flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: none;
-  border-radius: 50%;
+  border-radius: 999px;
   background: none;
-  color: var(--text-tertiary);
-  font-size: 14px;
-  line-height: 1;
+  color: var(--md-on-secondary-container);
   cursor: pointer;
 }
 
 .fav-unpin:hover {
-  background: var(--bg-elevated);
-  color: var(--danger);
+  background: color-mix(in srgb, var(--md-on-secondary-container) 12%, transparent);
+  color: var(--md-on-secondary-container);
 }
 
-/* Pin/unpin star in the module-detail header. */
+.fav-unpin .msym {
+  font-size: 18px;
+  color: inherit;
+}
+
+/* Pin/unpin (push_pin) in the module-detail header — M3 icon button. */
 .pin-toggle {
   margin-left: auto;
-  align-self: flex-start;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
-  color: var(--text-tertiary);
-  font-size: 17px;
+  align-self: center;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--md-outline);
+  border-radius: 999px;
+  color: var(--md-on-surface-variant);
   cursor: pointer;
-  transition: color 0.12s, border-color 0.12s;
+  transition: background 0.12s, color 0.12s;
 }
 
 .pin-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--md-primary) 8%, transparent);
+  border-color: var(--md-outline);
+  color: var(--md-on-surface-variant);
 }
 
-.pin-toggle.pinned {
-  color: var(--native);
-  border-color: var(--native);
+.pin-toggle.pinned,
+.pin-toggle.pinned:hover {
+  border-color: transparent;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.pin-toggle .msym {
+  font-size: 22px;
 }

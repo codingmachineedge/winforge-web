@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { moduleCount, catalog, allModules } from '../data/catalog';
+import { MSym } from './m3/MSym';
 
 export function About() {
   const { t } = useTranslation();
@@ -10,8 +11,17 @@ export function About() {
       <div className="page-head">
         <h1>{t('about.title')}</h1>
       </div>
-      <div className="panel">
-        <p style={{ marginTop: 0 }}>{t('about.body')}</p>
+      <div className="about-card">
+        <div className="about-brand">
+          <span className="about-logo">
+            <MSym name="radio_button_checked" fill size={30} />
+          </span>
+          <div>
+            <div className="about-name">{t('app.title')}</div>
+            <div className="about-sub">{t('app.subtitle')}</div>
+          </div>
+        </div>
+        <p className="about-body">{t('about.body')}</p>
         <dl className="kv">
           <dt>Modules</dt>
           <dd>{moduleCount}</dd>
@@ -22,9 +32,7 @@ export function About() {
           <dt>Native-only stubs</dt>
           <dd>{nativeCount}</dd>
         </dl>
-        <p style={{ color: 'var(--text-tertiary)', fontSize: 12.5, marginBottom: 0 }}>
-          {t('about.source')}
-        </p>
+        <p className="about-source">{t('about.source')}</p>
       </div>
     </div>
   );

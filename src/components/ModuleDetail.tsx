@@ -7,6 +7,7 @@ import { isTauri } from '../tauri/bridge';
 import { actionFor } from '../tauri/nativeActions';
 import { realModuleFor } from '../modules/registry';
 import { toggleFavorite, useFavorites } from '../state/favorites';
+import { MSym, moduleSymbol } from './m3/MSym';
 
 // This module is only reached through the lazy ModuleDetail route chunk. Registering
 // the per-module i18n strings here (at chunk-eval time, before any component renders)
@@ -53,7 +54,8 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
     return (
       <div className="detail">
         <button className="back" onClick={onBack}>
-          ← {t('detail.back')}
+          <MSym name="arrow_back" size={20} />
+          {t('detail.back')}
         </button>
         <p>{t('catalog.noResults')}</p>
       </div>
@@ -69,11 +71,14 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
   return (
     <div className="detail">
       <button className="back" onClick={onBack}>
-        ← {t('detail.back')}
+        <MSym name="arrow_back" size={20} />
+        {t('detail.back')}
       </button>
 
       <div className="detail-head">
-        <span className="detail-icon glyph">{module.glyph || '▢'}</span>
+        <span className={`detail-icon${module.native ? ' native' : ''}`}>
+          <MSym name={moduleSymbol(module)} size={38} />
+        </span>
         <div>
           <h1>{title}</h1>
           {subtitle && subtitle !== title && <div className="zh">{subtitle}</div>}
@@ -85,13 +90,16 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
           aria-label={t(pinned ? 'shellnav.unpinAria' : 'shellnav.pinAria', { name: title })}
           aria-pressed={pinned}
         >
-          <span className="glyph" aria-hidden="true">{pinned ? '★' : '☆'}</span>
+          <MSym name="push_pin" size={22} fill={pinned} />
         </button>
       </div>
 
       {RealModule && (inDesktop || !module.native) ? (
         <div className="panel live">
-          <h3>● {t('detail.liveTitle')}</h3>
+          <h3>
+            <MSym name="radio_button_checked" fill size={18} />
+            {t('detail.liveTitle')}
+          </h3>
           <RealModule />
         </div>
       ) : RealModule && !inDesktop ? (
@@ -101,14 +109,18 @@ export function ModuleDetail({ module, lang, onBack, onOpenReactor }: Props) {
         </div>
       ) : (
         <div className={`panel ${module.native ? 'native' : 'web'}`}>
-          <h3>{module.native ? t('detail.nativeTitle') : t('detail.webTitle')}</h3>
+          <h3>
+            <MSym name={module.native ? 'memory' : 'web'} size={22} />
+            {module.native ? t('detail.nativeTitle') : t('detail.webTitle')}
+          </h3>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
             {module.native ? t('detail.nativeBody') : t('detail.webBody')}
           </p>
           {isReactor && (
             <p style={{ marginBottom: 0 }}>
               <button className="btn" onClick={onOpenReactor}>
-                ★ {t('detail.openReactor')}
+                <MSym name="bolt" size={20} />
+                {t('detail.openReactor')}
               </button>
             </p>
           )}
@@ -165,7 +177,10 @@ function NativeActionPanel({ tag, lang }: { tag: string; lang: string }) {
 
   return (
     <div className="panel web">
-      <h3>⚡ {t('detail.backendTitle')}</h3>
+      <h3>
+        <MSym name="bolt" size={20} />
+        {t('detail.backendTitle')}
+      </h3>
       {inDesktop ? (
         <>
           <p style={{ marginTop: 0, color: 'var(--text-secondary)' }}>{t('detail.backendBody')}</p>

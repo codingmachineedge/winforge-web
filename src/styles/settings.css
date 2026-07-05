@@ -1,21 +1,24 @@
-/* Settings page + the layout-preference EFFECT rules.
+/* Settings page + the layout-preference EFFECT rules — Material 3 restyle
+ * (design handoff "WinForge Material 3.dc.html"). Uses the --md-* token set
+ * from styles/m3.css. Imported by SettingsView/ModuleCatalog, so it loads
+ * AFTER m3.css in the module graph and owns the final word for these rules.
  *
  * This file has two jobs:
  *  1. Style the SettingsView (search box, grouped rows, segmented / toggle /
- *     slider controls) using the shell design tokens.
- *  2. Make the LayoutPrefs actually take effect — the density and uiScale rules
- *     keyed off attributes/vars that state/applyPrefs.ts writes onto <html>, and
- *     the list-view layout that ModuleCatalog opts into. */
+ *     slider controls).
+ *  2. Make the LayoutPrefs actually take effect — the density and list-view
+ *     rules keyed off attributes/vars that state/applyPrefs.ts writes onto
+ *     <html>, and the grid/list toggle that ModuleCatalog renders. */
 
 /* =========================================================================
  * 1. Settings page
  * ====================================================================== */
 
 .settings-view {
-  max-width: 760px;
+  max-width: 780px;
 }
 
-/* ---- search box ---- */
+/* ---- search box (M3 filled search bar) ---- */
 .settings-search {
   position: relative;
   display: flex;
@@ -24,150 +27,175 @@
 }
 .settings-search-icon {
   position: absolute;
-  left: 12px;
-  font-size: 16px;
-  color: var(--text-tertiary);
+  left: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--md-on-surface-variant);
   pointer-events: none;
 }
 .settings-search-input {
   width: 100%;
-  padding: 9px 12px 9px 36px;
-  border-radius: var(--radius);
-  border: 1px solid var(--stroke);
-  background: var(--bg-elevated);
-  color: var(--text);
+  height: 48px;
+  padding: 0 16px 0 46px;
+  border-radius: 24px;
+  border: none;
+  background: var(--md-surface-container-high);
+  color: var(--md-on-surface);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 .settings-search-input:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-  border-color: var(--accent);
+  outline: 2px solid var(--md-primary);
+  outline-offset: -2px;
 }
 .settings-empty {
-  color: var(--text-tertiary);
-  font-size: 13.5px;
+  color: var(--md-on-surface-variant);
+  font-size: 14px;
   padding: 20px 4px;
 }
 
-/* ---- grouped rows ---- */
+/* ---- grouped rows (surface-container cards, 24px radius) ---- */
 .settings-group {
-  margin-top: 24px;
+  margin-top: 4px;
 }
 .settings-cat {
-  font-size: 13px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--md-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-tertiary);
-  margin: 0 0 10px;
-  font-weight: 600;
+  margin: 28px 4px 12px;
 }
 .settings-rows {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--stroke-subtle);
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: 24px;
   overflow: hidden;
-  background: var(--bg-card);
+  background: var(--md-surface-container);
 }
 .setting-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--stroke-subtle);
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--md-outline-variant);
 }
 .setting-row:last-child {
   border-bottom: none;
 }
 .setting-text {
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.setting-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.setting-icon .msym {
+  font-size: 22px;
 }
 .setting-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--md-on-surface);
 }
 .setting-desc {
-  font-size: 12px;
-  color: var(--text-tertiary);
+  font-size: 12.5px;
+  color: var(--md-on-surface-variant);
   margin-top: 2px;
 }
 .setting-control {
   flex-shrink: 0;
 }
 
-/* ---- segmented (select / theme / lang) ---- */
+/* ---- segmented (select / theme / lang) → outlined M3 button group ---- */
 .segmented {
   display: inline-flex;
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
+  border: 1px solid var(--md-outline);
+  border-radius: 999px;
   overflow: hidden;
-  background: var(--bg-elevated);
+  background: transparent;
 }
 .segmented-btn {
-  padding: 6px 12px;
+  height: 40px;
+  padding: 0 16px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--md-on-surface-variant);
   cursor: pointer;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
-  border-right: 1px solid var(--stroke-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   transition: background 0.12s, color 0.12s;
 }
-.segmented-btn:last-child {
-  border-right: none;
+.segmented-btn + .segmented-btn {
+  border-left: 1px solid var(--md-outline);
 }
 .segmented-btn:hover {
-  background: var(--bg-card-hover);
-  color: var(--text);
+  background: color-mix(in srgb, var(--md-on-surface) 6%, transparent);
+  color: var(--md-on-surface);
 }
-.segmented-btn.active {
-  background: var(--accent);
-  color: #fff;
+.segmented-btn.active,
+.segmented-btn.active:hover {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
   font-weight: 600;
 }
 .segmented-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--md-primary);
   outline-offset: -2px;
 }
 
-/* ---- toggle switch ---- */
+/* ---- toggle switch → M3 switch ---- */
 .toggle-switch {
-  width: 40px;
-  height: 22px;
+  width: 52px;
+  height: 32px;
   border-radius: 999px;
-  border: 1px solid var(--stroke);
-  background: var(--bg-elevated);
+  border: 2px solid var(--md-outline);
+  background: var(--md-surface-container-highest);
   cursor: pointer;
   padding: 0;
   position: relative;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.2s, border-color 0.2s;
 }
 .toggle-switch.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--md-primary);
+  border-color: var(--md-primary);
 }
 .toggle-knob {
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--text-secondary);
-  transition: transform 0.15s, background 0.15s;
+  background: var(--md-outline);
+  transition: all 0.2s;
 }
 .toggle-switch.on .toggle-knob {
-  transform: translateX(18px);
-  background: #fff;
+  left: 24px;
+  width: 22px;
+  height: 22px;
+  background: var(--md-on-primary);
 }
 .toggle-switch:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--md-primary);
   outline-offset: 2px;
 }
 
@@ -179,7 +207,7 @@
 }
 .slider-input {
   width: 160px;
-  accent-color: var(--accent);
+  accent-color: var(--md-primary);
   cursor: pointer;
 }
 .slider-readout {
@@ -187,7 +215,7 @@
   text-align: right;
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
+  color: var(--md-on-surface-variant);
 }
 
 /* =========================================================================
@@ -195,42 +223,44 @@
  * ====================================================================== */
 
 /* ---- density ----
- * comfortable = the global.css defaults (.card-grid gap:12px, .card padding:14px),
- * so it deliberately has NO override. compact tightens, spacious loosens. */
+ * comfortable = the m3.css defaults (.card-grid gap:14px, .card padding:16px),
+ * so it deliberately has NO override. compact tightens, spacious loosens —
+ * values from the design's density table. */
 :root[data-density='compact'] .card-grid {
-  gap: 8px;
+  gap: 10px;
 }
 :root[data-density='compact'] .card {
-  padding: 10px;
-  gap: 6px;
+  padding: 12px;
+  gap: 8px;
 }
 :root[data-density='spacious'] .card-grid {
   gap: 18px;
 }
 :root[data-density='spacious'] .card {
-  padding: 20px;
-  gap: 10px;
+  padding: 22px;
+  gap: 12px;
 }
 
 /* Density also nudges the settings rows so the page reflects the choice. */
 :root[data-density='compact'] .setting-row {
-  padding: 10px 14px;
+  padding: 12px 18px;
 }
 :root[data-density='spacious'] .setting-row {
-  padding: 18px 18px;
+  padding: 22px 24px;
 }
 
 /* ---- list view (ModuleCatalog viewMode='list') ----
  * A single-column, compact-row rendering of the same cards. */
 .card-grid.list {
   grid-template-columns: 1fr;
-  gap: 6px;
+  gap: 8px;
 }
 .card-grid.list .card {
   flex-direction: row;
   align-items: center;
-  padding: 8px 12px;
+  padding: 12px;
   gap: 12px;
+  border-radius: 14px;
 }
 /* In a row, let the badges/pills trail after the title block. */
 .card-grid.list .card-top {
@@ -241,35 +271,40 @@
   margin-left: auto;
 }
 
-/* ---- view toggle button (next to FilterChips) ---- */
+/* ---- grid/list view toggle (next to FilterChips) — outlined M3 pill ---- */
 .view-toggle {
   display: inline-flex;
-  border: 1px solid var(--stroke);
-  border-radius: var(--radius);
+  border: 1px solid var(--md-outline);
+  border-radius: 999px;
   overflow: hidden;
   margin-left: auto;
-  background: var(--bg-elevated);
+  background: transparent;
   align-self: center;
 }
 .view-toggle-btn {
-  padding: 5px 10px;
+  width: 44px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--md-on-surface-variant);
   cursor: pointer;
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1;
 }
 .view-toggle-btn + .view-toggle-btn {
-  border-left: 1px solid var(--stroke-subtle);
+  border-left: 1px solid var(--md-outline);
 }
 .view-toggle-btn.active {
-  background: var(--accent);
-  color: #fff;
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+.view-toggle-btn .msym {
+  font-size: 20px;
 }
 .view-toggle-btn:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--md-primary);
   outline-offset: -2px;
 }
 

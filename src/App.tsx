@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sidebar } from './components/Sidebar';
+import { NavRail } from './components/m3/NavRail';
+import { NavDrawer } from './components/m3/NavDrawer';
+import { TopBar } from './components/m3/TopBar';
 import { ModuleCatalog } from './components/ModuleCatalog';
 import { CommandPalette } from './components/CommandPalette';
 import { ToastHost } from './components/ToastHost';
@@ -27,14 +29,28 @@ const About = lazy(() => import('./components/About').then((m) => ({ default: m.
 export function App() {
   const { t, i18n } = useTranslation();
   useApplyLayoutPrefs();
-  const [view, setView] = useState<View>({ kind: 'catalog', sectionId: null });
+  const [view, setView] = useState<View>(() => {
+    // Shareable URL params (also used by tools/capture-screens.mjs): ?view=reactor|settings|about
+    // opens a shell view directly; ?module=<tag> opens a module detail. State-only — the app
+    // does not rewrite the URL afterwards.
+    const q = new URLSearchParams(window.location.search);
+    const v = q.get('view');
+    if (v === 'reactor') return { kind: 'reactor' };
+    if (v === 'settings') return { kind: 'settings' };
+    if (v === 'about') return { kind: 'about' };
+    const tag = q.get('module');
+    if (tag) return { kind: 'module', tag };
+    return { kind: 'catalog', sectionId: null };
+  });
   const [query, setQuery] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteSeed, setPaletteSeed] = useState('');
   const lang = i18n.language;
 
   // When searching, always show the catalog results regardless of the current view.
   const effectiveView: View = query.trim() ? { kind: 'catalog', sectionId: null } : view;
+  const isReactor = effectiveView.kind === 'reactor';
 
   const moduleByTag = useMemo(() => new Map(allModules.map((m) => [m.tag, m])), []);
 
@@ -49,6 +65,11 @@ export function App() {
   const openPalette = (seed = '') => {
     setPaletteSeed(seed);
     setPaletteOpen(true);
+  };
+
+  const navigate = (v: View) => {
+    setQuery('');
+    setView(v);
   };
 
   // Nav bus: modules (e.g. the Dashboard tiles) ask the shell to navigate.
@@ -80,12 +101,15 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Global Ctrl/⌘+K (and "/" when not typing) opens the command palette.
+  // Global Ctrl/⌘+K (and "/" when not typing) opens the command palette;
+  // Escape closes the navigation drawer when nothing else claims it.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         setPaletteOpen((o) => !o);
+      } else if (e.key === 'Escape' && drawerOpen && !paletteOpen) {
+        setDrawerOpen(false);
       } else if (e.key === '/' && !paletteOpen) {
         const el = document.activeElement;
         const typing = el instanceof HTMLElement && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
@@ -94,54 +118,63 @@ export function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [paletteOpen]);
+  }, [paletteOpen, drawerOpen]);
 
   return (
-    <div className="shell">
+    <div className="m3-shell">
       <a href="#main-content" className="skip-link">
         {t('shella11y.skipToMain')}
       </a>
-      <Sidebar
+
+      <NavRail view={effectiveView} onNavigate={navigate} onOpenDrawer={() => setDrawerOpen(true)} />
+      <NavDrawer
+        open={drawerOpen}
         view={effectiveView}
-        query={query}
         lang={lang}
-        onOpenPalette={openPalette}
-        onNavigate={(v) => {
-          setQuery('');
-          setView(v);
-        }}
+        onClose={() => setDrawerOpen(false)}
+        onNavigate={navigate}
       />
-      <main className="content" id="main-content" tabIndex={-1}>
-        {effectiveView.kind === 'catalog' && (
-          <ModuleCatalog
-            sectionId={effectiveView.sectionId}
-            query={query}
-            lang={lang}
-            onOpen={openModule}
-          />
-        )}
-        <Suspense fallback={<div className="route-fallback">{t('shella11y.loading')}</div>}>
-          {effectiveView.kind === 'module' && (
-            <ErrorBoundary
-              label={moduleByTag.get(effectiveView.tag)?.en}
-              onReset={() => setView({ kind: 'catalog', sectionId: null })}
-            >
-              <ModuleDetail
-                module={moduleByTag.get(effectiveView.tag) ?? null}
-                lang={lang}
-                onBack={() => setView({ kind: 'catalog', sectionId: null })}
-                onOpenReactor={() => setView({ kind: 'reactor' })}
-              />
-            </ErrorBoundary>
-          )}
-          {effectiveView.kind === 'reactor' && (
-            <ErrorBoundary label="Reactor" onReset={() => setView({ kind: 'catalog', sectionId: null })}>
+
+      <main className="m3-content" id="main-content" tabIndex={-1}>
+        {/* The reactor Control Room is a self-contained dark console rendered
+            full-bleed — no top bar, no page padding. Everything else gets the
+            M3 top app bar + padded page column. */}
+        {!isReactor && <TopBar lang={lang} onOpenPalette={openPalette} />}
+        {isReactor ? (
+          <Suspense fallback={<div className="route-fallback">{t('shella11y.loading')}</div>}>
+            <ErrorBoundary label="Reactor" onReset={() => navigate({ kind: 'catalog', sectionId: null })}>
               <ReactorView />
             </ErrorBoundary>
-          )}
-          {effectiveView.kind === 'about' && <About />}
-        </Suspense>
-        {effectiveView.kind === 'settings' && <SettingsView />}
+          </Suspense>
+        ) : (
+          <div className="m3-page">
+            {effectiveView.kind === 'catalog' && (
+              <ModuleCatalog
+                sectionId={effectiveView.sectionId}
+                query={query}
+                lang={lang}
+                onOpen={openModule}
+              />
+            )}
+            <Suspense fallback={<div className="route-fallback">{t('shella11y.loading')}</div>}>
+              {effectiveView.kind === 'module' && (
+                <ErrorBoundary
+                  label={moduleByTag.get(effectiveView.tag)?.en}
+                  onReset={() => navigate({ kind: 'catalog', sectionId: null })}
+                >
+                  <ModuleDetail
+                    module={moduleByTag.get(effectiveView.tag) ?? null}
+                    lang={lang}
+                    onBack={() => navigate({ kind: 'catalog', sectionId: null })}
+                    onOpenReactor={() => navigate({ kind: 'reactor' })}
+                  />
+                </ErrorBoundary>
+              )}
+              {effectiveView.kind === 'about' && <About />}
+            </Suspense>
+            {effectiveView.kind === 'settings' && <SettingsView />}
+          </div>
+        )}
       </main>
 
       <CommandPalette

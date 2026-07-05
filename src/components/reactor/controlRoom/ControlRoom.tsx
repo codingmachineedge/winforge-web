@@ -89,6 +89,21 @@ export function ControlRoom({ sim }: { sim: UseReactorSim }) {
   const keys = Object.keys(latches);
   const flashing = keys.filter((k) => latches[k]!.active && !latches[k]!.acked).length;
 
+  // Demo/deep-link params (also used by tools/capture-screens.mjs): ?warm=1 warm-starts the
+  // plant on entry; &core=1 opens the core cutaway. Read once on mount.
+  const demoRef = useRef(false);
+  useEffect(() => {
+    if (demoRef.current) return;
+    demoRef.current = true;
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('warm') === '1') {
+      sim.loadStandardCore(); // fresh profiles (headless captures) have no fuel persisted
+      sim.warmStart();
+    }
+    if (q.get('core') === '1') setCoreOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     audio.update(st.neutronPowerFraction, st.sourceRangeCps, flashing, tickRef.current, sim.speed);
     // eslint-disable-next-line react-hooks/exhaustive-deps

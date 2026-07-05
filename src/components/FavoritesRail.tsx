@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { allModules } from '../data/catalog';
 import { pick } from '../i18n';
 import { moveFavorite, removeFavorite, useFavorites } from '../state/favorites';
+import { MSym, moduleSymbol } from './m3/MSym';
 import '../styles/favorites.css';
 
 interface Props {
@@ -75,7 +76,7 @@ export function FavoritesRail({ lang, onOpen }: Props) {
                 aria-label={t('shellnav.openAria', { name })}
                 title={name}
               >
-                <span className="glyph">{m.glyph || '▢'}</span>
+                <MSym name={moduleSymbol(m)} size={20} />
                 <span className="rail-chip-label">{name}</span>
               </button>
               <button
@@ -85,7 +86,7 @@ export function FavoritesRail({ lang, onOpen }: Props) {
                 aria-label={t('shellnav.unpinAria', { name })}
                 title={t('shellnav.unpin')}
               >
-                ✕
+                <MSym name="close" size={18} />
               </button>
             </div>
           );
