@@ -3,10 +3,13 @@
 // ARE the module's features. We flatten them per namespace so the command palette
 // can find an app by what it *does* ("shannon entropy", "vigenère", "luhn"), not
 // just by its title. Everything is static/pure — computed once at import.
+//
+// This pulls in the full ~570 kB of per-module strings, so it is LAZY-loaded by the
+// command palette on first open (see CommandPalette.tsx) rather than shipped eagerly.
+// The cheap catalog-only section map lives separately in ./sectionIndex.
 import { en } from '../i18n/en';
 import { zhHant } from '../i18n/zh-Hant';
 import { enB, yueB } from '../i18n/batchB';
-import { catalog, type CatalogModule } from './catalog';
 
 type Tree = Record<string, unknown>;
 
@@ -56,17 +59,4 @@ export function matchedFeature(tag: string, terms: string[]): string | null {
 /** How many distinct features a module exposes (rough richness signal). */
 export function featureCount(tag: string): number {
   return fragmentsByNs.get(nsFor(tag))?.length ?? 0;
-}
-
-// tag -> owning section label, for grouping results.
-export const sectionByTag = new Map<string, { en: string; zh: string }>();
-for (const s of catalog) {
-  const add = (m: CatalogModule) => {
-    if (!sectionByTag.has(m.tag)) sectionByTag.set(m.tag, { en: s.en, zh: s.zh });
-  };
-  s.directModules.forEach(add);
-  for (const g of s.groups) {
-    g.modules.forEach(add);
-    (g.subgroups ?? []).forEach((sg) => sg.modules.forEach(add));
-  }
 }

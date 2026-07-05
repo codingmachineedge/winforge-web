@@ -2,10 +2,17 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { catalog, type CatalogModule } from '../data/catalog';
 import { pick, sub } from '../i18n';
+import { registerModuleStrings } from '../i18n/moduleStrings';
 import { isTauri } from '../tauri/bridge';
 import { actionFor } from '../tauri/nativeActions';
 import { realModuleFor } from '../modules/registry';
 import { toggleFavorite, useFavorites } from '../state/favorites';
+
+// This module is only reached through the lazy ModuleDetail route chunk. Registering
+// the per-module i18n strings here (at chunk-eval time, before any component renders)
+// keeps that ~570 kB out of the eager bundle while guaranteeing t('<module>.…')
+// resolves synchronously the moment a module renders. addResourceBundle is sync.
+registerModuleStrings();
 
 interface Props {
   module: CatalogModule | null;

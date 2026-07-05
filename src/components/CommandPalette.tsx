@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { allModules, type CatalogModule } from '../data/catalog';
-import { featureTextFor, matchedFeature, sectionByTag } from '../data/featureIndex';
+import { sectionByTag } from '../data/sectionIndex';
 import { moduleStatus, type ModuleStatus } from '../modules/status';
 import { pick, sub } from '../i18n';
 import { fuzzyScore, fuzzyRanges, mergeRanges, type Range } from '../data/fuzzy';
 import { Highlight } from './Highlight';
+
+// The feature-text search index flattens every module's i18n strings (~570 kB), so
+// it is loaded lazily the first time the palette opens rather than shipped eagerly.
+// Until it resolves, ranking falls back to title/keyword matching (a few ms gap).
+type FeatureIndex = typeof import('../data/featureIndex');
 
 type Capability = 'all' | 'web' | 'native';
 type StatusFilter = 'any' | 'working' | 'stub';
@@ -45,11 +50,15 @@ function substringRanges(text: string, ts: string[]): Range[] {
   return mergeRanges(out);
 }
 
-function rank(m: CatalogModule, ts: string[]): { score: number; feature: string | null } | null {
+function rank(
+  m: CatalogModule,
+  ts: string[],
+  fi: FeatureIndex | null,
+): { score: number; feature: string | null } | null {
   if (ts.length === 0) return { score: 0, feature: null };
   const title = `${m.en} ${m.zh}`.toLowerCase();
   const keys = m.keywords.toLowerCase();
-  const feat = featureTextFor(m.tag);
+  const feat = fi ? fi.featureTextFor(m.tag) : '';
   let score = 0;
   let viaFeatureOnly = true;
   for (const t of ts) {
@@ -86,7 +95,7 @@ function rank(m: CatalogModule, ts: string[]): { score: number; feature: string 
     }
     return null; // every term must match somewhere (exact or fuzzy)
   }
-  return { score, feature: viaFeatureOnly ? matchedFeature(m.tag, ts) : null };
+  return { score, feature: viaFeatureOnly && fi ? fi.matchedFeature(m.tag, ts) : null };
 }
 
 export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenModule }: Props) {
@@ -95,6 +104,7 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
   const [capability, setCapability] = useState<Capability>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('any');
   const [active, setActive] = useState(0);
+  const [featureIndex, setFeatureIndex] = useState<FeatureIndex | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -108,6 +118,21 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
     return undefined;
   }, [open, initialQuery]);
 
+  // Pull in the feature-text index the first time the palette opens; results
+  // re-rank automatically once it lands (see the `featureIndex` dep on `hits`).
+  useEffect(() => {
+    if (open && !featureIndex) {
+      let alive = true;
+      void import('../data/featureIndex').then((m) => {
+        if (alive) setFeatureIndex(m);
+      });
+      return () => {
+        alive = false;
+      };
+    }
+    return undefined;
+  }, [open, featureIndex]);
+
   const ts = useMemo(() => terms(query), [query]);
 
   const hits: Hit[] = useMemo(() => {
@@ -117,14 +142,14 @@ export function CommandPalette({ open, lang, initialQuery = '', onClose, onOpenM
       const status = moduleStatus(m.tag);
       if (statusFilter === 'working' && status === 'stub') continue;
       if (statusFilter === 'stub' && status !== 'stub') continue;
-      const r = rank(m, ts);
+      const r = rank(m, ts, featureIndex);
       if (!r) continue;
       const featureRanges = r.feature ? substringRanges(r.feature, ts) : [];
       out.push({ m, status, score: r.score, feature: r.feature, featureRanges });
     }
     out.sort((a, b) => b.score - a.score || a.m.en.localeCompare(b.m.en));
     return out.slice(0, 60);
-  }, [ts, capability, statusFilter]);
+  }, [ts, capability, statusFilter, featureIndex]);
 
   // clamp active index whenever the list changes
   useEffect(() => {
