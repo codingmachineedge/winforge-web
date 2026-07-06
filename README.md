@@ -66,6 +66,7 @@ WinForge's C# reactor engine:
 | **Material 3 shell** — navigation rail (**Modules · Simulations · Reactor · Settings · About**) + modal drawer, md-* tokens, light/dark/system theme | ✅ |
 | **PWR Reactor Control Room** — console UI + protection/ESF/turbine engines, 394 physics tests | ✅ |
 | **File Browser** — drives, breadcrumbs, file ops, Recycle-Bin delete, text preview | ✅ |
+| **Feature-parity waves** — modules brought to fuller WinForge parity; e.g. the Gradient generator (9 presets, radial shapes, angle quick-set, stop tools, CSS round-trip import), the Habit tracker (week navigation, best-streak, JSON import/export), Everything search (relevance sort, kind/extension filters, command preview) | ✅ |
 | Trilingual i18n (EN / 粵語 / bilingual) with a CI guard enforcing **zero missing strings** | ✅ |
 | Fuzzy search + highlighting, favorites, recents, grid/list, density settings, PWA, deep links | ✅ |
 
@@ -90,6 +91,10 @@ Requires the **Rust toolchain** (`rustup`, MSVC host), **VS Build Tools / MSVC**
 - **Categories · 分類** — Files & Disks, System, Media & Capture, Tweaks & Input, Apps & Git, Security & Privacy (native-only).
 - **Toolbox · 工具箱** — 12 groups of pure client-side utilities (JSON/Data, Text, Encoding, Crypto, Web/HTTP, Network, Dev, Time, Calculators, Colors, Everyday). Web-portable.
 - **Windows 11 · 視窗 11** — a browsable, searchable, fully-bilingual catalog of **895 Windows tweaks across 22 categories** (WinForge's desktop `TweakCatalog`), grouped under **All Tweaks**. Registry writes run in the desktop app; the web renders each tweak as a reference card with its real metadata (kind, elevation, destructiveness, restart scope).
+
+![Simulations tab](docs/screenshots/simulations.png)
+
+Deep links: `?view=reactor|settings|about`, `?module=<tag>`, and `?section=<id>` (e.g. `?section=suite` opens the Simulations tab) all open a view directly — handy for sharing and for `tools/capture-screens.mjs`.
 
 ## Develop (frontend only, in a browser)
 
