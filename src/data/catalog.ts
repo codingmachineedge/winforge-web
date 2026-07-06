@@ -1,6 +1,6 @@
 // AUTO-GENERATED from WinForge MainWindow.xaml nav tree + Services/ModuleRegistry.cs.
 // Regenerate with: node tools/gen-catalog.mjs [path-to-WinForge]
-// 315 modules across 4 sections.
+// 315 modules + 22 tweak categories across 4 sections.
 /* eslint-disable */
 
 export interface CatalogModule {
@@ -2739,15 +2739,185 @@ export const catalog: CatalogSection[] = [
         "id": "all-tweaks",
         "en": "All Tweaks",
         "zh": "全部調校",
-        "modules": [],
-        "subgroups": [
+        "modules": [
           {
-            "id": "recipes",
-            "en": "Recipes",
+            "tag": "module.tweaks.appearance-personalisation",
+            "en": "Appearance & Personalisation",
+            "zh": "外觀與個人化",
+            "glyph": "",
+            "keywords": "Appearance & Personalisation 外觀與個人化 tweak tweaks 調校 windows Accent colour 主題色 Accent colour on Start & taskbar 開始與工作列顯示主題色 Accent colour on title bars & borders 標題列與邊框顯示主題色 Translucent selection rectangle 半透明選取框 Show seconds in clock 時鐘顯示秒數 Dark mode 深色模式 Show window contents while dragging 拖曳時顯示視窗內容 Drop shadows for icon labels 圖示標籤陰影 Open colour settings 開啟色彩設定 Snap layout flyout on hover 懸停顯示貼齊版面 Start menu layout 開始功能表版面 Taskbar animations 工作列動畫 Combine taskbar buttons 合併工作列按鈕 Transparency effects 透明效果 Disable wallpaper JPEG compression 停用桌布 JPEG 壓縮 Window min/max animations 視窗縮放動畫",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.apps-startup",
+            "en": "Apps & Startup",
+            "zh": "應用程式與啟動",
+            "glyph": "",
+            "keywords": "Apps & Startup 應用程式與啟動 tweak tweaks 調校 windows Analyze component store 分析元件存放區 Open Default apps settings 開啟預設應用程式設定 Open Installed apps settings 開啟已安裝應用程式設定 Kill 'Not Responding' apps 結束無回應嘅應用程式 List auto-start programs 列出自動啟動程式 Restart File Explorer 重新啟動檔案總管 Restart Print Spooler 重新啟動列印多工緩衝處理器 Open Startup apps settings 開啟開機應用程式設定 Update Microsoft Store apps 更新 Microsoft Store 應用程式 Top processes by memory 記憶體用量最高嘅程序 List installed apps 列出已安裝應用程式 Update all apps 更新所有應用程式 List available app updates 列出可更新嘅應用程式",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.browser-control",
+            "en": "Browser Control",
+            "zh": "瀏覽器控制",
+            "glyph": "",
+            "keywords": "Browser Control 瀏覽器控制 tweak tweaks 調校 windows Open in App mode 用應用程式模式開 Open Clear data dialog 開清除資料對話框 Launch with GPU disabled 停用 GPU 啟動 Open Downloads page 開下載頁 Open Extensions page 開擴充功能頁 Open experimental flags 開實驗性功能 Open DNS cache page 開 DNS 快取頁 Open Guest window 開訪客視窗 Open History page 開瀏覽紀錄頁 Open Incognito window 開無痕視窗 Open in Kiosk mode 用 Kiosk 全螢幕模式 Launch Chrome 啟動 Chrome Open a new window 開新視窗 Launch without extensions 停用擴充功能啟動 Open URL in new window 喺新視窗開網址 Open specific profile 開指定設定檔 Launch with proxy server 用代理伺服器啟動 Launch in safe diagnostic mode 用安全診斷模式啟動 Open Settings page 開設定頁 Open Version info 開版本資料 Launch site in app mode 用應用程式模式開網站 Clear browsing data 清除瀏覽資料 Open downloads 開下載項目 Open extensions page 開擴充功能頁 Open favorites manager 開我的最愛管理 Open Edge experiments 開實驗功能頁 Open GPU diagnostics 開 GPU 診斷 Open IE mode settings 開 IE 模式設定 Open InPrivate window 開無痕視窗 Launch in kiosk mode 用自助服務模式開啟 Launch Microsoft Edge 開啟 Microsoft Edge Open network logger 開網路紀錄工具 Open URL in new window 喺新視窗開網址 Open password settings 開密碼設定 Open privacy settings 開私隱設定 Open profile settings 開設定檔設定 Open default apps settings 開預設應用程式設定 Open Edge settings 開 Edge 設定 Open startup boost setting 開啟動加速設定 Show Edge version 睇 Edge 版本 Chrome: address autofill Chrome：地址自動填入 Chrome: background mode Chrome：背景執行模式 Chrome: bookmark bar Chrome：書籤列 Chrome: default browser prompt Chrome：預設瀏覽器提示 Chrome: set homepage policy Chrome：設定主頁政策 Chrome: incognito availability Chrome：無痕模式可用性 Chrome: usage metrics reporting Chrome：使用統計報告 Chrome: set new tab page Chrome：設定新分頁版面 Chrome: password manager Chrome：密碼管理員 Chrome: Safe Browsing Chrome：安全瀏覽 Edge: background mode Edge：背景執行模式 Edge: default browser prompt Edge：預設瀏覽器提示 Edge: set homepage policy Edge：設定主頁政策 Edge: hubs sidebar Edge：側邊欄 Edge: InPrivate availability Edge：InPrivate 可用性 Edge: password manager Edge：密碼管理員 Edge: web data personalization Edge：個人化內容 Edge: shopping assistant Edge：購物助手 Edge: SmartScreen Edge：SmartScreen Edge: startup boost Edge：啟動加速 Backup Chrome bookmarks 備份 Chrome 書籤 Backup Edge bookmarks 備份 Edge 書籤 Chrome profile disk usage Chrome 設定檔磁碟用量 Clear Chrome cache 清除 Chrome 快取 Clear Chrome cookies 清除 Chrome Cookies Clear Edge cache 清除 Edge 快取 Edge profile disk usage Edge 設定檔磁碟用量 Kill all Chrome processes 結束所有 Chrome 程序 Kill all Edge processes 結束所有 Edge 程序 List Chrome profiles 列出 Chrome 設定檔 List Edge profiles 列出 Edge 設定檔 List installed browsers 列出已安裝瀏覽器 Open Chrome user data folder 開啟 Chrome 用戶資料夾 Open Default apps 開啟預設應用程式 Open downloads folder 開啟下載資料夾 Open Edge download folder 開啟 Edge 下載資料夾 Open Edge user data folder 開啟 Edge 用戶資料夾 Reset Chrome Default profile 重設 Chrome 預設設定檔 Set default browser 設定預設瀏覽器 Show Chrome version 顯示 Chrome 版本 Edge efficiency mode policy Edge 效率模式政策 Edge startup behavior policy Edge 啟動行為政策 Flush DNS cache 清除 DNS 快取 List installed PWAs 列出已安裝 PWA List saved Wi-Fi profiles 列出已儲存 Wi-Fi Browser task manager note 瀏覽器工作管理員提示 DevTools shortcut note 開發人員工具捷徑提示 Capture webpage note 擷取網頁提示 Open a blank page 開空白頁 Open Chrome Web Store 開 Chrome 網上商店 Open Credential Manager 開認證管理員 Open Edge Collections 開 Edge 收藏集 Open Edge favorites 開 Edge 我的最愛 Open Edge settings 開 Edge 設定 Open Edge site permissions 開 Edge 網站權限 Open Edge startup pages 開 Edge 啟動頁設定 Open Internet Options 開網際網路選項 Open proxy settings 開 Proxy 設定 Open URL in default browser 喺預設瀏覽器開網址 Reset IE / WinINET settings 重設 IE / WinINET 設定",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.cleanup-storage",
+            "en": "Cleanup & Storage",
+            "zh": "清理與儲存",
+            "glyph": "",
+            "keywords": "Cleanup & Storage 清理與儲存 tweak tweaks 調校 windows Clear delivery optimisation cache 清除傳遞最佳化快取 Run Disk Cleanup 執行磁碟清理 DISM component cleanup DISM 元件清理 Empty clipboard 清空剪貼簿 Clear Windows event logs 清除 Windows 事件記錄 Clear Prefetch 清除 Prefetch Empty Recycle Bin 清空資源回收筒 Open Storage Sense settings 開啟儲存空間感知設定 Reset Microsoft Store cache 重設 Microsoft Store 快取 Clear thumbnail cache 清除縮圖快取 Clear user temp files 清除使用者暫存檔 Clear Windows Temp 清除 Windows 暫存 Clear Windows Update cache 清除 Windows Update 快取",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.debloat-annoyances",
+            "en": "Debloat & Annoyances",
+            "zh": "去煩擾",
+            "glyph": "",
+            "keywords": "Debloat & Annoyances 去煩擾 tweak tweaks 調校 windows Turn off Bing in Start search 熄開始搜尋嘅 Bing Turn off Click to Do 熄 Click to Do Disable Windows consumer features 停用 Windows 消費者功能 Turn off general content suggestions 熄一般內容建議 Remap the Copilot key to do nothing 將 Copilot 鍵改成乜都唔做 Turn off Windows Copilot 熄 Windows Copilot Turn off Cortana above lock screen 熄鎖屏上面嘅 Cortana Turn off Cortana consent in search 熄搜尋度嘅 Cortana 同意 Turn off Cortana 熄 Cortana Turn off web results in Search (policy) 用原則熄搜尋嘅網上結果 Turn off Edge Collections 熄 Edge Collections Turn off Edge Copilot page context 熄 Edge Copilot 讀取頁面內容 Turn off Edge Copilot sidebar 熄 Edge Copilot 側欄 Turn off Edge shopping assistant 熄 Edge 購物助手 Hide File Explorer sync-provider ads 收埋檔案總管嘅 sync 推廣 Turn off lock-screen fun facts & tips 熄鎖機畫面趣聞同貼士 Turn off lock-screen Spotlight tips 熄鎖機畫面 Spotlight 提示 Stop silently installing suggested apps 唔好靜雞雞裝建議 App Turn off Recall snapshots 熄 Recall 截圖記錄 Remove the Copilot app 移除 Copilot app Turn off \"Get even more out of Windows\" nag 熄「再進一步善用 Windows」嘅纏擾 Turn off search box web suggestions 熄搜尋框嘅網上建議 Turn off Search Highlights 熄搜尋焦點 (Search Highlights) Turn off web search in Search 熄搜尋度嘅網上搜尋 Hide the Settings homepage 隱藏設定首頁 Hide suggested content in Settings (1) 收埋設定入面嘅建議內容 (1) Hide suggested content in Settings (2) 收埋設定入面嘅建議內容 (2) Hide suggested content in Settings (3) 收埋設定入面嘅建議內容 (3) Turn off tips & suggestions (soft landing) 熄提示同建議（soft landing） Turn off account notifications in Start 熄開始選單嘅帳戶通知 Reduce Start \"recommended\" suggestions 減少開始選單「建議」推介 Turn off Start menu app suggestions 熄開始選單嘅 App 建議 Skip welcome experience after updates 更新後跳過歡迎畫面 Disable the Widgets board 停用小工具面板 Turn off Windows tips notifications 熄 Windows 貼士通知",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.developer-terminal",
+            "en": "Developer & Terminal",
+            "zh": "開發與終端機",
+            "glyph": "",
+            "keywords": "Developer & Terminal 開發與終端機 tweak tweaks 調校 windows Base64 encode text Base64 編碼文字 Claude CLI version Claude CLI 版本 Codex CLI version Codex CLI 版本 Curl a URL 用 curl 抓網址 GitHub auth status GitHub 登入狀態 GitHub CLI version GitHub CLI 版本 List Git aliases 列出 Git 別名 List global Git config 列出全域 Git 設定 Git version Git 版本 jq version jq 版本 New GUID 產生新 GUID Open Git Bash 開 Git Bash Open Windows Terminal 開 Windows Terminal Open VS Code here 喺呢度開 VS Code OpenCode CLI version OpenCode CLI 版本 OpenSSL version OpenSSL 版本 SHA256 of clipboard text 剪貼簿文字 SHA256 Generate SSH key (Ed25519) 產生 SSH 金鑰（Ed25519） List WSL distros 列出 WSL 發行版 WSL status WSL 狀態 Prune build cache 清理建置快取 Compose services Compose 服務 Prune containers 清理容器 List contexts 列出 context Image history help 映像檔歷史說明 Prune images 清理映像檔 List images 列出映像檔 Docker info Docker 資訊 Container logs help 容器日誌說明 List networks 列出網路 List running containers 列出執行緊嘅容器 List all containers 列出所有容器 Restart Docker Desktop 重啟 Docker Desktop Container stats 容器統計 Disk usage 磁碟用量 Prune system 清理系統 Container processes help 容器程序說明 Docker version Docker 版本 List volumes 列出卷 Prune volumes 清理卷 List active TCP connections 列出已建立嘅 TCP 連線 Show DNS client cache 顯示 DNS 客戶端快取 Echo a specific env var 顯示指定環境變數 Open Environment Variables editor 開啟環境變數編輯器 Find process by port 用端口搵進程 Show hostname 顯示主機名 Show IP configuration 顯示 IP 設定 Kill process by name 用名稱終止進程 Kill process by PID 用 PID 終止進程 List environment variables 列出環境變數 List listening TCP ports 列出監聽中嘅 TCP 端口 List local administrators 列出本機管理員 Show PATH per-line 逐行顯示 PATH Refresh environment 重新整理環境變數 List scheduled reboot tasks 列出排程重啟工作 Open System Properties (Advanced) 開啟系統內容(進階) Top processes by CPU 按 CPU 排名嘅進程 Show system uptime 顯示系統運行時間 Show current user SID 顯示目前用戶 SID Show whoami /all 顯示 whoami /all Deno version Deno 版本 .NET info .NET 資訊 .NET runtimes .NET 執行階段 .NET SDKs .NET SDK 清單 NuGet cache folders NuGet 快取資料夾 Go version Go 版本 Java version Java 版本 Node.js version Node.js 版本 Clear npm cache 清除 npm 快取 Verify npm cache 驗證 npm 快取 Global npm packages 全域 npm 套件 Outdated global npm 過時嘅全域 npm npm version npm 版本 Installed pip packages 已安裝嘅 pip 套件 Outdated pip packages 過時嘅 pip 套件 pip version pip 版本 List Python installs 列出 Python 安裝 Python version Python 版本 Rust compiler version Rust 編譯器版本 Locate node and python 搵 node 同 python Guided dev environment check 引導式開發環境檢查 Show configuration 顯示組態 Download only 只下載 Export installed list 匯出已安裝清單 Import package list 匯入套件清單 Install by ID 按 ID 安裝 List installed 列出已安裝 List pins 列出釘選 List with versions 列出連版本 Pin a package 釘選套件 Repair a package 修復套件 Search a package 搜尋套件 Search by tag 按標籤搜尋 Check winget version 檢查 winget 版本 Show package info 顯示套件資料 Show package versions 顯示套件版本 List sources 列出來源 Uninstall a package 解除安裝套件 Update sources 更新來源 List upgradable 列出可更新 Upgrade all apps 更新所有應用程式 Validate a manifest 驗證資訊清單",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.encryption-vault",
+            "en": "Encryption & Vault",
+            "zh": "加密與保險庫",
+            "glyph": "",
+            "keywords": "Encryption & Vault 加密與保險庫 tweak tweaks 調校 windows Add password protector 加入密碼保護器 Backup recovery key to AD 備份還原金鑰到 AD Backup recovery key to file 備份還原金鑰到檔案 Change volume password 更改磁碟區密碼 Open BitLocker control panel 開 BitLocker 控制台 Enable auto-unlock 啟用自動解鎖 Enable BitLocker on a drive 為磁碟啟用 BitLocker Force recovery on next boot 下次開機逼出還原畫面 Get-Tpm details Get-Tpm 詳情 Get-BitLockerVolume Get-BitLockerVolume List encrypted volumes 列出已加密磁碟區 Lock a drive 鎖定磁碟 Pause encryption/decryption 暫停加密／解密 Repair a damaged drive (repair-bde) 修復爛咗嘅磁碟 (repair-bde) Resume encryption/decryption 繼續加密／解密 Resume protection 恢復保護 Show key protectors 顯示金鑰保護器 BitLocker status (all) BitLocker 狀態（全部） BitLocker status (C:) BitLocker 狀態（C:） Suspend for 1 reboot 暫停 1 次重開機 TPM status (manage-bde) TPM 狀態（manage-bde） Turn off BitLocker (decrypt) 關閉 BitLocker（解密） Unlock with password 用密碼解鎖 List Certificate Stores 列出憑證庫 Check a Certificate Thumbprint 檢查憑證指紋 Show Code-Signing Certificates 顯示程式碼簽署憑證 Export a Certificate (Note) 匯出憑證（提示） Group Policy Cert Settings (Note) 群組原則憑證設定（提示） KeyStore Location (Note) 金鑰庫位置（提示） List Intermediate CA Certificates 列出中繼 CA 憑證 List Expiring Certificates 列出即將到期憑證 List All My-Store Certificate Fields 列出個人憑證庫詳細欄位 List Personal Certificates 列出個人憑證 List Trusted Root CAs 列出受信任根 CA List Windows Credentials 列出 Windows 認證 Open Manage User Certificates 開啟管理使用者憑證 Open Certificate Manager (Machine) 開啟憑證管理員（電腦） Open Certificate Manager (User) 開啟憑證管理員（使用者） Open Credential Manager 開啟認證管理員 Open Windows Hello Settings 開啟 Windows Hello 設定 Count Root Store Certificates 統計根憑證庫數量 List Smart Card Readers (Note) 列出智能卡讀卡機（提示） Show TPM Information 顯示 TPM 資訊 Add scan exclusion (C:\\Temp) 新增掃描排除 (C:\\Temp) ASR: all rules to Audit mode ASR：全部規則設稽核 List ASR rules (with names) 列出 ASR 規則（連名） ASR: block LSASS theft (Audit) ASR：封鎖 LSASS 竊取（稽核） ASR: block LSASS theft (Disabled) ASR：封鎖 LSASS 竊取（停用） ASR: block LSASS theft (Enabled) ASR：封鎖 LSASS 竊取（啟用） ASR: block LSASS theft (Warn) ASR：封鎖 LSASS 竊取（警告） Block an app (note) 封鎖應用程式 (說明) Show blocked connections (note) 顯示被擋連線 (說明) Cloud protection level (policy) 雲端保護等級 (政策) Enable controlled folder access 啟用受控資料夾存取 Enable firewall logging 啟用防火牆記錄 Turn firewall off 熄防火牆 Turn firewall on 開防火牆 List firewall rules 列出防火牆規則 Firewall status 防火牆狀態 Full scan 完整掃描 List exclusions 列出排除清單 Defender preferences Defender 偏好設定 Quick scan 快速掃描 Remove scan exclusion (C:\\Temp) 移除掃描排除 (C:\\Temp) Reset firewall to defaults 重設防火牆做預設 Set cloud protection level (high) 設定雲端保護等級 (高) Defender status Defender 狀態 Threat history 威脅記錄 Update signatures 更新特徵碼 Show Defender version 顯示 Defender 版本 Show EFS recovery agent 顯示 EFS 復原代理 Backup EFS certificate 備份 EFS 憑證 Show cipher help 顯示 cipher 說明 Create new EFS key 建立新 EFS 金鑰 Decrypt Documents folder 解密文件資料夾 Decrypt a folder (EFS) 解密資料夾 (EFS) Display folder encryption state 顯示資料夾加密狀態 Encrypt Documents folder 加密文件資料夾 Encrypt a folder (EFS) 加密資料夾 (EFS) Encrypt folder & subfolders 加密資料夾及子資料夾 List encrypted files 列出已加密檔案 Open EFS cert manager 開啟 EFS 憑證管理員 Manage EFS (rekeywiz) 管理 EFS (rekeywiz) Reset EFS keys (rekey) 重設 EFS 金鑰 Secure-delete a file 安全刪除檔案 Show EFS certificates 顯示 EFS 憑證 Show file encryption state 顯示檔案加密狀態 Show state of subfolders 顯示子資料夾狀態 Wipe free space on C: 抹除 C: 可用空間 Wipe free space on a drive 抹除磁碟可用空間 Auto-mount devices 自動掛載裝置 Start background task 啟動背景工作 Backup volume header 備份磁碟區檔頭 Snapshot raw header (first 131072 bytes) 快照原始檔頭（首 131072 位元組） Open settings / benchmark 打開設定／效能測試 Change container password 更改容器密碼 Create new volume 建立新磁碟區 Dismount all volumes 卸載所有磁碟區 Dismount drive letter 卸載指定磁碟機 Open vault guide 打開保險庫指南 Explore mounted volume 瀏覽已掛載磁碟區 Force dismount all 強制卸載全部 Launch WinForge Vault 啟動 WinForge 保險庫 Hidden volume wizard 隱藏磁碟區精靈 Keyfile generator 金鑰檔產生器 List mounted drives 列出已掛載磁碟 Open mount dialog 打開掛載對話框 Mount favorites 掛載最愛磁碟區 Mount with keyfile + PIM 用鎖匙檔加 PIM 掛載 Mount read-only 唯讀掛載 Mount as removable media 以可移除媒體掛載 Partition / device encryption 分割區／裝置加密 Restore volume header 還原磁碟區檔頭 Restore raw header snapshot 還原原始檔頭快照 Mount with PIM 以 PIM 掛載 System encryption tools 系統加密工具 Traveler disk setup 隨身碟設定 Show engine path 顯示引擎路徑 Volume Creation Wizard 磁碟區建立精靈 Wipe password cache 清除密碼快取",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.file-explorer",
+            "en": "File Explorer",
+            "zh": "檔案總管",
+            "glyph": "",
+            "keywords": "File Explorer 檔案總管 tweak tweaks 調校 windows Item check boxes 項目核取方塊 Classic right-click menu 經典右鍵選單 Confirm delete dialog 刪除確認對話框 Open Folder Options 開啟資料夾選項 Full path in title bar 標題列顯示完整路徑 Open File Explorer to 檔案總管開啟到 Expand to current folder 導覽窗格展開至目前資料夾 Restart File Explorer 重新啟動檔案總管 Launch folder windows in a separate process 資料夾視窗用獨立程序開啟 Show file extensions 顯示副檔名 Show frequent folders 顯示常用資料夾 Show hidden files 顯示隱藏檔案 Show recent files in Quick Access 快速存取顯示最近檔案 Show protected OS files 顯示受保護系統檔案",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.launcher-elevation",
+            "en": "Launcher & Elevation",
+            "zh": "啟動器與提權",
+            "glyph": "",
+            "keywords": "Launcher & Elevation 啟動器與提權 tweak tweaks 調校 windows Create no-UAC elevated launcher 建立免 UAC 提權啟動器 Open Task Scheduler 開啟工作排程器 Remove the elevated launcher 移除提權啟動器 Run WinForge elevated now 立即以管理員運行 Elevation status 提權狀態",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.maintenance-diagnostics",
+            "en": "Maintenance & Diagnostics",
+            "zh": "維護與診斷",
+            "glyph": "",
+            "keywords": "Maintenance & Diagnostics 維護與診斷 tweak tweaks 調校 windows Battery report 電池報告 Clear Application event log 清除應用程式記錄 Clear System event log 清除系統事件記錄 Clear Windows Update cache 清除更新快取 Computer info summary 電腦資訊摘要 Create restore point 建立還原點 Query 8.3 name creation 查詢 8.3 短檔名建立 Analyze component store 分析元件儲存區 Schedule full check & repair 排程完整檢查同修復 Check disk (read-only) 檢查磁碟（唯讀） Clean up component store 清理元件儲存區 Open Optimize Drives 開最佳化磁碟機 Query dirty bit 查詢污染位元 Volume free space 磁碟區可用空間 Filesystem info 檔案系統資訊 List disks 列出磁碟 List partitions 列出分割區 List volumes 列出磁碟區 Largest folders in Users Users 最大嘅資料夾 Open Disk Management 開磁碟管理 Optimize / defrag C: 最佳化／重組 C: Physical disk health 實體磁碟健康 Storage reliability counters 儲存可靠性計數器 Scan volume for errors 掃描磁碟區錯誤 Spot-fix volume errors 即時修復磁碟區錯誤 ReTrim SSD 重新 TRIM SSD List shadow copies 列出陰影複本 Shadow storage usage 陰影儲存用量 DISM check health DISM 快速檢查健康 DISM restore health DISM 修復健康 DISM scan health DISM 深入掃描健康 Show DNS cache 顯示 DNS 快取 List audio devices 列出音效裝置 Open Device Manager 開啟裝置管理員 List disk drives 列出磁碟機 List display adapters 列出顯示卡 Detailed driver query 詳細驅動程式清單 Export driver list to file 匯出驅動清單去檔案 GPU information 顯示卡資料 List third-party drivers 列出第三方驅動程式 Monitor information 顯示器資料 List network adapters 列出網絡卡 List printers 列出打印機 Count devices with problems 數有問題嘅裝置 Devices with errors 有錯誤嘅裝置 Restart active network adapters 重啟使用緊嘅網絡卡 Scan for hardware changes 掃描硬件變更 Signed drivers (top 30) 已簽署驅動（頭 30 個） Open Sound settings 開啟音效設定 List USB devices 列出 USB 裝置 Open DirectX Diagnostics 開 DirectX 診斷工具 Enable System Protection 開啟系統保護 Energy efficiency report 電源效率報告 Export System event log 匯出系統事件記錄 Flush + restart spooler queue 清空並重啟列印佇列 Last wake source 上次喚醒嘅來源 List automatic services 列出自動啟動嘅服務 Auto services that are stopped 自動但已停咗嘅服務 List startup programs 列出開機自動啟動程式 List installed updates 列出已安裝更新 List restore points 列出還原點 List running services 列出運行緊嘅服務 List scheduled tasks 列出排程工作 Open System Information 開系統資訊工具 Event Viewer 事件檢視器 Open System Information 開系統資訊 Open Services 開啟服務管理員 Open Startup apps settings 開啟開機應用程式設定 Open Task Scheduler 開啟工作排程器 Open Windows Update settings 開 Windows Update 設定 Check pending reboot 檢查待重啟 Open Performance Monitor 開效能監視器 Active power requests 目前嘅電源請求 Query a service 查詢服務狀態 Recent critical & error events 近期嚴重同錯誤事件 Open Reliability Monitor 開可靠性監視器 Reset Windows Update services 重置 Windows Update 服務 Open Resource Monitor 開資源監視器 Restart Windows Audio 重啟 Windows 音效服務 Restart BITS 重啟 BITS 背景傳輸服務 Restart DNS Client 重啟 DNS 用戶端服務 Restart Explorer 重啟檔案總管 Restart Windows Search 重啟 Windows 搜尋服務 Restart Print Spooler 重啟列印多工緩衝處理器 Restart Windows Time + resync 重啟 Windows 時間並同步 Run a scheduled task 執行排程工作 Set DiagTrack to Manual 將 DiagTrack 設為手動啟動 Run System File Checker 執行系統檔案檢查 (SFC) Verify system files only 淨係驗證系統檔案 Sleep study report 睡眠研究報告 Start DiagTrack 啟動 DiagTrack 服務 Stop DiagTrack 停止 DiagTrack 服務 System power report 系統電源報告 System information 系統資訊 Test internet connectivity 測試上網連線 Thermal zone temperature 熱區溫度 Top processes by memory 記憶體用得最多嘅程序 Uptime and last boot 開機時間同上次啟動 Devices armed to wake 可以喚醒系統嘅裝置 Download Windows Updates 下載 Windows 更新 Install Windows Updates 安裝 Windows 更新 Scan for Windows Updates 掃描 Windows 更新",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.network-internet",
+            "en": "Network & Internet",
+            "zh": "網絡與互聯網",
+            "glyph": "",
+            "keywords": "Network & Internet 網絡與互聯網 tweak tweaks 調校 windows Show active connections 顯示使用中連線 Reset DNS to automatic DNS 還原自動 Set DNS to Cloudflare (1.1.1.1) 設 DNS 為 Cloudflare Set DNS to Google (8.8.8.8) 設 DNS 為 Google Flush ARP cache 清除 ARP 快取 Flush DNS cache 清除 DNS 快取 Show full IP configuration 顯示完整 IP 設定 Ping test (Cloudflare) Ping 測試 Show public IP 顯示公共 IP Release IP address 釋放 IP 位址 Renew IP address 更新 IP 位址 Reset TCP/IP stack 重設 TCP/IP Reset Winsock catalog 重設 Winsock Show saved Wi-Fi profiles 顯示已儲存 Wi-Fi",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.network-pro",
+            "en": "Network Pro",
+            "zh": "網絡進階",
+            "glyph": "",
+            "keywords": "Network Pro 網絡進階 tweak tweaks 調校 windows Advanced properties 進階屬性 Adapter bindings 網絡卡綁定 Connection profile 連線設定檔 Disable an adapter 停用網絡卡 Disable IPv6 on adapter 停用網絡卡 IPv6 DNS client settings DNS 客戶端設定 Enable an adapter 啟用網絡卡 Show MAC addresses 顯示 MAC 地址 IP addresses IP 地址 IP configuration IP 設定 Link speed 連線速度 List network adapters 列出網絡卡 Adapter power management 網絡卡電源管理 Rename an adapter 重新命名網絡卡 Restart an adapter 重啟網絡卡 Routing table 路由表 Reset adapter to DHCP 重設為 DHCP Set adapter MTU 設定網絡卡 MTU Adapter statistics 網絡卡統計 Detailed statistics 詳細統計 Wake-on-LAN setting 網絡喚醒設定 Network adapter usage 網絡卡用量 Listening ports with process 監聽埠連程序 Latency to multiple hosts 多主機延遲 Show network category 顯示網絡類別 Active connections (netstat -ano) 活動連線 (netstat -ano) Routing table (netstat -rn) 路由表 (netstat -rn) DNS lookup (nslookup) DNS 查詢 (nslookup) Path ping to 1.1.1.1 Path ping 去 1.1.1.1 Ping 1.1.1.1 Ping 1.1.1.1 Ping default gateway Ping 預設閘道 Reset WinHTTP proxy 重設 WinHTTP 代理 Open proxy settings 開啟代理設定 Show WinHTTP proxy 顯示 WinHTTP 代理 TCP connections by state 按狀態列 TCP 連線 Telnet port test (note) Telnet 埠測試 (備註) Test-Connection (4 pings) Test-Connection (4 次 ping) Test-NetConnection (ping) Test-NetConnection (ping) Test TCP port 443 測試 TCP 埠 443 Test-NetConnection trace route Test-NetConnection 追蹤路由 Trace route to 1.1.1.1 追蹤路由去 1.1.1.1 Allow ping (ICMP echo) 允許 Ping（ICMP） Block an app inbound 封鎖應用程式入站 Count enabled rules 統計已啟用規則數量 Set default inbound to block 設定預設入站為封鎖 Enable firewall logging 啟用防火牆記錄 Enable Remote Desktop rule 啟用遠端桌面規則 Enable a rule group (Remote Assistance) 啟用規則群組（遠端協助） Export firewall policy to file 匯出防火牆政策到檔案 List blocked program rules 列出已封鎖程式規則 List rules grouped by group 依群組列出規則 List enabled inbound rules 列出已啟用嘅入站規則 List enabled outbound rules 列出已啟用嘅出站規則 Reset firewall to defaults 重設防火牆做預設值 Restore default policy file 從預設政策檔還原 Show all profiles state 顯示所有設定檔狀態 Show current active profile 顯示目前作用中設定檔 Show firewall log path 顯示防火牆記錄路徑 Show notification setting 顯示通知設定 Turn firewall off (all profiles) 關閉防火牆（所有設定檔） Turn firewall on (all profiles) 開啟防火牆（所有設定檔） Add persistent route 新增永久路由 Show ARP table 顯示 ARP 表 Clear DNS client cache 清 DNS 用戶端快取 Show DNS cache 顯示 DNS 快取 Flush DNS cache 清除 DNS 快取 Get DNS servers 查 DNS 伺服器 Full IP configuration 完整 IP 設定 Test DNS lookup 測試 DNS 查詢 Show public IP 顯示對外 IP Re-register DNS 重新註冊 DNS Release IP address 釋放 IP 位址 Renew IP address 更新 IP 位址 Reset DNS to DHCP DNS 還原做 DHCP Reset TCP/IP stack 重設 TCP/IP 堆疊 Reset Winsock catalog 重設 Winsock 目錄 Resolve a hostname 解析網域名稱 Print routing table 顯示路由表 Use Cloudflare DNS 用 Cloudflare DNS Use Google DNS 用 Google DNS Use Quad9 DNS 用 Quad9 DNS Block a network 封鎖一個網絡 Connect to a profile 連接到設定檔 Disconnect Wi-Fi 中斷 Wi-Fi 連線 Export profiles to folder 匯出設定檔到資料夾 Forget a network 忘記一個網絡 List SSIDs in range 列出範圍內 SSID Refresh networks 重新整理網絡 Show all profiles (details) 顯示所有設定檔（詳情） Show auto-config setting 顯示自動設定狀態 Show wireless capabilities 顯示無線功能 Show Wi-Fi drivers 顯示 Wi-Fi 驅動程式 Show network filters 顯示網絡篩選 Show hosted network 顯示主機網絡 Show wireless interfaces 顯示無線網絡介面 Scan networks (with BSSID) 掃描網絡（含 BSSID） Show Wi-Fi password 顯示 Wi-Fi 密碼 Show saved Wi-Fi profiles 顯示已儲存嘅 Wi-Fi 設定檔 Show MAC randomization 顯示 MAC 隨機化 Show signal strength 顯示訊號強度 Generate WLAN report 產生 WLAN 報告",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.performance-power",
+            "en": "Performance & Power",
+            "zh": "效能與電源",
+            "glyph": "",
+            "keywords": "Performance & Power 效能與電源 tweak tweaks 調校 windows Activate Balanced plan 啟用平衡電源計劃 Clear page file at shutdown 關機時清除分頁檔 Fast startup 快速啟動 Game DVR background recording 遊戲 DVR 背景錄製 Game Mode 遊戲模式 Turn off hibernation 熄咗休眠 Turn on hibernation 開啟休眠 Activate High performance plan 啟用高效能電源計劃 Menu show delay 選單顯示延遲 Disable power throttling 停用電源節流 No startup app delay 取消啟動程式延遲 Add Ultimate Performance plan 新增極致效能電源計劃 Visual effects mode 視覺效果模式",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.power-tools",
+            "en": "Power Tools",
+            "zh": "進階工具",
+            "glyph": "",
+            "keywords": "Power Tools 進階工具 tweak tweaks 調校 windows Show Windows activation status 顯示 Windows 啟用狀態 Generate battery report 產生電池報告 Check system drive 檢查系統磁碟 DISM restore health DISM 還原健康 Edit the hosts file 編輯 hosts 檔案 Generate energy report 產生能源報告 Lock the workstation 鎖定電腦 Open System Information 開啟系統資訊 Open Reliability Monitor 開啟可靠性監視器 Restart now 即刻重新啟動 System File Checker (SFC) 系統檔案檢查 (SFC) Shut down now 即刻關機 Sign out 登出 Sleep now 即刻睡眠",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.privacy-telemetry",
+            "en": "Privacy & Telemetry",
+            "zh": "私隱與遙測",
+            "glyph": "",
+            "keywords": "Privacy & Telemetry 私隱與遙測 tweak tweaks 調校 windows Activity history 活動記錄 Personalised ads (advertising ID) 個人化廣告（廣告識別碼） App launch tracking App 啟動追蹤 Never ask for feedback 永不索取意見 Inking & typing personalisation 手寫與輸入個人化 Block websites reading my language list 阻止網站讀取語言清單 Location access 位置存取 Online speech recognition 線上語音辨識 Suggested content in Settings 設定內嘅建議內容 Windows welcome tips Windows 歡迎提示 Suggestions in Start 開始功能表建議 Tailored experiences 量身打造嘅體驗 Diagnostic data level 診斷資料層級 Tips when using Windows 使用 Windows 時嘅提示",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.recipes-one-click",
+            "en": "Recipes (one-click)",
             "zh": "一鍵流程",
-            "modules": []
+            "glyph": "",
+            "keywords": "Recipes (one-click) 一鍵流程 tweak tweaks 調校 windows Calm Windows (de-annoy) 靜化 Windows（去煩擾） Declutter taskbar 簡化工作列 Developer setup 開發人員設定 Disable telemetry tasks 停用遙測排程工作 Classic Explorer 經典檔案總管 Free up space 釋放空間 Gaming mode 遊戲模式 System health check 系統健康檢查 Security lock-down 保安加固 Network reset 網絡重置 Performance boost 效能提升 Privacy hardening 私隱強化 Quick cleanup 快速清理 Re-enable Windows nags 還原 Windows 提示 Create a restore point 建立還原點 Trim startup bloat 清開機臃腫 Update everything 全部更新",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.security",
+            "en": "Security",
+            "zh": "安全",
+            "glyph": "",
+            "keywords": "Security 安全 tweak tweaks 調校 windows Show BitLocker status 顯示 BitLocker 狀態 Exclude Downloads from Defender scans 將 Downloads 排除喺 Defender 掃描之外 Run a quick Defender scan 行一次 Defender 快速掃描 Update Defender definitions 更新 Defender 病毒定義 Turn Windows Firewall off (all profiles) 熄咗 Windows 防火牆（所有設定檔） Turn Windows Firewall on (all profiles) 開返 Windows 防火牆（所有設定檔） Hide last signed-in user name 隱藏上次登入嘅使用者名稱 Open Windows Security 開啟 Windows 安全性 Enable Remote Desktop 開啟遠端桌面 Require Ctrl+Alt+Del at sign-in 登入要按 Ctrl+Alt+Del SmartScreen for apps & files 應用程式同檔案 SmartScreen SmartScreen for Store & web content 商店同網頁內容 SmartScreen UAC prompt behaviour UAC 提示行為 Dim the desktop for UAC UAC 時將桌面變暗",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.system-boot",
+            "en": "System & Boot",
+            "zh": "系統與開機",
+            "glyph": "",
+            "keywords": "System & Boot 系統與開機 tweak tweaks 調校 windows Auto-restart on crash 當機自動重新開機 Restart to Advanced startup 重新開機入進階啟動 Restart to UEFI firmware 重新開機入 UEFI 韌體 Clipboard history 剪貼簿記錄 Cloud clipboard sync 雲端剪貼簿同步 Developer Mode 開發人員模式 Enable System Protection (C:) 啟用系統保護 (C:) Edit Environment Variables 編輯環境變數 Create God Mode folder 建立 God Mode 資料夾 Hung app close timeout 無回應程式關閉等候 Mapped-drive reconnect fix 網絡磁碟重連修正 Enable long path support 啟用長路徑支援 NumLock at startup 開機 NumLock Create a restore point 建立還原點 Verbose sign-in messages 詳細登入訊息",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.system-information",
+            "en": "System Information",
+            "zh": "系統資訊",
+            "glyph": "",
+            "keywords": "System Information 系統資訊 tweak tweaks 調校 windows Last boot 上次開機 Processor 處理器 Logical processors 邏輯處理器 System drive 系統磁碟 Graphics adapter 顯示卡 Device name 裝置名稱 Edition 版本 Installed memory 已安裝記憶體 Memory in use 記憶體用量 App runtime 應用程式執行階段 Time zone 時區 Uptime 運行時間 Signed-in user 登入使用者 Version & build 版本與組建",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.taskbar-start",
+            "en": "Taskbar & Start",
+            "zh": "工作列與開始功能表",
+            "glyph": "",
+            "keywords": "Taskbar & Start 工作列與開始功能表 tweak tweaks 調校 windows Taskbar alignment 工作列對齊 Show Chat/Copilot button 顯示聊天/Copilot 按鈕 Combine taskbar buttons 合併工作列按鈕 Show \"End Task\" on right-click 右鍵顯示「結束工作」 Show taskbar on all displays 所有螢幕顯示工作列 Open Taskbar settings 開啟工作列設定 Search on taskbar 工作列搜尋 Show all system tray icons 顯示所有系統匣圖示 Show seconds in system clock 系統時鐘顯示秒數 Show most used apps in Start 開始功能表顯示最常用程式 Show recently added apps in Start 開始功能表顯示最近新增程式 Show tips and recommendations in Start 開始功能表顯示提示同建議 Show Task View button 顯示工作檢視按鈕 Show Widgets button 顯示小工具按鈕",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.winaero-tweaks",
+            "en": "Winaero Tweaks",
+            "zh": "Winaero 進階調校",
+            "glyph": "",
+            "keywords": "Winaero Tweaks Winaero 進階調校 tweak tweaks 調校 windows Show accent color on Start, taskbar and action center 喺開始選單、工作列同操作中心顯示強調色 Colored title bars (accent on window title bars and borders) 彩色標題列（視窗標題列同邊框上色） Disable window shake (Aero Shake) to minimize 停用搖晃視窗（Aero Shake）最小化 Desktop icon horizontal spacing 桌面圖示水平間距 Inactive title bar color (accent on background windows) 非作用中標題列顏色（背景視窗用強調色） Use classic balloon tips instead of toast notifications 用傳統氣球提示取代浮動通知（toast） Menu show delay (snappier menus) 選單顯示延遲（選單更快彈出） Scrollbar width (thicker scroll bars) 捲動列闊度（較粗捲動列） Auto-End Tasks on Shutdown 關機時自動結束工作 Disable Win+L Lock 停用 Win+L 鎖定 Hung App Timeout (1s) 程式無回應等候時間（1 秒） Disable Shutdown Event Tracker 停用關機事件追蹤器 Wait To Kill App Timeout (2s) 強制結束程式等候時間（2 秒） Wait To Kill Service Timeout 強制結束服務等候時間 Disable blur on sign-in screen 停用登入畫面模糊效果 Disable automatic restart sign-on (ARSO) 停用自動重啟登入 (ARSO) Disable \"Press Ctrl+Alt+Del\" at logon 停用登入「按 Ctrl+Alt+Del」 Disable sign-in screen background image 停用登入畫面背景圖 Disable Windows startup sound 停用 Windows 開機音效 Show last interactive logon info 顯示上次互動登入資訊 Disable lock screen 停用上鎖畫面 Enable Num Lock at startup 開機時開啟 Num Lock Remove \"Cast to Device\" from context menu context menu 移除「投放到裝置」 Remove \"Edit with Photos\" from context menu context menu 移除「用相片編輯」 Remove \"Give access to\" / Share from context menu context menu 移除「授權存取 / 共用」 Remove \"Restore previous versions\" from context menu context menu 移除「還原舊版本」 Remove \"Scan with Microsoft Defender\" from context menu context menu 移除「用 Microsoft Defender 掃描」 Checkboxes for item selection 用核取方塊選取項目 Use compact view (reduce spacing) 使用精簡檢視（減少間距） Disable thumbnail cache 停用縮圖快取 Show drive letters first 磁碟機代號顯示喺前 Expand to current folder 導覽窗格展開至目前資料夾 Open Explorer to This PC 檔案總管開啟「本機」 Hide recent files in Quick access 唔顯示快速存取最近檔案 Show seconds in taskbar clock 工作列時鐘顯示秒數 Show Explorer status bar 顯示檔案總管狀態列 End task on taskbar right-click 工作列右鍵加入「結束工作」 Delivery Optimization: no download from other PCs 傳遞最佳化：唔由其他 PC 下載 Deny apps access to location (policy) 拒絕 App 存取位置 (政策) Disable app launch tracking 停用程式啟動追蹤 Disable feedback request frequency 停用意見反映要求頻率 Disable feedback notifications 停用意見反映通知 Disable tailored experiences with diagnostic data 停用以診斷資料提供的量身體驗 Disable telemetry autologger (DiagTrack) 停用遙測自動記錄器 (DiagTrack) Disable typing insights 停用輸入分析",
+            "native": false
+          },
+          {
+            "tag": "module.tweaks.windows-11-advanced",
+            "en": "Windows 11 Advanced",
+            "zh": "Windows 11 進階",
+            "glyph": "",
+            "keywords": "Windows 11 Advanced Windows 11 進階 tweak tweaks 調校 windows Restore classic volume mixer 還原傳統音量混音器 Show seconds in the system clock 系統時鐘顯示秒數 Always confirm before deleting files 刪除檔案前永遠確認 Disable Bing in Windows Search 停用 Windows 搜尋嘅 Bing Disable the lock screen 停用鎖定畫面 Disable Aero Shake to minimise 停用 Aero 搖晃最小化 Disable web search suggestions in Start 停用開始功能表網路搜尋建議 Disable thumbnail caching 停用縮圖快取 Drive letter display order 磁碟機代號顯示次序 Expand the legacy ribbon by default 預設展開舊版功能區 Show details in file operation dialogs 檔案操作對話框顯示詳細資料 Maximise icon cache size 加大圖示快取容量 Taskbar on multiple displays 多顯示器工作列模式 Hide frequent folders in Quick Access 快速存取隱藏常用資料夾 Hide recent files in Quick Access 快速存取隱藏最近檔案 Remove 3D Objects folder 移除 3D 物件資料夾 Restore folder windows at logon 登入時還原資料夾視窗 Launch folder windows in a separate process 用獨立處理序開資料夾視窗 Combine taskbar buttons / show labels 合併工作列按鈕／顯示標籤 Always show all tray icons (legacy) 永遠顯示所有系統匣圖示（舊版） Cursor blink rate 游標閃爍速度 Caret (cursor) width 游標闊度 Double-click speed 連按速度 Filter Keys 篩選鍵 First day of week 一週嘅第一日 Keyboard repeat delay 鍵盤重複延遲 Keyboard repeat rate 鍵盤重複速度 Disable mouse acceleration 停用滑鼠加速 Mouse threshold 1 off 滑鼠閾值 1 關閉 Mouse threshold 2 off 滑鼠閾值 2 關閉 Open Keyboard accessibility 開啟鍵盤協助工具 Open Mouse & touchpad settings 開啟滑鼠同觸控板設定 Open Region format settings 開啟地區格式設定 Open Typing settings 開啟輸入設定 Short date format 短日期格式 Time format (24h / 12h) 時間格式（24 / 12 小時） Sticky Keys 相黏鍵 Swap mouse buttons 對調滑鼠按鍵 Toggle Keys 切換鍵 Wheel scroll lines 滾輪捲動行數 Crash dump type 當機傾印類型 Disable boot animation 停用開機動畫 Disable Fast Startup 停用快速啟動 Disable HPET timer 停用 HPET 計時器 Disable SysMain (Superfetch) 停用 SysMain（Superfetch） Disable reserved storage 停用保留儲存空間 Hardware-accelerated GPU scheduling 硬件加速 GPU 排程 Hypervisor launch auto (bcdedit) 自動虛擬器啟動（bcdedit） Hypervisor launch off (bcdedit) 關閉虛擬器啟動（bcdedit） Disable memory compression 停用記憶體壓縮 Enable memory compression 啟用記憶體壓縮 Set network to Private 設網絡為私人 Disable NTFS last-access 停用 NTFS 最後存取 Activate High Performance plan 啟用高效能電源計劃 Processor scheduling 處理器排程 Rebuild performance counters 重建效能計數器 Rebuild search index 重建搜尋索引 Disable startup app delay 停用啟動程式延遲 GPU TDR delay GPU TDR 延遲 Disable USB selective suspend 停用 USB 選擇性暫停 Open About this PC 開啟關於此電腦 Open Activation settings 開啟啟用設定 Open Backup settings 開啟備份設定 Open Bluetooth & devices 開啟藍牙同裝置 Open Clipboard settings 開啟剪貼簿設定 Open Nearby sharing 開啟附近共用 Open Date & time 開啟日期同時間 Open For developers 開啟開發人員設定 Open Display settings 開啟顯示器設定 Open Multitasking settings 開啟多工處理設定 Open Night light settings 開啟夜燈設定 Open Optional features 開啟選用功能 Open Power & battery 開啟電源同電池 Open Language settings 開啟語言設定 Open Sound settings 開啟音效設定 Open Storage settings 開啟儲存空間設定 Open Taskbar settings 開啟工作列設定 Open Themes settings 開啟佈景主題設定 Open Windows Security 開啟 Windows 安全性 Open Windows Update 開啟 Windows Update Alt-Tab shows browser tabs Alt-Tab 顯示瀏覽器分頁 Joint resize snapped windows 同時調整貼齊視窗 Lock-screen notifications 鎖定畫面通知 Notification sound 通知聲音 All notifications 所有通知 Shut down OneDrive 關閉 OneDrive Open Focus settings 開啟專注設定 Open Multitasking settings 開啟多工處理設定 Open Notifications settings 開啟通知設定 Open Storage settings 開啟儲存空間設定 Recycle Bin retention 回收筒保留期 Show snap layout tips 顯示貼齊版面提示 Snap Assist 貼齊助手 Snap layout bar 貼齊版面工具列 Snap fill 貼齊自動填充 Snap layout flyout 貼齊版面飛出視窗 Show app suggestions in Snap 貼齊顯示應用程式建議 Storage Sense 儲存空間感知功能 Virtual desktops on all monitors 所有螢幕顯示虛擬桌面 Window arrangement (animations) 視窗排列動畫",
+            "native": false
           }
-        ]
+        ],
+        "subgroups": []
       }
     ]
   }
@@ -5273,7 +5443,186 @@ export const allModules: CatalogModule[] = [
     "glyph": "",
     "keywords": "split join file parts chunk merge concatenate 001 002 sha256 切割 合併 分割 檔案 部件 分片 併合 重組",
     "native": false
+  },
+  {
+    "tag": "module.tweaks.appearance-personalisation",
+    "en": "Appearance & Personalisation",
+    "zh": "外觀與個人化",
+    "glyph": "",
+    "keywords": "Appearance & Personalisation 外觀與個人化 tweak tweaks 調校 windows Accent colour 主題色 Accent colour on Start & taskbar 開始與工作列顯示主題色 Accent colour on title bars & borders 標題列與邊框顯示主題色 Translucent selection rectangle 半透明選取框 Show seconds in clock 時鐘顯示秒數 Dark mode 深色模式 Show window contents while dragging 拖曳時顯示視窗內容 Drop shadows for icon labels 圖示標籤陰影 Open colour settings 開啟色彩設定 Snap layout flyout on hover 懸停顯示貼齊版面 Start menu layout 開始功能表版面 Taskbar animations 工作列動畫 Combine taskbar buttons 合併工作列按鈕 Transparency effects 透明效果 Disable wallpaper JPEG compression 停用桌布 JPEG 壓縮 Window min/max animations 視窗縮放動畫",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.apps-startup",
+    "en": "Apps & Startup",
+    "zh": "應用程式與啟動",
+    "glyph": "",
+    "keywords": "Apps & Startup 應用程式與啟動 tweak tweaks 調校 windows Analyze component store 分析元件存放區 Open Default apps settings 開啟預設應用程式設定 Open Installed apps settings 開啟已安裝應用程式設定 Kill 'Not Responding' apps 結束無回應嘅應用程式 List auto-start programs 列出自動啟動程式 Restart File Explorer 重新啟動檔案總管 Restart Print Spooler 重新啟動列印多工緩衝處理器 Open Startup apps settings 開啟開機應用程式設定 Update Microsoft Store apps 更新 Microsoft Store 應用程式 Top processes by memory 記憶體用量最高嘅程序 List installed apps 列出已安裝應用程式 Update all apps 更新所有應用程式 List available app updates 列出可更新嘅應用程式",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.browser-control",
+    "en": "Browser Control",
+    "zh": "瀏覽器控制",
+    "glyph": "",
+    "keywords": "Browser Control 瀏覽器控制 tweak tweaks 調校 windows Open in App mode 用應用程式模式開 Open Clear data dialog 開清除資料對話框 Launch with GPU disabled 停用 GPU 啟動 Open Downloads page 開下載頁 Open Extensions page 開擴充功能頁 Open experimental flags 開實驗性功能 Open DNS cache page 開 DNS 快取頁 Open Guest window 開訪客視窗 Open History page 開瀏覽紀錄頁 Open Incognito window 開無痕視窗 Open in Kiosk mode 用 Kiosk 全螢幕模式 Launch Chrome 啟動 Chrome Open a new window 開新視窗 Launch without extensions 停用擴充功能啟動 Open URL in new window 喺新視窗開網址 Open specific profile 開指定設定檔 Launch with proxy server 用代理伺服器啟動 Launch in safe diagnostic mode 用安全診斷模式啟動 Open Settings page 開設定頁 Open Version info 開版本資料 Launch site in app mode 用應用程式模式開網站 Clear browsing data 清除瀏覽資料 Open downloads 開下載項目 Open extensions page 開擴充功能頁 Open favorites manager 開我的最愛管理 Open Edge experiments 開實驗功能頁 Open GPU diagnostics 開 GPU 診斷 Open IE mode settings 開 IE 模式設定 Open InPrivate window 開無痕視窗 Launch in kiosk mode 用自助服務模式開啟 Launch Microsoft Edge 開啟 Microsoft Edge Open network logger 開網路紀錄工具 Open URL in new window 喺新視窗開網址 Open password settings 開密碼設定 Open privacy settings 開私隱設定 Open profile settings 開設定檔設定 Open default apps settings 開預設應用程式設定 Open Edge settings 開 Edge 設定 Open startup boost setting 開啟動加速設定 Show Edge version 睇 Edge 版本 Chrome: address autofill Chrome：地址自動填入 Chrome: background mode Chrome：背景執行模式 Chrome: bookmark bar Chrome：書籤列 Chrome: default browser prompt Chrome：預設瀏覽器提示 Chrome: set homepage policy Chrome：設定主頁政策 Chrome: incognito availability Chrome：無痕模式可用性 Chrome: usage metrics reporting Chrome：使用統計報告 Chrome: set new tab page Chrome：設定新分頁版面 Chrome: password manager Chrome：密碼管理員 Chrome: Safe Browsing Chrome：安全瀏覽 Edge: background mode Edge：背景執行模式 Edge: default browser prompt Edge：預設瀏覽器提示 Edge: set homepage policy Edge：設定主頁政策 Edge: hubs sidebar Edge：側邊欄 Edge: InPrivate availability Edge：InPrivate 可用性 Edge: password manager Edge：密碼管理員 Edge: web data personalization Edge：個人化內容 Edge: shopping assistant Edge：購物助手 Edge: SmartScreen Edge：SmartScreen Edge: startup boost Edge：啟動加速 Backup Chrome bookmarks 備份 Chrome 書籤 Backup Edge bookmarks 備份 Edge 書籤 Chrome profile disk usage Chrome 設定檔磁碟用量 Clear Chrome cache 清除 Chrome 快取 Clear Chrome cookies 清除 Chrome Cookies Clear Edge cache 清除 Edge 快取 Edge profile disk usage Edge 設定檔磁碟用量 Kill all Chrome processes 結束所有 Chrome 程序 Kill all Edge processes 結束所有 Edge 程序 List Chrome profiles 列出 Chrome 設定檔 List Edge profiles 列出 Edge 設定檔 List installed browsers 列出已安裝瀏覽器 Open Chrome user data folder 開啟 Chrome 用戶資料夾 Open Default apps 開啟預設應用程式 Open downloads folder 開啟下載資料夾 Open Edge download folder 開啟 Edge 下載資料夾 Open Edge user data folder 開啟 Edge 用戶資料夾 Reset Chrome Default profile 重設 Chrome 預設設定檔 Set default browser 設定預設瀏覽器 Show Chrome version 顯示 Chrome 版本 Edge efficiency mode policy Edge 效率模式政策 Edge startup behavior policy Edge 啟動行為政策 Flush DNS cache 清除 DNS 快取 List installed PWAs 列出已安裝 PWA List saved Wi-Fi profiles 列出已儲存 Wi-Fi Browser task manager note 瀏覽器工作管理員提示 DevTools shortcut note 開發人員工具捷徑提示 Capture webpage note 擷取網頁提示 Open a blank page 開空白頁 Open Chrome Web Store 開 Chrome 網上商店 Open Credential Manager 開認證管理員 Open Edge Collections 開 Edge 收藏集 Open Edge favorites 開 Edge 我的最愛 Open Edge settings 開 Edge 設定 Open Edge site permissions 開 Edge 網站權限 Open Edge startup pages 開 Edge 啟動頁設定 Open Internet Options 開網際網路選項 Open proxy settings 開 Proxy 設定 Open URL in default browser 喺預設瀏覽器開網址 Reset IE / WinINET settings 重設 IE / WinINET 設定",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.cleanup-storage",
+    "en": "Cleanup & Storage",
+    "zh": "清理與儲存",
+    "glyph": "",
+    "keywords": "Cleanup & Storage 清理與儲存 tweak tweaks 調校 windows Clear delivery optimisation cache 清除傳遞最佳化快取 Run Disk Cleanup 執行磁碟清理 DISM component cleanup DISM 元件清理 Empty clipboard 清空剪貼簿 Clear Windows event logs 清除 Windows 事件記錄 Clear Prefetch 清除 Prefetch Empty Recycle Bin 清空資源回收筒 Open Storage Sense settings 開啟儲存空間感知設定 Reset Microsoft Store cache 重設 Microsoft Store 快取 Clear thumbnail cache 清除縮圖快取 Clear user temp files 清除使用者暫存檔 Clear Windows Temp 清除 Windows 暫存 Clear Windows Update cache 清除 Windows Update 快取",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.debloat-annoyances",
+    "en": "Debloat & Annoyances",
+    "zh": "去煩擾",
+    "glyph": "",
+    "keywords": "Debloat & Annoyances 去煩擾 tweak tweaks 調校 windows Turn off Bing in Start search 熄開始搜尋嘅 Bing Turn off Click to Do 熄 Click to Do Disable Windows consumer features 停用 Windows 消費者功能 Turn off general content suggestions 熄一般內容建議 Remap the Copilot key to do nothing 將 Copilot 鍵改成乜都唔做 Turn off Windows Copilot 熄 Windows Copilot Turn off Cortana above lock screen 熄鎖屏上面嘅 Cortana Turn off Cortana consent in search 熄搜尋度嘅 Cortana 同意 Turn off Cortana 熄 Cortana Turn off web results in Search (policy) 用原則熄搜尋嘅網上結果 Turn off Edge Collections 熄 Edge Collections Turn off Edge Copilot page context 熄 Edge Copilot 讀取頁面內容 Turn off Edge Copilot sidebar 熄 Edge Copilot 側欄 Turn off Edge shopping assistant 熄 Edge 購物助手 Hide File Explorer sync-provider ads 收埋檔案總管嘅 sync 推廣 Turn off lock-screen fun facts & tips 熄鎖機畫面趣聞同貼士 Turn off lock-screen Spotlight tips 熄鎖機畫面 Spotlight 提示 Stop silently installing suggested apps 唔好靜雞雞裝建議 App Turn off Recall snapshots 熄 Recall 截圖記錄 Remove the Copilot app 移除 Copilot app Turn off \"Get even more out of Windows\" nag 熄「再進一步善用 Windows」嘅纏擾 Turn off search box web suggestions 熄搜尋框嘅網上建議 Turn off Search Highlights 熄搜尋焦點 (Search Highlights) Turn off web search in Search 熄搜尋度嘅網上搜尋 Hide the Settings homepage 隱藏設定首頁 Hide suggested content in Settings (1) 收埋設定入面嘅建議內容 (1) Hide suggested content in Settings (2) 收埋設定入面嘅建議內容 (2) Hide suggested content in Settings (3) 收埋設定入面嘅建議內容 (3) Turn off tips & suggestions (soft landing) 熄提示同建議（soft landing） Turn off account notifications in Start 熄開始選單嘅帳戶通知 Reduce Start \"recommended\" suggestions 減少開始選單「建議」推介 Turn off Start menu app suggestions 熄開始選單嘅 App 建議 Skip welcome experience after updates 更新後跳過歡迎畫面 Disable the Widgets board 停用小工具面板 Turn off Windows tips notifications 熄 Windows 貼士通知",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.developer-terminal",
+    "en": "Developer & Terminal",
+    "zh": "開發與終端機",
+    "glyph": "",
+    "keywords": "Developer & Terminal 開發與終端機 tweak tweaks 調校 windows Base64 encode text Base64 編碼文字 Claude CLI version Claude CLI 版本 Codex CLI version Codex CLI 版本 Curl a URL 用 curl 抓網址 GitHub auth status GitHub 登入狀態 GitHub CLI version GitHub CLI 版本 List Git aliases 列出 Git 別名 List global Git config 列出全域 Git 設定 Git version Git 版本 jq version jq 版本 New GUID 產生新 GUID Open Git Bash 開 Git Bash Open Windows Terminal 開 Windows Terminal Open VS Code here 喺呢度開 VS Code OpenCode CLI version OpenCode CLI 版本 OpenSSL version OpenSSL 版本 SHA256 of clipboard text 剪貼簿文字 SHA256 Generate SSH key (Ed25519) 產生 SSH 金鑰（Ed25519） List WSL distros 列出 WSL 發行版 WSL status WSL 狀態 Prune build cache 清理建置快取 Compose services Compose 服務 Prune containers 清理容器 List contexts 列出 context Image history help 映像檔歷史說明 Prune images 清理映像檔 List images 列出映像檔 Docker info Docker 資訊 Container logs help 容器日誌說明 List networks 列出網路 List running containers 列出執行緊嘅容器 List all containers 列出所有容器 Restart Docker Desktop 重啟 Docker Desktop Container stats 容器統計 Disk usage 磁碟用量 Prune system 清理系統 Container processes help 容器程序說明 Docker version Docker 版本 List volumes 列出卷 Prune volumes 清理卷 List active TCP connections 列出已建立嘅 TCP 連線 Show DNS client cache 顯示 DNS 客戶端快取 Echo a specific env var 顯示指定環境變數 Open Environment Variables editor 開啟環境變數編輯器 Find process by port 用端口搵進程 Show hostname 顯示主機名 Show IP configuration 顯示 IP 設定 Kill process by name 用名稱終止進程 Kill process by PID 用 PID 終止進程 List environment variables 列出環境變數 List listening TCP ports 列出監聽中嘅 TCP 端口 List local administrators 列出本機管理員 Show PATH per-line 逐行顯示 PATH Refresh environment 重新整理環境變數 List scheduled reboot tasks 列出排程重啟工作 Open System Properties (Advanced) 開啟系統內容(進階) Top processes by CPU 按 CPU 排名嘅進程 Show system uptime 顯示系統運行時間 Show current user SID 顯示目前用戶 SID Show whoami /all 顯示 whoami /all Deno version Deno 版本 .NET info .NET 資訊 .NET runtimes .NET 執行階段 .NET SDKs .NET SDK 清單 NuGet cache folders NuGet 快取資料夾 Go version Go 版本 Java version Java 版本 Node.js version Node.js 版本 Clear npm cache 清除 npm 快取 Verify npm cache 驗證 npm 快取 Global npm packages 全域 npm 套件 Outdated global npm 過時嘅全域 npm npm version npm 版本 Installed pip packages 已安裝嘅 pip 套件 Outdated pip packages 過時嘅 pip 套件 pip version pip 版本 List Python installs 列出 Python 安裝 Python version Python 版本 Rust compiler version Rust 編譯器版本 Locate node and python 搵 node 同 python Guided dev environment check 引導式開發環境檢查 Show configuration 顯示組態 Download only 只下載 Export installed list 匯出已安裝清單 Import package list 匯入套件清單 Install by ID 按 ID 安裝 List installed 列出已安裝 List pins 列出釘選 List with versions 列出連版本 Pin a package 釘選套件 Repair a package 修復套件 Search a package 搜尋套件 Search by tag 按標籤搜尋 Check winget version 檢查 winget 版本 Show package info 顯示套件資料 Show package versions 顯示套件版本 List sources 列出來源 Uninstall a package 解除安裝套件 Update sources 更新來源 List upgradable 列出可更新 Upgrade all apps 更新所有應用程式 Validate a manifest 驗證資訊清單",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.encryption-vault",
+    "en": "Encryption & Vault",
+    "zh": "加密與保險庫",
+    "glyph": "",
+    "keywords": "Encryption & Vault 加密與保險庫 tweak tweaks 調校 windows Add password protector 加入密碼保護器 Backup recovery key to AD 備份還原金鑰到 AD Backup recovery key to file 備份還原金鑰到檔案 Change volume password 更改磁碟區密碼 Open BitLocker control panel 開 BitLocker 控制台 Enable auto-unlock 啟用自動解鎖 Enable BitLocker on a drive 為磁碟啟用 BitLocker Force recovery on next boot 下次開機逼出還原畫面 Get-Tpm details Get-Tpm 詳情 Get-BitLockerVolume Get-BitLockerVolume List encrypted volumes 列出已加密磁碟區 Lock a drive 鎖定磁碟 Pause encryption/decryption 暫停加密／解密 Repair a damaged drive (repair-bde) 修復爛咗嘅磁碟 (repair-bde) Resume encryption/decryption 繼續加密／解密 Resume protection 恢復保護 Show key protectors 顯示金鑰保護器 BitLocker status (all) BitLocker 狀態（全部） BitLocker status (C:) BitLocker 狀態（C:） Suspend for 1 reboot 暫停 1 次重開機 TPM status (manage-bde) TPM 狀態（manage-bde） Turn off BitLocker (decrypt) 關閉 BitLocker（解密） Unlock with password 用密碼解鎖 List Certificate Stores 列出憑證庫 Check a Certificate Thumbprint 檢查憑證指紋 Show Code-Signing Certificates 顯示程式碼簽署憑證 Export a Certificate (Note) 匯出憑證（提示） Group Policy Cert Settings (Note) 群組原則憑證設定（提示） KeyStore Location (Note) 金鑰庫位置（提示） List Intermediate CA Certificates 列出中繼 CA 憑證 List Expiring Certificates 列出即將到期憑證 List All My-Store Certificate Fields 列出個人憑證庫詳細欄位 List Personal Certificates 列出個人憑證 List Trusted Root CAs 列出受信任根 CA List Windows Credentials 列出 Windows 認證 Open Manage User Certificates 開啟管理使用者憑證 Open Certificate Manager (Machine) 開啟憑證管理員（電腦） Open Certificate Manager (User) 開啟憑證管理員（使用者） Open Credential Manager 開啟認證管理員 Open Windows Hello Settings 開啟 Windows Hello 設定 Count Root Store Certificates 統計根憑證庫數量 List Smart Card Readers (Note) 列出智能卡讀卡機（提示） Show TPM Information 顯示 TPM 資訊 Add scan exclusion (C:\\Temp) 新增掃描排除 (C:\\Temp) ASR: all rules to Audit mode ASR：全部規則設稽核 List ASR rules (with names) 列出 ASR 規則（連名） ASR: block LSASS theft (Audit) ASR：封鎖 LSASS 竊取（稽核） ASR: block LSASS theft (Disabled) ASR：封鎖 LSASS 竊取（停用） ASR: block LSASS theft (Enabled) ASR：封鎖 LSASS 竊取（啟用） ASR: block LSASS theft (Warn) ASR：封鎖 LSASS 竊取（警告） Block an app (note) 封鎖應用程式 (說明) Show blocked connections (note) 顯示被擋連線 (說明) Cloud protection level (policy) 雲端保護等級 (政策) Enable controlled folder access 啟用受控資料夾存取 Enable firewall logging 啟用防火牆記錄 Turn firewall off 熄防火牆 Turn firewall on 開防火牆 List firewall rules 列出防火牆規則 Firewall status 防火牆狀態 Full scan 完整掃描 List exclusions 列出排除清單 Defender preferences Defender 偏好設定 Quick scan 快速掃描 Remove scan exclusion (C:\\Temp) 移除掃描排除 (C:\\Temp) Reset firewall to defaults 重設防火牆做預設 Set cloud protection level (high) 設定雲端保護等級 (高) Defender status Defender 狀態 Threat history 威脅記錄 Update signatures 更新特徵碼 Show Defender version 顯示 Defender 版本 Show EFS recovery agent 顯示 EFS 復原代理 Backup EFS certificate 備份 EFS 憑證 Show cipher help 顯示 cipher 說明 Create new EFS key 建立新 EFS 金鑰 Decrypt Documents folder 解密文件資料夾 Decrypt a folder (EFS) 解密資料夾 (EFS) Display folder encryption state 顯示資料夾加密狀態 Encrypt Documents folder 加密文件資料夾 Encrypt a folder (EFS) 加密資料夾 (EFS) Encrypt folder & subfolders 加密資料夾及子資料夾 List encrypted files 列出已加密檔案 Open EFS cert manager 開啟 EFS 憑證管理員 Manage EFS (rekeywiz) 管理 EFS (rekeywiz) Reset EFS keys (rekey) 重設 EFS 金鑰 Secure-delete a file 安全刪除檔案 Show EFS certificates 顯示 EFS 憑證 Show file encryption state 顯示檔案加密狀態 Show state of subfolders 顯示子資料夾狀態 Wipe free space on C: 抹除 C: 可用空間 Wipe free space on a drive 抹除磁碟可用空間 Auto-mount devices 自動掛載裝置 Start background task 啟動背景工作 Backup volume header 備份磁碟區檔頭 Snapshot raw header (first 131072 bytes) 快照原始檔頭（首 131072 位元組） Open settings / benchmark 打開設定／效能測試 Change container password 更改容器密碼 Create new volume 建立新磁碟區 Dismount all volumes 卸載所有磁碟區 Dismount drive letter 卸載指定磁碟機 Open vault guide 打開保險庫指南 Explore mounted volume 瀏覽已掛載磁碟區 Force dismount all 強制卸載全部 Launch WinForge Vault 啟動 WinForge 保險庫 Hidden volume wizard 隱藏磁碟區精靈 Keyfile generator 金鑰檔產生器 List mounted drives 列出已掛載磁碟 Open mount dialog 打開掛載對話框 Mount favorites 掛載最愛磁碟區 Mount with keyfile + PIM 用鎖匙檔加 PIM 掛載 Mount read-only 唯讀掛載 Mount as removable media 以可移除媒體掛載 Partition / device encryption 分割區／裝置加密 Restore volume header 還原磁碟區檔頭 Restore raw header snapshot 還原原始檔頭快照 Mount with PIM 以 PIM 掛載 System encryption tools 系統加密工具 Traveler disk setup 隨身碟設定 Show engine path 顯示引擎路徑 Volume Creation Wizard 磁碟區建立精靈 Wipe password cache 清除密碼快取",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.file-explorer",
+    "en": "File Explorer",
+    "zh": "檔案總管",
+    "glyph": "",
+    "keywords": "File Explorer 檔案總管 tweak tweaks 調校 windows Item check boxes 項目核取方塊 Classic right-click menu 經典右鍵選單 Confirm delete dialog 刪除確認對話框 Open Folder Options 開啟資料夾選項 Full path in title bar 標題列顯示完整路徑 Open File Explorer to 檔案總管開啟到 Expand to current folder 導覽窗格展開至目前資料夾 Restart File Explorer 重新啟動檔案總管 Launch folder windows in a separate process 資料夾視窗用獨立程序開啟 Show file extensions 顯示副檔名 Show frequent folders 顯示常用資料夾 Show hidden files 顯示隱藏檔案 Show recent files in Quick Access 快速存取顯示最近檔案 Show protected OS files 顯示受保護系統檔案",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.launcher-elevation",
+    "en": "Launcher & Elevation",
+    "zh": "啟動器與提權",
+    "glyph": "",
+    "keywords": "Launcher & Elevation 啟動器與提權 tweak tweaks 調校 windows Create no-UAC elevated launcher 建立免 UAC 提權啟動器 Open Task Scheduler 開啟工作排程器 Remove the elevated launcher 移除提權啟動器 Run WinForge elevated now 立即以管理員運行 Elevation status 提權狀態",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.maintenance-diagnostics",
+    "en": "Maintenance & Diagnostics",
+    "zh": "維護與診斷",
+    "glyph": "",
+    "keywords": "Maintenance & Diagnostics 維護與診斷 tweak tweaks 調校 windows Battery report 電池報告 Clear Application event log 清除應用程式記錄 Clear System event log 清除系統事件記錄 Clear Windows Update cache 清除更新快取 Computer info summary 電腦資訊摘要 Create restore point 建立還原點 Query 8.3 name creation 查詢 8.3 短檔名建立 Analyze component store 分析元件儲存區 Schedule full check & repair 排程完整檢查同修復 Check disk (read-only) 檢查磁碟（唯讀） Clean up component store 清理元件儲存區 Open Optimize Drives 開最佳化磁碟機 Query dirty bit 查詢污染位元 Volume free space 磁碟區可用空間 Filesystem info 檔案系統資訊 List disks 列出磁碟 List partitions 列出分割區 List volumes 列出磁碟區 Largest folders in Users Users 最大嘅資料夾 Open Disk Management 開磁碟管理 Optimize / defrag C: 最佳化／重組 C: Physical disk health 實體磁碟健康 Storage reliability counters 儲存可靠性計數器 Scan volume for errors 掃描磁碟區錯誤 Spot-fix volume errors 即時修復磁碟區錯誤 ReTrim SSD 重新 TRIM SSD List shadow copies 列出陰影複本 Shadow storage usage 陰影儲存用量 DISM check health DISM 快速檢查健康 DISM restore health DISM 修復健康 DISM scan health DISM 深入掃描健康 Show DNS cache 顯示 DNS 快取 List audio devices 列出音效裝置 Open Device Manager 開啟裝置管理員 List disk drives 列出磁碟機 List display adapters 列出顯示卡 Detailed driver query 詳細驅動程式清單 Export driver list to file 匯出驅動清單去檔案 GPU information 顯示卡資料 List third-party drivers 列出第三方驅動程式 Monitor information 顯示器資料 List network adapters 列出網絡卡 List printers 列出打印機 Count devices with problems 數有問題嘅裝置 Devices with errors 有錯誤嘅裝置 Restart active network adapters 重啟使用緊嘅網絡卡 Scan for hardware changes 掃描硬件變更 Signed drivers (top 30) 已簽署驅動（頭 30 個） Open Sound settings 開啟音效設定 List USB devices 列出 USB 裝置 Open DirectX Diagnostics 開 DirectX 診斷工具 Enable System Protection 開啟系統保護 Energy efficiency report 電源效率報告 Export System event log 匯出系統事件記錄 Flush + restart spooler queue 清空並重啟列印佇列 Last wake source 上次喚醒嘅來源 List automatic services 列出自動啟動嘅服務 Auto services that are stopped 自動但已停咗嘅服務 List startup programs 列出開機自動啟動程式 List installed updates 列出已安裝更新 List restore points 列出還原點 List running services 列出運行緊嘅服務 List scheduled tasks 列出排程工作 Open System Information 開系統資訊工具 Event Viewer 事件檢視器 Open System Information 開系統資訊 Open Services 開啟服務管理員 Open Startup apps settings 開啟開機應用程式設定 Open Task Scheduler 開啟工作排程器 Open Windows Update settings 開 Windows Update 設定 Check pending reboot 檢查待重啟 Open Performance Monitor 開效能監視器 Active power requests 目前嘅電源請求 Query a service 查詢服務狀態 Recent critical & error events 近期嚴重同錯誤事件 Open Reliability Monitor 開可靠性監視器 Reset Windows Update services 重置 Windows Update 服務 Open Resource Monitor 開資源監視器 Restart Windows Audio 重啟 Windows 音效服務 Restart BITS 重啟 BITS 背景傳輸服務 Restart DNS Client 重啟 DNS 用戶端服務 Restart Explorer 重啟檔案總管 Restart Windows Search 重啟 Windows 搜尋服務 Restart Print Spooler 重啟列印多工緩衝處理器 Restart Windows Time + resync 重啟 Windows 時間並同步 Run a scheduled task 執行排程工作 Set DiagTrack to Manual 將 DiagTrack 設為手動啟動 Run System File Checker 執行系統檔案檢查 (SFC) Verify system files only 淨係驗證系統檔案 Sleep study report 睡眠研究報告 Start DiagTrack 啟動 DiagTrack 服務 Stop DiagTrack 停止 DiagTrack 服務 System power report 系統電源報告 System information 系統資訊 Test internet connectivity 測試上網連線 Thermal zone temperature 熱區溫度 Top processes by memory 記憶體用得最多嘅程序 Uptime and last boot 開機時間同上次啟動 Devices armed to wake 可以喚醒系統嘅裝置 Download Windows Updates 下載 Windows 更新 Install Windows Updates 安裝 Windows 更新 Scan for Windows Updates 掃描 Windows 更新",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.network-internet",
+    "en": "Network & Internet",
+    "zh": "網絡與互聯網",
+    "glyph": "",
+    "keywords": "Network & Internet 網絡與互聯網 tweak tweaks 調校 windows Show active connections 顯示使用中連線 Reset DNS to automatic DNS 還原自動 Set DNS to Cloudflare (1.1.1.1) 設 DNS 為 Cloudflare Set DNS to Google (8.8.8.8) 設 DNS 為 Google Flush ARP cache 清除 ARP 快取 Flush DNS cache 清除 DNS 快取 Show full IP configuration 顯示完整 IP 設定 Ping test (Cloudflare) Ping 測試 Show public IP 顯示公共 IP Release IP address 釋放 IP 位址 Renew IP address 更新 IP 位址 Reset TCP/IP stack 重設 TCP/IP Reset Winsock catalog 重設 Winsock Show saved Wi-Fi profiles 顯示已儲存 Wi-Fi",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.network-pro",
+    "en": "Network Pro",
+    "zh": "網絡進階",
+    "glyph": "",
+    "keywords": "Network Pro 網絡進階 tweak tweaks 調校 windows Advanced properties 進階屬性 Adapter bindings 網絡卡綁定 Connection profile 連線設定檔 Disable an adapter 停用網絡卡 Disable IPv6 on adapter 停用網絡卡 IPv6 DNS client settings DNS 客戶端設定 Enable an adapter 啟用網絡卡 Show MAC addresses 顯示 MAC 地址 IP addresses IP 地址 IP configuration IP 設定 Link speed 連線速度 List network adapters 列出網絡卡 Adapter power management 網絡卡電源管理 Rename an adapter 重新命名網絡卡 Restart an adapter 重啟網絡卡 Routing table 路由表 Reset adapter to DHCP 重設為 DHCP Set adapter MTU 設定網絡卡 MTU Adapter statistics 網絡卡統計 Detailed statistics 詳細統計 Wake-on-LAN setting 網絡喚醒設定 Network adapter usage 網絡卡用量 Listening ports with process 監聽埠連程序 Latency to multiple hosts 多主機延遲 Show network category 顯示網絡類別 Active connections (netstat -ano) 活動連線 (netstat -ano) Routing table (netstat -rn) 路由表 (netstat -rn) DNS lookup (nslookup) DNS 查詢 (nslookup) Path ping to 1.1.1.1 Path ping 去 1.1.1.1 Ping 1.1.1.1 Ping 1.1.1.1 Ping default gateway Ping 預設閘道 Reset WinHTTP proxy 重設 WinHTTP 代理 Open proxy settings 開啟代理設定 Show WinHTTP proxy 顯示 WinHTTP 代理 TCP connections by state 按狀態列 TCP 連線 Telnet port test (note) Telnet 埠測試 (備註) Test-Connection (4 pings) Test-Connection (4 次 ping) Test-NetConnection (ping) Test-NetConnection (ping) Test TCP port 443 測試 TCP 埠 443 Test-NetConnection trace route Test-NetConnection 追蹤路由 Trace route to 1.1.1.1 追蹤路由去 1.1.1.1 Allow ping (ICMP echo) 允許 Ping（ICMP） Block an app inbound 封鎖應用程式入站 Count enabled rules 統計已啟用規則數量 Set default inbound to block 設定預設入站為封鎖 Enable firewall logging 啟用防火牆記錄 Enable Remote Desktop rule 啟用遠端桌面規則 Enable a rule group (Remote Assistance) 啟用規則群組（遠端協助） Export firewall policy to file 匯出防火牆政策到檔案 List blocked program rules 列出已封鎖程式規則 List rules grouped by group 依群組列出規則 List enabled inbound rules 列出已啟用嘅入站規則 List enabled outbound rules 列出已啟用嘅出站規則 Reset firewall to defaults 重設防火牆做預設值 Restore default policy file 從預設政策檔還原 Show all profiles state 顯示所有設定檔狀態 Show current active profile 顯示目前作用中設定檔 Show firewall log path 顯示防火牆記錄路徑 Show notification setting 顯示通知設定 Turn firewall off (all profiles) 關閉防火牆（所有設定檔） Turn firewall on (all profiles) 開啟防火牆（所有設定檔） Add persistent route 新增永久路由 Show ARP table 顯示 ARP 表 Clear DNS client cache 清 DNS 用戶端快取 Show DNS cache 顯示 DNS 快取 Flush DNS cache 清除 DNS 快取 Get DNS servers 查 DNS 伺服器 Full IP configuration 完整 IP 設定 Test DNS lookup 測試 DNS 查詢 Show public IP 顯示對外 IP Re-register DNS 重新註冊 DNS Release IP address 釋放 IP 位址 Renew IP address 更新 IP 位址 Reset DNS to DHCP DNS 還原做 DHCP Reset TCP/IP stack 重設 TCP/IP 堆疊 Reset Winsock catalog 重設 Winsock 目錄 Resolve a hostname 解析網域名稱 Print routing table 顯示路由表 Use Cloudflare DNS 用 Cloudflare DNS Use Google DNS 用 Google DNS Use Quad9 DNS 用 Quad9 DNS Block a network 封鎖一個網絡 Connect to a profile 連接到設定檔 Disconnect Wi-Fi 中斷 Wi-Fi 連線 Export profiles to folder 匯出設定檔到資料夾 Forget a network 忘記一個網絡 List SSIDs in range 列出範圍內 SSID Refresh networks 重新整理網絡 Show all profiles (details) 顯示所有設定檔（詳情） Show auto-config setting 顯示自動設定狀態 Show wireless capabilities 顯示無線功能 Show Wi-Fi drivers 顯示 Wi-Fi 驅動程式 Show network filters 顯示網絡篩選 Show hosted network 顯示主機網絡 Show wireless interfaces 顯示無線網絡介面 Scan networks (with BSSID) 掃描網絡（含 BSSID） Show Wi-Fi password 顯示 Wi-Fi 密碼 Show saved Wi-Fi profiles 顯示已儲存嘅 Wi-Fi 設定檔 Show MAC randomization 顯示 MAC 隨機化 Show signal strength 顯示訊號強度 Generate WLAN report 產生 WLAN 報告",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.performance-power",
+    "en": "Performance & Power",
+    "zh": "效能與電源",
+    "glyph": "",
+    "keywords": "Performance & Power 效能與電源 tweak tweaks 調校 windows Activate Balanced plan 啟用平衡電源計劃 Clear page file at shutdown 關機時清除分頁檔 Fast startup 快速啟動 Game DVR background recording 遊戲 DVR 背景錄製 Game Mode 遊戲模式 Turn off hibernation 熄咗休眠 Turn on hibernation 開啟休眠 Activate High performance plan 啟用高效能電源計劃 Menu show delay 選單顯示延遲 Disable power throttling 停用電源節流 No startup app delay 取消啟動程式延遲 Add Ultimate Performance plan 新增極致效能電源計劃 Visual effects mode 視覺效果模式",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.power-tools",
+    "en": "Power Tools",
+    "zh": "進階工具",
+    "glyph": "",
+    "keywords": "Power Tools 進階工具 tweak tweaks 調校 windows Show Windows activation status 顯示 Windows 啟用狀態 Generate battery report 產生電池報告 Check system drive 檢查系統磁碟 DISM restore health DISM 還原健康 Edit the hosts file 編輯 hosts 檔案 Generate energy report 產生能源報告 Lock the workstation 鎖定電腦 Open System Information 開啟系統資訊 Open Reliability Monitor 開啟可靠性監視器 Restart now 即刻重新啟動 System File Checker (SFC) 系統檔案檢查 (SFC) Shut down now 即刻關機 Sign out 登出 Sleep now 即刻睡眠",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.privacy-telemetry",
+    "en": "Privacy & Telemetry",
+    "zh": "私隱與遙測",
+    "glyph": "",
+    "keywords": "Privacy & Telemetry 私隱與遙測 tweak tweaks 調校 windows Activity history 活動記錄 Personalised ads (advertising ID) 個人化廣告（廣告識別碼） App launch tracking App 啟動追蹤 Never ask for feedback 永不索取意見 Inking & typing personalisation 手寫與輸入個人化 Block websites reading my language list 阻止網站讀取語言清單 Location access 位置存取 Online speech recognition 線上語音辨識 Suggested content in Settings 設定內嘅建議內容 Windows welcome tips Windows 歡迎提示 Suggestions in Start 開始功能表建議 Tailored experiences 量身打造嘅體驗 Diagnostic data level 診斷資料層級 Tips when using Windows 使用 Windows 時嘅提示",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.recipes-one-click",
+    "en": "Recipes (one-click)",
+    "zh": "一鍵流程",
+    "glyph": "",
+    "keywords": "Recipes (one-click) 一鍵流程 tweak tweaks 調校 windows Calm Windows (de-annoy) 靜化 Windows（去煩擾） Declutter taskbar 簡化工作列 Developer setup 開發人員設定 Disable telemetry tasks 停用遙測排程工作 Classic Explorer 經典檔案總管 Free up space 釋放空間 Gaming mode 遊戲模式 System health check 系統健康檢查 Security lock-down 保安加固 Network reset 網絡重置 Performance boost 效能提升 Privacy hardening 私隱強化 Quick cleanup 快速清理 Re-enable Windows nags 還原 Windows 提示 Create a restore point 建立還原點 Trim startup bloat 清開機臃腫 Update everything 全部更新",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.security",
+    "en": "Security",
+    "zh": "安全",
+    "glyph": "",
+    "keywords": "Security 安全 tweak tweaks 調校 windows Show BitLocker status 顯示 BitLocker 狀態 Exclude Downloads from Defender scans 將 Downloads 排除喺 Defender 掃描之外 Run a quick Defender scan 行一次 Defender 快速掃描 Update Defender definitions 更新 Defender 病毒定義 Turn Windows Firewall off (all profiles) 熄咗 Windows 防火牆（所有設定檔） Turn Windows Firewall on (all profiles) 開返 Windows 防火牆（所有設定檔） Hide last signed-in user name 隱藏上次登入嘅使用者名稱 Open Windows Security 開啟 Windows 安全性 Enable Remote Desktop 開啟遠端桌面 Require Ctrl+Alt+Del at sign-in 登入要按 Ctrl+Alt+Del SmartScreen for apps & files 應用程式同檔案 SmartScreen SmartScreen for Store & web content 商店同網頁內容 SmartScreen UAC prompt behaviour UAC 提示行為 Dim the desktop for UAC UAC 時將桌面變暗",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.system-boot",
+    "en": "System & Boot",
+    "zh": "系統與開機",
+    "glyph": "",
+    "keywords": "System & Boot 系統與開機 tweak tweaks 調校 windows Auto-restart on crash 當機自動重新開機 Restart to Advanced startup 重新開機入進階啟動 Restart to UEFI firmware 重新開機入 UEFI 韌體 Clipboard history 剪貼簿記錄 Cloud clipboard sync 雲端剪貼簿同步 Developer Mode 開發人員模式 Enable System Protection (C:) 啟用系統保護 (C:) Edit Environment Variables 編輯環境變數 Create God Mode folder 建立 God Mode 資料夾 Hung app close timeout 無回應程式關閉等候 Mapped-drive reconnect fix 網絡磁碟重連修正 Enable long path support 啟用長路徑支援 NumLock at startup 開機 NumLock Create a restore point 建立還原點 Verbose sign-in messages 詳細登入訊息",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.system-information",
+    "en": "System Information",
+    "zh": "系統資訊",
+    "glyph": "",
+    "keywords": "System Information 系統資訊 tweak tweaks 調校 windows Last boot 上次開機 Processor 處理器 Logical processors 邏輯處理器 System drive 系統磁碟 Graphics adapter 顯示卡 Device name 裝置名稱 Edition 版本 Installed memory 已安裝記憶體 Memory in use 記憶體用量 App runtime 應用程式執行階段 Time zone 時區 Uptime 運行時間 Signed-in user 登入使用者 Version & build 版本與組建",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.taskbar-start",
+    "en": "Taskbar & Start",
+    "zh": "工作列與開始功能表",
+    "glyph": "",
+    "keywords": "Taskbar & Start 工作列與開始功能表 tweak tweaks 調校 windows Taskbar alignment 工作列對齊 Show Chat/Copilot button 顯示聊天/Copilot 按鈕 Combine taskbar buttons 合併工作列按鈕 Show \"End Task\" on right-click 右鍵顯示「結束工作」 Show taskbar on all displays 所有螢幕顯示工作列 Open Taskbar settings 開啟工作列設定 Search on taskbar 工作列搜尋 Show all system tray icons 顯示所有系統匣圖示 Show seconds in system clock 系統時鐘顯示秒數 Show most used apps in Start 開始功能表顯示最常用程式 Show recently added apps in Start 開始功能表顯示最近新增程式 Show tips and recommendations in Start 開始功能表顯示提示同建議 Show Task View button 顯示工作檢視按鈕 Show Widgets button 顯示小工具按鈕",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.winaero-tweaks",
+    "en": "Winaero Tweaks",
+    "zh": "Winaero 進階調校",
+    "glyph": "",
+    "keywords": "Winaero Tweaks Winaero 進階調校 tweak tweaks 調校 windows Show accent color on Start, taskbar and action center 喺開始選單、工作列同操作中心顯示強調色 Colored title bars (accent on window title bars and borders) 彩色標題列（視窗標題列同邊框上色） Disable window shake (Aero Shake) to minimize 停用搖晃視窗（Aero Shake）最小化 Desktop icon horizontal spacing 桌面圖示水平間距 Inactive title bar color (accent on background windows) 非作用中標題列顏色（背景視窗用強調色） Use classic balloon tips instead of toast notifications 用傳統氣球提示取代浮動通知（toast） Menu show delay (snappier menus) 選單顯示延遲（選單更快彈出） Scrollbar width (thicker scroll bars) 捲動列闊度（較粗捲動列） Auto-End Tasks on Shutdown 關機時自動結束工作 Disable Win+L Lock 停用 Win+L 鎖定 Hung App Timeout (1s) 程式無回應等候時間（1 秒） Disable Shutdown Event Tracker 停用關機事件追蹤器 Wait To Kill App Timeout (2s) 強制結束程式等候時間（2 秒） Wait To Kill Service Timeout 強制結束服務等候時間 Disable blur on sign-in screen 停用登入畫面模糊效果 Disable automatic restart sign-on (ARSO) 停用自動重啟登入 (ARSO) Disable \"Press Ctrl+Alt+Del\" at logon 停用登入「按 Ctrl+Alt+Del」 Disable sign-in screen background image 停用登入畫面背景圖 Disable Windows startup sound 停用 Windows 開機音效 Show last interactive logon info 顯示上次互動登入資訊 Disable lock screen 停用上鎖畫面 Enable Num Lock at startup 開機時開啟 Num Lock Remove \"Cast to Device\" from context menu context menu 移除「投放到裝置」 Remove \"Edit with Photos\" from context menu context menu 移除「用相片編輯」 Remove \"Give access to\" / Share from context menu context menu 移除「授權存取 / 共用」 Remove \"Restore previous versions\" from context menu context menu 移除「還原舊版本」 Remove \"Scan with Microsoft Defender\" from context menu context menu 移除「用 Microsoft Defender 掃描」 Checkboxes for item selection 用核取方塊選取項目 Use compact view (reduce spacing) 使用精簡檢視（減少間距） Disable thumbnail cache 停用縮圖快取 Show drive letters first 磁碟機代號顯示喺前 Expand to current folder 導覽窗格展開至目前資料夾 Open Explorer to This PC 檔案總管開啟「本機」 Hide recent files in Quick access 唔顯示快速存取最近檔案 Show seconds in taskbar clock 工作列時鐘顯示秒數 Show Explorer status bar 顯示檔案總管狀態列 End task on taskbar right-click 工作列右鍵加入「結束工作」 Delivery Optimization: no download from other PCs 傳遞最佳化：唔由其他 PC 下載 Deny apps access to location (policy) 拒絕 App 存取位置 (政策) Disable app launch tracking 停用程式啟動追蹤 Disable feedback request frequency 停用意見反映要求頻率 Disable feedback notifications 停用意見反映通知 Disable tailored experiences with diagnostic data 停用以診斷資料提供的量身體驗 Disable telemetry autologger (DiagTrack) 停用遙測自動記錄器 (DiagTrack) Disable typing insights 停用輸入分析",
+    "native": false
+  },
+  {
+    "tag": "module.tweaks.windows-11-advanced",
+    "en": "Windows 11 Advanced",
+    "zh": "Windows 11 進階",
+    "glyph": "",
+    "keywords": "Windows 11 Advanced Windows 11 進階 tweak tweaks 調校 windows Restore classic volume mixer 還原傳統音量混音器 Show seconds in the system clock 系統時鐘顯示秒數 Always confirm before deleting files 刪除檔案前永遠確認 Disable Bing in Windows Search 停用 Windows 搜尋嘅 Bing Disable the lock screen 停用鎖定畫面 Disable Aero Shake to minimise 停用 Aero 搖晃最小化 Disable web search suggestions in Start 停用開始功能表網路搜尋建議 Disable thumbnail caching 停用縮圖快取 Drive letter display order 磁碟機代號顯示次序 Expand the legacy ribbon by default 預設展開舊版功能區 Show details in file operation dialogs 檔案操作對話框顯示詳細資料 Maximise icon cache size 加大圖示快取容量 Taskbar on multiple displays 多顯示器工作列模式 Hide frequent folders in Quick Access 快速存取隱藏常用資料夾 Hide recent files in Quick Access 快速存取隱藏最近檔案 Remove 3D Objects folder 移除 3D 物件資料夾 Restore folder windows at logon 登入時還原資料夾視窗 Launch folder windows in a separate process 用獨立處理序開資料夾視窗 Combine taskbar buttons / show labels 合併工作列按鈕／顯示標籤 Always show all tray icons (legacy) 永遠顯示所有系統匣圖示（舊版） Cursor blink rate 游標閃爍速度 Caret (cursor) width 游標闊度 Double-click speed 連按速度 Filter Keys 篩選鍵 First day of week 一週嘅第一日 Keyboard repeat delay 鍵盤重複延遲 Keyboard repeat rate 鍵盤重複速度 Disable mouse acceleration 停用滑鼠加速 Mouse threshold 1 off 滑鼠閾值 1 關閉 Mouse threshold 2 off 滑鼠閾值 2 關閉 Open Keyboard accessibility 開啟鍵盤協助工具 Open Mouse & touchpad settings 開啟滑鼠同觸控板設定 Open Region format settings 開啟地區格式設定 Open Typing settings 開啟輸入設定 Short date format 短日期格式 Time format (24h / 12h) 時間格式（24 / 12 小時） Sticky Keys 相黏鍵 Swap mouse buttons 對調滑鼠按鍵 Toggle Keys 切換鍵 Wheel scroll lines 滾輪捲動行數 Crash dump type 當機傾印類型 Disable boot animation 停用開機動畫 Disable Fast Startup 停用快速啟動 Disable HPET timer 停用 HPET 計時器 Disable SysMain (Superfetch) 停用 SysMain（Superfetch） Disable reserved storage 停用保留儲存空間 Hardware-accelerated GPU scheduling 硬件加速 GPU 排程 Hypervisor launch auto (bcdedit) 自動虛擬器啟動（bcdedit） Hypervisor launch off (bcdedit) 關閉虛擬器啟動（bcdedit） Disable memory compression 停用記憶體壓縮 Enable memory compression 啟用記憶體壓縮 Set network to Private 設網絡為私人 Disable NTFS last-access 停用 NTFS 最後存取 Activate High Performance plan 啟用高效能電源計劃 Processor scheduling 處理器排程 Rebuild performance counters 重建效能計數器 Rebuild search index 重建搜尋索引 Disable startup app delay 停用啟動程式延遲 GPU TDR delay GPU TDR 延遲 Disable USB selective suspend 停用 USB 選擇性暫停 Open About this PC 開啟關於此電腦 Open Activation settings 開啟啟用設定 Open Backup settings 開啟備份設定 Open Bluetooth & devices 開啟藍牙同裝置 Open Clipboard settings 開啟剪貼簿設定 Open Nearby sharing 開啟附近共用 Open Date & time 開啟日期同時間 Open For developers 開啟開發人員設定 Open Display settings 開啟顯示器設定 Open Multitasking settings 開啟多工處理設定 Open Night light settings 開啟夜燈設定 Open Optional features 開啟選用功能 Open Power & battery 開啟電源同電池 Open Language settings 開啟語言設定 Open Sound settings 開啟音效設定 Open Storage settings 開啟儲存空間設定 Open Taskbar settings 開啟工作列設定 Open Themes settings 開啟佈景主題設定 Open Windows Security 開啟 Windows 安全性 Open Windows Update 開啟 Windows Update Alt-Tab shows browser tabs Alt-Tab 顯示瀏覽器分頁 Joint resize snapped windows 同時調整貼齊視窗 Lock-screen notifications 鎖定畫面通知 Notification sound 通知聲音 All notifications 所有通知 Shut down OneDrive 關閉 OneDrive Open Focus settings 開啟專注設定 Open Multitasking settings 開啟多工處理設定 Open Notifications settings 開啟通知設定 Open Storage settings 開啟儲存空間設定 Recycle Bin retention 回收筒保留期 Show snap layout tips 顯示貼齊版面提示 Snap Assist 貼齊助手 Snap layout bar 貼齊版面工具列 Snap fill 貼齊自動填充 Snap layout flyout 貼齊版面飛出視窗 Show app suggestions in Snap 貼齊顯示應用程式建議 Storage Sense 儲存空間感知功能 Virtual desktops on all monitors 所有螢幕顯示虛擬桌面 Window arrangement (animations) 視窗排列動畫",
+    "native": false
   }
 ];
 
 export const moduleCount = 315;
+
+/** Category buckets for the Windows-tweak catalog (module.tweaks.* nav entries). */
+export const tweakCategoryCount = 22;

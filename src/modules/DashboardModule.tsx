@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAsync, AsyncState, ModuleToolbar, StatusDot, DataTable, type Column } from './common';
 import { runPowershellJson, isTauri } from '../tauri/bridge';
-import { allModules, catalog } from '../data/catalog';
+import { allModules, catalog, moduleCount } from '../data/catalog';
 import { registeredModuleTags } from './registryKeys';
 import { pick } from '../i18n';
 import { requestModuleOpen, requestPaletteOpen } from '../state/navBus';
@@ -119,7 +119,7 @@ export function DashboardModule() {
       <p className="count-note">{t('dashboard.heroSub')}</p>
       <p className="count-note">
         {t('dashboard.stats', {
-          total: allModules.length,
+          total: moduleCount,
           working: registeredModuleTags.size,
           sections: catalog.length,
         })}

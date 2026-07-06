@@ -199,6 +199,7 @@ import { ReactorSettingsModule } from './ReactorSettingsModule';
 import { WorldMonitorModule } from './WorldMonitorModule';
 import { moduleRegistryB } from './registryB';
 import { moduleRegistryA } from './registryA';
+import { moduleRegistryTweaks } from './registryTweaks';
 
 /**
  * Real, interactive module implementations keyed by WinForge page tag. A module here
@@ -411,6 +412,7 @@ export const moduleRegistry: Record<string, ComponentType> = {
   'module.reactorsettings': ReactorSettingsModule,
   'module.worldmonitor': WorldMonitorModule,
   ...moduleRegistryB,
+  ...moduleRegistryTweaks,
 };
 
 export function realModuleFor(tag: string): ComponentType | undefined {
