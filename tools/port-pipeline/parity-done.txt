@@ -66,3 +66,10 @@ vivetool
 mouseutils
 monitor
 lightswitch
+
+# Parity wave 11 (2026-07-06, client-first): parity-plus feature upgrades
+gradient
+habittracker
+everything
+webcloner
+bitwarden

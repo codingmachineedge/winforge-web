@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { runCommand } from '../tauri/bridge';
+import { pick } from '../i18n';
+import { isTauri, runCommand } from '../tauri/bridge';
 import { AsyncState, Column, DataTable, ModuleToolbar, StatusDot, useAsync } from './common';
 
 // ── Native Bitwarden Vault module ────────────────────────────────────────────
@@ -117,8 +118,291 @@ async function bwStatus(): Promise<BwStatus | null> {
   }
 }
 
+// ── Password / passphrase generator (ports BitwardenService.Generate) ─────────
+//
+// Pure, network-free, browser-composable logic — a faithful TS port of the C#
+// generator dialog (ambiguity-free character sets, at-least-one-per-set, Fisher-
+// Yates shuffle; passphrase word list + separator + capitalize + trailing digit).
+// Uses crypto.getRandomValues so it is unbiased, exactly like RandomNumberGenerator.
+
+interface GenOptions {
+  passphrase: boolean;
+  length: number;
+  uppercase: boolean;
+  lowercase: boolean;
+  numbers: boolean;
+  special: boolean;
+  words: number;
+  separator: string;
+  capitalize: boolean;
+}
+
+const GEN_UPPER = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+const GEN_LOWER = 'abcdefghijkmnpqrstuvwxyz';
+const GEN_NUMS = '23456789';
+const GEN_SPECIAL = '!@#$%^&*()-_=+[]{}';
+const GEN_WORDS =
+  'correct horse battery staple apple river table cloud stone light forest copper silver maple ocean planet rocket garden window mirror anchor bridge candle dragon engine flower guitar hammer island jungle kettle ladder magnet needle orange pillow puzzle quartz ribbon saddle tunnel velvet walnut yellow zephyr breeze canyon ember falcon glacier harbor'.split(
+    ' ',
+  );
+
+/** Unbiased [0, max) integer from a CSPRNG (mirrors RandomNumberGenerator.GetInt32). */
+function randInt(max: number): number {
+  if (max <= 0) return 0;
+  const limit = Math.floor(0xffffffff / max) * max;
+  const buf = new Uint32Array(1);
+  let x = 0;
+  do {
+    crypto.getRandomValues(buf);
+    x = buf[0] ?? 0;
+  } while (x >= limit);
+  return x % max;
+}
+
+function clamp(n: number, lo: number, hi: number): number {
+  return Math.min(hi, Math.max(lo, n));
+}
+
+function generateSecret(o: GenOptions): string {
+  if (o.passphrase) {
+    const n = clamp(Math.round(o.words), 3, 20);
+    const parts: string[] = [];
+    for (let i = 0; i < n; i++) {
+      let w = GEN_WORDS[randInt(GEN_WORDS.length)] ?? 'word';
+      if (o.capitalize) w = w.charAt(0).toUpperCase() + w.slice(1);
+      parts.push(w);
+    }
+    const sep = o.separator === '' ? '-' : o.separator;
+    let result = parts.join(sep);
+    if (o.numbers) result += String(randInt(10));
+    return result;
+  }
+  const sets: string[] = [];
+  if (o.uppercase) sets.push(GEN_UPPER);
+  if (o.lowercase) sets.push(GEN_LOWER);
+  if (o.numbers) sets.push(GEN_NUMS);
+  if (o.special) sets.push(GEN_SPECIAL);
+  if (sets.length === 0) sets.push(GEN_LOWER);
+  const all = sets.join('');
+  const len = clamp(Math.round(o.length), 5, 128);
+  const chars: string[] = new Array(len);
+  for (let i = 0; i < sets.length && i < len; i++) {
+    const s = sets[i] ?? GEN_LOWER;
+    chars[i] = s[randInt(s.length)] ?? 'a';
+  }
+  for (let i = sets.length; i < len; i++) chars[i] = all[randInt(all.length)] ?? 'a';
+  for (let i = len - 1; i > 0; i--) {
+    const j = randInt(i + 1);
+    const tmp = chars[i] as string;
+    chars[i] = chars[j] as string;
+    chars[j] = tmp;
+  }
+  return chars.join('');
+}
+
+/** Rough entropy estimate + strength band for the generated secret. */
+function estimateStrength(o: GenOptions, secret: string): { bits: number; band: 'weak' | 'fair' | 'strong' } {
+  let bits: number;
+  if (o.passphrase) {
+    bits = Math.round(clamp(Math.round(o.words), 3, 20) * Math.log2(GEN_WORDS.length));
+  } else {
+    let pool = 0;
+    if (o.uppercase) pool += GEN_UPPER.length;
+    if (o.lowercase) pool += GEN_LOWER.length;
+    if (o.numbers) pool += GEN_NUMS.length;
+    if (o.special) pool += GEN_SPECIAL.length;
+    if (pool === 0) pool = GEN_LOWER.length;
+    bits = Math.round(secret.length * Math.log2(pool));
+  }
+  const band = bits < 50 ? 'weak' : bits < 80 ? 'fair' : 'strong';
+  return { bits, band };
+}
+
+// ── Local TOTP (ports BitwardenService.ComputeTotp, RFC 6238) ─────────────────
+
+function base32Decode(input: string): Uint8Array {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const s = input.trim().replace(/[ -]/g, '').replace(/=+$/, '').toUpperCase();
+  if (!s) return new Uint8Array(0);
+  let bits = 0;
+  let value = 0;
+  const out: number[] = [];
+  for (const c of s) {
+    const idx = alphabet.indexOf(c);
+    if (idx < 0) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      out.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(out);
+}
+
+interface TotpParsed {
+  secret: string;
+  digits: number;
+  period: number;
+  algo: 'SHA-1' | 'SHA-256' | 'SHA-512';
+}
+
+function parseTotpInput(secretOrUri: string): TotpParsed {
+  let secret = secretOrUri.trim();
+  let digits = 6;
+  let period = 30;
+  let algo: TotpParsed['algo'] = 'SHA-1';
+  const applyQuery = (qs: URLSearchParams) => {
+    const sv = qs.get('secret');
+    if (sv) secret = sv;
+    const dv = Number(qs.get('digits'));
+    if (Number.isFinite(dv) && dv > 0) digits = dv;
+    const pv = Number(qs.get('period'));
+    if (Number.isFinite(pv) && pv > 0) period = pv;
+    const av = (qs.get('algorithm') || '').toUpperCase();
+    if (av === 'SHA256') algo = 'SHA-256';
+    else if (av === 'SHA512') algo = 'SHA-512';
+  };
+  if (/^otpauth:\/\//i.test(secret)) {
+    const q = secret.indexOf('?');
+    if (q >= 0) applyQuery(new URLSearchParams(secret.slice(q + 1)));
+  } else if (/(^|&)secret=/i.test(secret) || /^secret=/i.test(secret)) {
+    applyQuery(new URLSearchParams(secret.startsWith('?') ? secret.slice(1) : secret));
+  }
+  return { secret, digits, period, algo };
+}
+
+async function computeTotp(secretOrUri: string): Promise<{ code: string; remaining: number; period: number } | null> {
+  try {
+    const p = parseTotpInput(secretOrUri);
+    const key = base32Decode(p.secret);
+    if (key.length === 0) return null;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const counter = Math.floor(nowSec / p.period);
+    const counterBytes = new Uint8Array(8);
+    let c = counter;
+    for (let i = 7; i >= 0; i--) {
+      counterBytes[i] = c & 0xff;
+      c = Math.floor(c / 256);
+    }
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      key as unknown as BufferSource,
+      { name: 'HMAC', hash: p.algo },
+      false,
+      ['sign'],
+    );
+    const sig = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, counterBytes as unknown as BufferSource));
+    const offset = (sig[sig.length - 1] ?? 0) & 0x0f;
+    const bin =
+      (((sig[offset] ?? 0) & 0x7f) << 24) |
+      (((sig[offset + 1] ?? 0) & 0xff) << 16) |
+      (((sig[offset + 2] ?? 0) & 0xff) << 8) |
+      ((sig[offset + 3] ?? 0) & 0xff);
+    const mod = Math.pow(10, p.digits);
+    const code = String(bin % mod).padStart(p.digits, '0');
+    const remaining = p.period - (nowSec % p.period);
+    return { code, remaining, period: p.period };
+  } catch {
+    return null;
+  }
+}
+
+// ── New Vaultwarden instance composer (ports BitwardenInstanceService) ─────────
+
+interface InstanceSpec {
+  name: string;
+  hostPort: number;
+  signupsAllowed: boolean;
+  websocketEnabled: boolean;
+  adminToken: string;
+}
+
+/** Strong random ADMIN_TOKEN — 32 bytes, base64url (mirrors GenerateAdminToken). */
+function generateAdminToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+const VW_IMAGE = 'vaultwarden/server:latest';
+
+/** docker compose file for one Vaultwarden instance (mirrors BuildProject's env). */
+function composeYaml(s: InstanceSpec): string {
+  const project = 'winforge_vaultwarden';
+  const localUrl = `http://localhost:${s.hostPort}`;
+  return [
+    `# ${s.name || `Vaultwarden :${s.hostPort}`}`,
+    `# save as docker-compose.yml, then:  docker compose -p ${project} up -d`,
+    'services:',
+    '  server:',
+    `    image: ${VW_IMAGE}`,
+    '    restart: unless-stopped',
+    '    ports:',
+    `      - "${s.hostPort}:80"`,
+    '    volumes:',
+    `      - ${project}_data:/data`,
+    '    environment:',
+    `      DOMAIN: "${localUrl}"`,
+    `      ADMIN_TOKEN: "${s.adminToken}"`,
+    `      SIGNUPS_ALLOWED: "${s.signupsAllowed ? 'true' : 'false'}"`,
+    `      WEBSOCKET_ENABLED: "${s.websocketEnabled ? 'true' : 'false'}"`,
+    '      ROCKET_PORT: "80"',
+    'volumes:',
+    `  ${project}_data:`,
+    '',
+  ].join('\n');
+}
+
+/** Equivalent one-shot `docker run` command for the same instance. */
+function dockerRunCommand(s: InstanceSpec): string {
+  const localUrl = `http://localhost:${s.hostPort}`;
+  return [
+    'docker run -d --name winforge_vaultwarden --restart unless-stopped',
+    `-p ${s.hostPort}:80`,
+    '-v winforge_vaultwarden_data:/data',
+    `-e DOMAIN="${localUrl}"`,
+    `-e ADMIN_TOKEN="${s.adminToken}"`,
+    `-e SIGNUPS_ALLOWED=${s.signupsAllowed ? 'true' : 'false'}`,
+    `-e WEBSOCKET_ENABLED=${s.websocketEnabled ? 'true' : 'false'}`,
+    '-e ROCKET_PORT=80',
+    VW_IMAGE,
+  ].join(' \\\n  ');
+}
+
+async function copyText(value: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    /* fall through */
+  }
+  return false;
+}
+
+function downloadText(filename: string, text: string): void {
+  try {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function BitwardenModule() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language || 'en';
   const [filter, setFilter] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -136,6 +420,111 @@ export function BitwardenModule() {
 
   // Bitwarden CLI login/lock state (read-only; never touches secrets).
   const cli = useAsync(async () => await bwStatus(), []);
+
+  // ── Password / passphrase generator (browser-composable, no OS) ─────────────
+  const [gen, setGen] = useState<GenOptions>({
+    passphrase: false,
+    length: 16,
+    uppercase: true,
+    lowercase: true,
+    numbers: true,
+    special: true,
+    words: 4,
+    separator: '-',
+    capitalize: true,
+  });
+  const [generated, setGenerated] = useState<string>(() =>
+    generateSecret({
+      passphrase: false,
+      length: 16,
+      uppercase: true,
+      lowercase: true,
+      numbers: true,
+      special: true,
+      words: 4,
+      separator: '-',
+      capitalize: true,
+    }),
+  );
+  const [genCopied, setGenCopied] = useState(false);
+  const strength = useMemo(() => estimateStrength(gen, generated), [gen, generated]);
+
+  const patchGen = (patch: Partial<GenOptions>) => {
+    setGen((g) => {
+      const next = { ...g, ...patch };
+      setGenerated(generateSecret(next));
+      setGenCopied(false);
+      return next;
+    });
+  };
+  const regenerate = () => {
+    setGenerated(generateSecret(gen));
+    setGenCopied(false);
+  };
+  const copyGenerated = async () => {
+    if (await copyText(generated)) {
+      setGenCopied(true);
+      setTimeout(() => setGenCopied(false), 2000);
+    }
+  };
+
+  // ── Local TOTP calculator (RFC 6238; base32 secret or otpauth URI) ──────────
+  const [totpSecret, setTotpSecret] = useState('');
+  const [totp, setTotp] = useState<{ code: string; remaining: number; period: number } | null>(null);
+  const [totpErr, setTotpErr] = useState(false);
+  const [totpCopied, setTotpCopied] = useState(false);
+
+  const runTotp = async () => {
+    const s = totpSecret.trim();
+    setTotpCopied(false);
+    if (!s) {
+      setTotp(null);
+      setTotpErr(false);
+      return;
+    }
+    const r = await computeTotp(s);
+    setTotp(r);
+    setTotpErr(r === null);
+  };
+  const copyTotp = async () => {
+    if (totp && (await copyText(totp.code))) {
+      setTotpCopied(true);
+      setTimeout(() => setTotpCopied(false), 2000);
+    }
+  };
+
+  // ── New Vaultwarden instance composer (preview + copy/export; live = Tauri) ──
+  const [vwName, setVwName] = useState('');
+  const [vwPort, setVwPort] = useState(8443);
+  const [vwSignups, setVwSignups] = useState(true);
+  const [vwWebsocket, setVwWebsocket] = useState(false);
+  const [vwToken, setVwToken] = useState<string>(() => generateAdminToken());
+  const [vwFormat, setVwFormat] = useState<'compose' | 'run'>('compose');
+  const [vwCopied, setVwCopied] = useState(false);
+
+  const portValid = Number.isInteger(vwPort) && vwPort >= 1024 && vwPort <= 65535;
+  const vwSpec: InstanceSpec = useMemo(
+    () => ({
+      name: vwName.trim(),
+      hostPort: portValid ? vwPort : 8443,
+      signupsAllowed: vwSignups,
+      websocketEnabled: vwWebsocket,
+      adminToken: vwToken,
+    }),
+    [vwName, vwPort, portValid, vwSignups, vwWebsocket, vwToken],
+  );
+  const vwPreview = useMemo(
+    () => (vwFormat === 'compose' ? composeYaml(vwSpec) : dockerRunCommand(vwSpec)),
+    [vwFormat, vwSpec],
+  );
+  const copyVwPreview = async () => {
+    if (await copyText(vwPreview)) {
+      setVwCopied(true);
+      setTimeout(() => setVwCopied(false), 2000);
+    }
+  };
+  const exportVwPreview = () =>
+    downloadText(vwFormat === 'compose' ? 'docker-compose.yml' : 'vaultwarden-run.sh', vwPreview);
 
   const reloadAll = useCallback(() => {
     engine.reload();
@@ -364,6 +753,299 @@ export function BitwardenModule() {
           <p className="count-note" style={{ marginTop: 0 }}>{t('bitwarden.cli.notInstalled')}</p>
         )}
       </AsyncState>
+
+      {/* ── New Vaultwarden instance composer (preview; live create needs the desktop app) ── */}
+      <h3 className="group-title" style={{ fontSize: 15, margin: '20px 0 4px' }}>
+        {pick('New Vaultwarden instance', '新 Vaultwarden 實例', lang)}
+      </h3>
+      <p className="count-note" style={{ marginTop: 0 }}>
+        {pick(
+          'Compose a self-hosted Vaultwarden server. Each instance gets its own data volume and host port, so several can run at once. The desktop app can create and start it for you; here you can build, copy, and export the exact config.',
+          '編排一個自寄存 Vaultwarden 伺服器。每個實例有自己嘅資料卷同主機埠，可以同時行幾個。桌面版可以幫你建立同啟動；喺呢度你可以組出、複製同匯出完整設定。',
+          lang,
+        )}
+      </p>
+
+      <div className="hosts-edit" style={{ display: 'grid', gap: 8, maxWidth: 620 }}>
+        <label className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 8, alignItems: 'center' }}>
+          <span className="count-note" style={{ margin: 0 }}>{pick('Display name (optional)', '顯示名（可選）', lang)}</span>
+          <input
+            className="mod-search"
+            style={{ width: '100%' }}
+            placeholder={pick('My Vaultwarden', '我嘅 Vaultwarden', lang)}
+            value={vwName}
+            onChange={(e) => setVwName(e.target.value)}
+          />
+        </label>
+
+        <label className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 8, alignItems: 'center' }}>
+          <span className="count-note" style={{ margin: 0 }}>{pick('Host port', '主機埠', lang)}</span>
+          <input
+            className="mod-search"
+            type="number"
+            min={1024}
+            max={65535}
+            style={{ width: 140 }}
+            value={vwPort}
+            onChange={(e) => setVwPort(Number(e.target.value))}
+          />
+        </label>
+        {!portValid && (
+          <p className="count-note" style={{ margin: 0, color: 'var(--danger, #c0392b)' }}>
+            {pick('Enter a port between 1024 and 65535.', '請輸入 1024 至 65535 之間嘅埠。', lang)}
+          </p>
+        )}
+
+        <label className="kv-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input type="checkbox" checked={vwSignups} onChange={(e) => setVwSignups(e.target.checked)} />
+          <span className="count-note" style={{ margin: 0 }}>
+            {pick('Allow sign-ups (needed to create your first account)', '允許註冊（首次建立帳戶需要）', lang)}
+          </span>
+        </label>
+        <label className="kv-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input type="checkbox" checked={vwWebsocket} onChange={(e) => setVwWebsocket(e.target.checked)} />
+          <span className="count-note" style={{ margin: 0 }}>
+            {pick('Enable WebSocket notifications', '啟用 WebSocket 通知', lang)}
+          </span>
+        </label>
+
+        <div className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 8, alignItems: 'center' }}>
+          <span className="count-note" style={{ margin: 0 }}>{pick('Admin token', '管理權杖', lang)}</span>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', minWidth: 0 }}>
+            <code style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{vwToken}</code>
+            <button className="mini" onClick={() => setVwToken(generateAdminToken())}>
+              {pick('Regenerate', '重新產生', lang)}
+            </button>
+          </div>
+        </div>
+        <p className="count-note" style={{ margin: 0 }}>
+          {pick(
+            'The ADMIN_TOKEN opens the /admin panel. It is generated locally in your browser — save it somewhere safe before you deploy.',
+            'ADMIN_TOKEN 用嚟開 /admin 面板。佢喺你嘅瀏覽器本機產生 —— 部署前請儲存喺安全嘅地方。',
+            lang,
+          )}
+        </p>
+
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            className="mini"
+            aria-pressed={vwFormat === 'compose'}
+            style={vwFormat === 'compose' ? { fontWeight: 700 } : undefined}
+            onClick={() => setVwFormat('compose')}
+          >
+            {pick('docker compose', 'docker compose', lang)}
+          </button>
+          <button
+            className="mini"
+            aria-pressed={vwFormat === 'run'}
+            style={vwFormat === 'run' ? { fontWeight: 700 } : undefined}
+            onClick={() => setVwFormat('run')}
+          >
+            {pick('docker run', 'docker run', lang)}
+          </button>
+          <span style={{ flex: 1 }} />
+          <button className="mini" onClick={copyVwPreview}>
+            {vwCopied ? pick('Copied', '已複製', lang) : pick('Copy', '複製', lang)}
+          </button>
+          <button className="mini" onClick={exportVwPreview}>
+            {pick('Export', '匯出', lang)}
+          </button>
+        </div>
+
+        <pre className="cmd-out" style={{ margin: 0, maxHeight: 320, overflow: 'auto' }}>{vwPreview}</pre>
+        <p className="count-note" style={{ margin: 0 }}>
+          {isTauri()
+            ? pick(
+                'Live create/start of this container runs from the desktop app.',
+                '桌面版可以直接建立／啟動呢個容器。',
+                lang,
+              )
+            : pick(
+                'Live create/start runs only in the WinForge desktop app. In the browser, copy or export this config and run it yourself.',
+                '直接建立／啟動只喺 WinForge 桌面版可用。喺瀏覽器，請複製或匯出呢份設定自己執行。',
+                lang,
+              )}
+        </p>
+      </div>
+
+      {/* ── Password / passphrase generator (fully local, no OS) ── */}
+      <h3 className="group-title" style={{ fontSize: 15, margin: '20px 0 4px' }}>
+        {pick('Password generator', '密碼產生器', lang)}
+      </h3>
+      <p className="count-note" style={{ marginTop: 0 }}>
+        {pick(
+          'Generate a strong password or passphrase locally with a CSPRNG. Nothing leaves your device.',
+          '用密碼學安全隨機數本機產生強密碼或通行短語。全程唔會離開你部裝置。',
+          lang,
+        )}
+      </p>
+
+      <div className="hosts-edit" style={{ display: 'grid', gap: 8, maxWidth: 620 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <code style={{ flex: 1, fontSize: 15, wordBreak: 'break-all', padding: '6px 8px' }}>{generated}</code>
+          <button className="mini" onClick={regenerate}>
+            {pick('Regenerate', '重新產生', lang)}
+          </button>
+          <button className="mini" onClick={copyGenerated}>
+            {genCopied ? pick('Copied', '已複製', lang) : pick('Copy', '複製', lang)}
+          </button>
+        </div>
+        <p className="count-note" style={{ margin: 0 }}>
+          {pick('Estimated strength', '估計強度', lang)}:{' '}
+          <span
+            style={{
+              fontWeight: 700,
+              color:
+                strength.band === 'strong'
+                  ? 'var(--ok, #2e9e44)'
+                  : strength.band === 'fair'
+                    ? 'var(--warn, #c8951f)'
+                    : 'var(--danger, #c0392b)',
+            }}
+          >
+            {strength.band === 'strong'
+              ? pick('Strong', '強', lang)
+              : strength.band === 'fair'
+                ? pick('Fair', '中等', lang)
+                : pick('Weak', '弱', lang)}
+          </span>{' '}
+          <span>({strength.bits} {pick('bits', '位元', lang)})</span>
+        </p>
+
+        <label className="kv-row" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={gen.passphrase}
+            onChange={(e) => patchGen({ passphrase: e.target.checked })}
+          />
+          <span className="count-note" style={{ margin: 0 }}>
+            {pick('Passphrase (words) instead of password', '用通行短語（字詞）而唔係密碼', lang)}
+          </span>
+        </label>
+
+        {!gen.passphrase ? (
+          <>
+            <label className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 8, alignItems: 'center' }}>
+              <span className="count-note" style={{ margin: 0 }}>{pick('Length', '長度', lang)}</span>
+              <input
+                type="range"
+                min={5}
+                max={64}
+                value={gen.length}
+                onChange={(e) => patchGen({ length: Number(e.target.value) })}
+              />
+              <span className="count-note" style={{ margin: 0, minWidth: 28, textAlign: 'right' }}>{gen.length}</span>
+            </label>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+              <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="checkbox" checked={gen.uppercase} onChange={(e) => patchGen({ uppercase: e.target.checked })} />
+                <span className="count-note" style={{ margin: 0 }}>{pick('Uppercase (A-Z)', '大寫（A-Z）', lang)}</span>
+              </label>
+              <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="checkbox" checked={gen.lowercase} onChange={(e) => patchGen({ lowercase: e.target.checked })} />
+                <span className="count-note" style={{ margin: 0 }}>{pick('Lowercase (a-z)', '細寫（a-z）', lang)}</span>
+              </label>
+              <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="checkbox" checked={gen.numbers} onChange={(e) => patchGen({ numbers: e.target.checked })} />
+                <span className="count-note" style={{ margin: 0 }}>{pick('Numbers (0-9)', '數字（0-9）', lang)}</span>
+              </label>
+              <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input type="checkbox" checked={gen.special} onChange={(e) => patchGen({ special: e.target.checked })} />
+                <span className="count-note" style={{ margin: 0 }}>{pick('Special (!@#$…)', '特殊符號（!@#$…）', lang)}</span>
+              </label>
+            </div>
+          </>
+        ) : (
+          <>
+            <label className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: 8, alignItems: 'center' }}>
+              <span className="count-note" style={{ margin: 0 }}>{pick('Words', '字詞數', lang)}</span>
+              <input
+                type="range"
+                min={3}
+                max={12}
+                value={gen.words}
+                onChange={(e) => patchGen({ words: Number(e.target.value) })}
+              />
+              <span className="count-note" style={{ margin: 0, minWidth: 28, textAlign: 'right' }}>{gen.words}</span>
+            </label>
+            <label className="kv-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 8, alignItems: 'center' }}>
+              <span className="count-note" style={{ margin: 0 }}>{pick('Separator', '分隔符', lang)}</span>
+              <input
+                className="mod-search"
+                style={{ width: 80 }}
+                maxLength={4}
+                value={gen.separator}
+                onChange={(e) => patchGen({ separator: e.target.value })}
+              />
+            </label>
+            <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input type="checkbox" checked={gen.capitalize} onChange={(e) => patchGen({ capitalize: e.target.checked })} />
+              <span className="count-note" style={{ margin: 0 }}>{pick('Capitalize', '首字母大寫', lang)}</span>
+            </label>
+            <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input type="checkbox" checked={gen.numbers} onChange={(e) => patchGen({ numbers: e.target.checked })} />
+              <span className="count-note" style={{ margin: 0 }}>{pick('Append a number', '結尾加數字', lang)}</span>
+            </label>
+          </>
+        )}
+      </div>
+
+      {/* ── Local TOTP calculator (RFC 6238) ── */}
+      <h3 className="group-title" style={{ fontSize: 15, margin: '20px 0 4px' }}>
+        {pick('Verification code (TOTP)', '驗證碼（TOTP）', lang)}
+      </h3>
+      <p className="count-note" style={{ marginTop: 0 }}>
+        {pick(
+          'Compute a time-based one-time code (RFC 6238) from a base32 secret or an otpauth:// URI — locally, in your browser.',
+          '由 base32 密鑰或 otpauth:// URI 本機（喺瀏覽器）計算時間型一次性驗證碼（RFC 6238）。',
+          lang,
+        )}
+      </p>
+
+      <div className="hosts-edit" style={{ display: 'grid', gap: 8, maxWidth: 620 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input
+            className="mod-search"
+            style={{ flex: 1 }}
+            placeholder={pick('base32 secret or otpauth:// URI', 'base32 密鑰或 otpauth:// URI', lang)}
+            value={totpSecret}
+            onChange={(e) => setTotpSecret(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void runTotp();
+            }}
+          />
+          <button className="mini" onClick={() => void runTotp()}>
+            {pick('Compute', '計算', lang)}
+          </button>
+        </div>
+        {totpErr && (
+          <p className="count-note" style={{ margin: 0, color: 'var(--danger, #c0392b)' }}>
+            {pick('That is not a valid TOTP secret.', '嗰個唔係有效嘅 TOTP 密鑰。', lang)}
+          </p>
+        )}
+        {totp && (
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <code style={{ fontSize: 22, letterSpacing: 2 }}>
+              {totp.code.length === 6 ? `${totp.code.slice(0, 3)} ${totp.code.slice(3)}` : totp.code}
+            </code>
+            <span className="count-note" style={{ margin: 0 }}>
+              {totp.remaining}s / {totp.period}s
+            </span>
+            <button className="mini" onClick={copyTotp}>
+              {totpCopied ? pick('Copied', '已複製', lang) : pick('Copy', '複製', lang)}
+            </button>
+          </div>
+        )}
+        {totp && (
+          <p className="count-note" style={{ margin: 0 }}>
+            {pick(
+              'Recompute to refresh — the code rotates every period.',
+              '重新計算即可更新 —— 驗證碼每個週期輪換一次。',
+              lang,
+            )}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

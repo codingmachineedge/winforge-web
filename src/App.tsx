@@ -31,8 +31,9 @@ export function App() {
   useApplyLayoutPrefs();
   const [view, setView] = useState<View>(() => {
     // Shareable URL params (also used by tools/capture-screens.mjs): ?view=reactor|settings|about
-    // opens a shell view directly; ?module=<tag> opens a module detail. State-only — the app
-    // does not rewrite the URL afterwards.
+    // opens a shell view directly; ?module=<tag> opens a module detail; ?section=<id> opens a
+    // catalog section (e.g. ?section=suite → the Simulations tab). State-only — the app does not
+    // rewrite the URL afterwards.
     const q = new URLSearchParams(window.location.search);
     const v = q.get('view');
     if (v === 'reactor') return { kind: 'reactor' };
@@ -40,6 +41,8 @@ export function App() {
     if (v === 'about') return { kind: 'about' };
     const tag = q.get('module');
     if (tag) return { kind: 'module', tag };
+    const section = q.get('section');
+    if (section) return { kind: 'catalog', sectionId: section };
     return { kind: 'catalog', sectionId: null };
   });
   const [query, setQuery] = useState('');

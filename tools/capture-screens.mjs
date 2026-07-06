@@ -28,6 +28,11 @@ const SHOTS = [
   { name: 'catalog', url: `${BASE}/`, budget: 6000 },
   { name: 'control-room', url: `${BASE}/?view=reactor&warm=1`, budget: 30000 },
   { name: 'core-cutaway', url: `${BASE}/?view=reactor&warm=1&core=1`, budget: 30000 },
+  // The Simulations tab (a catalog-section route). NOTE: module-DETAIL routes (?module=<tag>)
+  // are intentionally not captured here — ModuleDetail eagerly imports the whole module registry,
+  // so headless Chromium's --virtual-time-budget never settles and no frame is produced. Section
+  // and shell routes render fine.
+  { name: 'simulations', url: `${BASE}/?section=suite`, budget: 6000 },
 ];
 
 for (const s of SHOTS) {
