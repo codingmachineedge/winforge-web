@@ -86,6 +86,7 @@
       <a href="#Reactor-Control-Room" data-slug="Reactor-Control-Room">Reactor Control Room</a>
       <a href="#Development" data-slug="Development">Development</a>
       <a href="#Build-from-Source" data-slug="Build-from-Source">Build from Source</a>
+      <a href="#FAQ" data-slug="FAQ">FAQ</a>
     </aside>
     <main>
       <div class="crumb"><a href="index.html">Home</a> / <span>Wiki</span> / <span id="crumb-page"></span></div>
@@ -206,6 +207,24 @@ npm run tauri:build   # Windows .exe + NSIS/MSI installer under src-tauri/target
 <pre><code>node tools/gen-catalog.mjs "C:/path/to/WinForge"   # module catalog + the 22 tweak categories
 node tools/gen-tweaks.mjs                           # the 895-tweak catalog from WinForge --export-docs
 node tools/gen-registry-keys.mjs                    # registry-guard mirror</code></pre>
+<p>See also <a href="Development">Development</a> for the repo layout, engine rules and testing.</p>
+</article>
+<article class="wpage" id="page-FAQ" hidden>
+<h1>FAQ · 常見問題</h1>
+<h2>Is this the same as the WinForge desktop app?</h2>
+<p>WinForge Web is its own product — a <strong>Tauri v2</strong> Windows desktop app with a React + TypeScript frontend. It carries the WinForge catalog (<strong>315 modules</strong> + the <strong>895-tweak Windows catalog</strong>) and the physics-based PWR reactor, and it also runs standalone in a plain browser for quick iteration.</p>
+<h2>Do the Windows tweaks and native modules actually work in a browser?</h2>
+<p>Native modules and the Windows tweaks perform <strong>real</strong> registry / service / filesystem operations through the built-in <strong>Rust backend</strong>, so they run in the installed desktop app. In a plain browser <code>isTauri()</code> is false, so those surfaces render as a **searchable, fully-bilingual reference** with a note that live results need the installed app. Web-safe modules (the Toolbox utilities, the reactor, etc.) run fully in the browser.</p>
+<h2>Where is the 895-tweak Windows catalog?</h2>
+<p>Under <strong>Windows 11 › All Tweaks</strong> — 22 categories browsable and searchable in English and 粵語, each tweak showing its real metadata (kind, elevation, destructiveness, restart scope). A global search for any tweak name (e.g. "bitlocker") surfaces its category. See <a href="Modules">Modules</a>.</p>
+<h2>Where's the nuclear reactor?</h2>
+<p>The <strong>Reactor</strong> tab (or the ⚡ shortcut) opens the full CRT control-room console. See <a href="Reactor-Control-Room">Reactor Control Room</a>.</p>
+<h2>What is the Simulations tab?</h2>
+<p>Its own nav-rail tab collecting the reactor and its <strong>18 reactor-powered industrial sims</strong> (Cake Factory, Grid Dispatch, Hydrogen, AI Cluster, HPC, smelter, data centre, collider, …) plus the Dashboard and Reactor Settings.</p>
+<h2>Why does <code>npm install</code> need <code>--legacy-peer-deps</code>?</h2>
+<p>The frontend pins a newer Vite than one dev plugin advertises support for; <code>--legacy-peer-deps</code> lets npm resolve the tree. It does not affect the build. See <a href="Build-from-Source">Build from Source</a>.</p>
+<h2>Is it really bilingual?</h2>
+<p>Yes — every module title, keyword, label and tweak is **English / 粵語 (written Cantonese, Traditional Chinese) / bilingual**, switchable from the shell. A CI guard fails the build on any missing string in any language mode.</p>
 </article>
     </main>
   </div>
@@ -213,7 +232,7 @@ node tools/gen-registry-keys.mjs                    # registry-guard mirror</cod
 
 <script>
   (function(){
-    var pages = [{"slug":"Home","title":"Home"},{"slug":"Modules","title":"Modules"},{"slug":"Reactor-Control-Room","title":"Reactor Control Room"},{"slug":"Development","title":"Development"},{"slug":"Build-from-Source","title":"Build from Source"}];
+    var pages = [{"slug":"Home","title":"Home"},{"slug":"Modules","title":"Modules"},{"slug":"Reactor-Control-Room","title":"Reactor Control Room"},{"slug":"Development","title":"Development"},{"slug":"Build-from-Source","title":"Build from Source"},{"slug":"FAQ","title":"FAQ"}];
     var links = Array.prototype.slice.call(document.querySelectorAll('aside.toc a'));
     function show(slug){
       var found = pages.some(function(p){ return p.slug === slug; });
