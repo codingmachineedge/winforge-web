@@ -90,7 +90,7 @@ Requires the **Rust toolchain** (`rustup`, MSVC host), **VS Build Tools / MSVC**
 - **Simulations · 模擬** — its own nav-rail tab: Dashboard, the Nuclear Reactor, Reactor Settings, and 18 reactor-powered industrial loads (Cake Factory, Grid Dispatch, Hydrogen, AI Cluster, HPC, smelter, data centre, collider, …).
 - **Categories · 分類** — Files & Disks, System, Media & Capture, Tweaks & Input, Apps & Git, Security & Privacy (native-only).
 - **Toolbox · 工具箱** — 12 groups of pure client-side utilities (JSON/Data, Text, Encoding, Crypto, Web/HTTP, Network, Dev, Time, Calculators, Colors, Everyday). Web-portable.
-- **Windows 11 · 視窗 11** — a browsable, searchable, fully-bilingual catalog of **895 Windows tweaks across 22 categories** (WinForge's desktop `TweakCatalog`), grouped under **All Tweaks**. Registry writes run in the desktop app; the web renders each tweak as a reference card with its real metadata (kind, elevation, destructiveness, restart scope).
+- **Windows 11 · 視窗 11** — a browsable, searchable, fully-bilingual catalog of **895 Windows tweaks across 22 categories** (WinForge's desktop `TweakCatalog`), grouped under **All Tweaks**. In the desktop (Tauri) app, **166 of these apply for real** — their toggles/choices read and write the exact registry value/kind the C# engine does (extracted by `tools/gen-tweak-ops.mjs`, verified against the source; admin/destructive tweaks confirm first). The remaining Action/launcher tweaks show their real metadata (kind, elevation, destructiveness, restart scope) as reference. This is a low-level desktop capability — it does not run in a plain browser.
 
 ![Simulations tab](docs/screenshots/simulations.png)
 
