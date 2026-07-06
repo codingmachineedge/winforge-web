@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pick } from '../i18n';
 import {
@@ -8,6 +8,9 @@ import {
   type TweakKind,
   type RestartScope,
 } from '../data/tweaks';
+import { opFor, type TweakOp, type RegToggleOp, type RegRadioOp } from '../data/tweakOps';
+import { isTauri } from '../tauri/bridge';
+import { isToggleOn, applyToggle, currentChoice, applyChoice } from '../tauri/registry';
 
 // Browsable, fully-bilingual view over WinForge's desktop TweakCatalog (the ~895 Windows
 // tweaks that make up most of the app's 1209 features). Applying a tweak edits the Windows
@@ -109,6 +112,148 @@ function Badge({ text, tone }: { text: string; tone?: 'admin' | 'danger' | 'rest
   );
 }
 
+const errMsg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
+/**
+ * A REAL, live tweak control (desktop/Tauri only). Reads the current registry state on mount
+ * and applies changes through the backend — mirroring WinForge's GetIsOn/SetIsOn & radio
+ * setChoice. Elevated (admin) or destructive tweaks confirm before writing.
+ */
+function LiveControl({
+  tweak,
+  op,
+  px,
+}: {
+  tweak: TweakData;
+  op: TweakOp;
+  px: (en: string, zh: string) => string;
+}) {
+  const [on, setOn] = useState<boolean | null>(null);
+  const [choice, setChoice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        if (op.op === 'toggle') {
+          const v = await isToggleOn(op);
+          if (alive) setOn(v);
+        } else {
+          const v = await currentChoice(op);
+          if (alive) setChoice(v);
+        }
+      } catch (e) {
+        if (alive) setErr(errMsg(e));
+      } finally {
+        if (alive) setLoaded(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [op]);
+
+  const confirmRisky = (): boolean => {
+    if (!op.admin && !tweak.destructive) return true;
+    const flags = [
+      op.admin ? px('needs administrator rights', '需要管理員權限') : '',
+      tweak.destructive ? px('is destructive', '具破壞性') : '',
+    ]
+      .filter(Boolean)
+      .join(px(' and ', ' 同埋 '));
+    return window.confirm(
+      px(
+        `Apply "${tweak.en}"? It writes to the Windows registry${flags ? ' and ' + flags : ''}.`,
+        `套用「${tweak.zh}」？佢會寫入 Windows 登錄${flags ? '，而且' + flags : ''}。`,
+      ),
+    );
+  };
+
+  const doToggle = async () => {
+    if (busy || on === null) return;
+    const next = !on;
+    if (!confirmRisky()) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await applyToggle(op as RegToggleOp, next);
+      if (!r.success) throw new Error(r.stderr.trim() || `exit ${r.code}`);
+      setOn(next);
+    } catch (e) {
+      setErr(errMsg(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const doChoose = async (value: string) => {
+    if (busy) return;
+    const rop = op as RegRadioOp;
+    const opt = rop.options.find((o) => String(o.value) === value);
+    if (!opt) return;
+    if (!confirmRisky()) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await applyChoice(rop, opt.value);
+      if (!r.success) throw new Error(r.stderr.trim() || `exit ${r.code}`);
+      setChoice(value);
+    } catch (e) {
+      setErr(errMsg(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+      {op.op === 'toggle' ? (
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, opacity: busy ? 0.6 : 1 }}>
+          <input
+            type="checkbox"
+            checked={on === true}
+            disabled={busy || !loaded}
+            onChange={() => void doToggle()}
+            aria-label={px(tweak.en, tweak.zh)}
+          />
+          <span className="count-note" style={{ fontSize: 11, minWidth: 24 }}>
+            {!loaded ? '…' : on ? px('On', '開') : px('Off', '關')}
+          </span>
+        </label>
+      ) : (
+        <select
+          className="mod-select"
+          style={{ maxWidth: 170, opacity: busy ? 0.6 : 1 }}
+          disabled={busy || !loaded}
+          value={choice ?? ''}
+          onChange={(e) => void doChoose(e.target.value)}
+          aria-label={px(tweak.en, tweak.zh)}
+        >
+          <option value="" disabled>
+            {loaded ? px('Choose…', '選擇…') : '…'}
+          </option>
+          {(op as RegRadioOp).options.map((o) => (
+            <option key={String(o.value)} value={String(o.value)}>
+              {px(o.en, o.zh)}
+            </option>
+          ))}
+        </select>
+      )}
+      {err && (
+        <span
+          className="count-note"
+          style={{ color: 'var(--danger)', fontSize: 10.5, maxWidth: 190, textAlign: 'right' }}
+        >
+          {err}
+        </span>
+      )}
+    </div>
+  );
+}
+
 interface Props {
   /** Category slug (matches tweakCategories[].id). Omit to browse every category. */
   categoryId?: string;
@@ -119,6 +264,7 @@ export function TweaksBrowser({ categoryId }: Props) {
   const lang = i18n.language || 'en';
   const px = (en: string, zh: string) => pick(en, zh, lang);
   const [filter, setFilter] = useState('');
+  const inTauri = isTauri();
 
   const base = useMemo(
     () => (categoryId ? ALL_TWEAKS.filter((t) => t.cat === categoryId) : ALL_TWEAKS),
@@ -156,11 +302,16 @@ export function TweaksBrowser({ categoryId }: Props) {
           'WinForge 提供嘅每項 Windows 調校 — 可用英文同粵語搜尋。',
         )}
       </p>
-      <p className="count-note" style={{ color: 'var(--text-secondary)' }}>
-        {px(
-          'Applying a tweak edits the Windows registry / services and runs in the WinForge desktop app; this web catalog is a reference.',
-          '套用調校會修改 Windows 登錄／服務，需喺 WinForge 桌面版執行；此網頁目錄係參考用途。',
-        )}
+      <p className="count-note" style={{ color: inTauri ? 'var(--web)' : 'var(--text-secondary)' }}>
+        {inTauri
+          ? px(
+              'Toggles and choices apply live to the Windows registry — admin / destructive tweaks confirm first.',
+              '開關同選項會即時寫入 Windows 登錄 — 需管理員／具破壞性嘅調校會先確認。',
+            )
+          : px(
+              'Applying a tweak edits the Windows registry / services and runs in the WinForge desktop app; this web catalog is a reference.',
+              '套用調校會修改 Windows 登錄／服務，需喺 WinForge 桌面版執行；此網頁目錄係參考用途。',
+            )}
       </p>
 
       <div className="mod-toolbar" style={{ flexWrap: 'wrap' }}>
@@ -220,7 +371,10 @@ export function TweaksBrowser({ categoryId }: Props) {
                     </div>
                   </div>
                   <div style={{ flexShrink: 0 }}>
-                    <ControlPreview t={t} px={px} />
+                    {(() => {
+                      const op = inTauri ? opFor(t.id) : undefined;
+                      return op ? <LiveControl tweak={t} op={op} px={px} /> : <ControlPreview t={t} px={px} />;
+                    })()}
                   </div>
                 </div>
               );
