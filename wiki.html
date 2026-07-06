@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<title>WinForge Web · Wiki</title>
+<meta name="description" content="WinForge Web wiki — the 315-module catalog, the 895-tweak Windows catalog, the Simulations tab, and the PWR reactor control room. Bilingual EN / 粵語." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231b1b1f'/%3E%3Ccircle cx='50' cy='50' r='24' fill='none' stroke='%234cc2ff' stroke-width='5'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%234cc2ff'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#1b1b1f; --bg-elevated:#26262b; --bg-card:#2a2a30; --bg-card-hover:#33333b;
+    --sidebar-bg:#202024; --stroke:#3a3a42; --stroke-subtle:#2f2f36;
+    --text:#f3f3f5; --text-secondary:#b8b8c0; --text-tertiary:#8a8a94;
+    --accent:#4cc2ff; --accent-strong:#0091f7; --native:#ffb454; --web:#5ad19b; --danger:#ff6b6b;
+    --radius:8px; --radius-lg:12px;
+    --font:'Segoe UI','Segoe UI Variable',system-ui,-apple-system,'Microsoft JhengHei','PingFang HK',sans-serif;
+    --mono:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1200px 600px at 80% -10%,rgba(76,194,255,.10),transparent 60%),radial-gradient(900px 500px at 0% 0%,rgba(0,145,247,.08),transparent 55%);min-height:100vh;}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+    background:rgba(27,27,31,.72);border-bottom:1px solid var(--stroke-subtle)}
+  .nav-inner{display:flex;align-items:center;gap:16px;height:60px;max-width:1180px;margin:0 auto;padding:0 24px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;font-size:1.05rem}
+  .brand .logo{width:26px;height:26px}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:.92rem}
+  .nav-right a{color:var(--text-secondary)}
+  .nav-right a:hover{color:var(--text);text-decoration:none}
+  .layout{max-width:1180px;margin:0 auto;padding:28px 24px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:36px;align-items:start}
+  aside.toc{position:sticky;top:80px;max-height:calc(100vh - 100px);overflow:auto}
+  .toc-h{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:10px}
+  aside.toc a{display:block;padding:8px 12px;border-radius:8px;color:var(--text-secondary);font-size:14px;margin-bottom:2px;border:1px solid transparent}
+  aside.toc a:hover{background:var(--bg-card);color:var(--text);text-decoration:none}
+  aside.toc a.active{background:rgba(76,194,255,.12);border-color:rgba(76,194,255,.35);color:var(--text)}
+  main{min-width:0}
+  .crumb{font-family:var(--mono);font-size:12px;color:var(--text-tertiary);margin-bottom:14px}
+  .crumb a{color:var(--text-tertiary)}
+  article.wpage{background:var(--bg-card);border:1px solid var(--stroke);border-radius:14px;padding:clamp(20px,4vw,40px);min-width:0}
+  article h1{font-size:clamp(26px,4vw,38px);font-weight:700;margin:0 0 14px;line-height:1.2}
+  article h2{font-size:1.4rem;font-weight:650;margin:30px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--stroke-subtle)}
+  article h3{font-size:1.12rem;font-weight:600;margin:22px 0 8px}
+  article h4{font-size:1rem;font-weight:600;margin:18px 0 6px;color:var(--text-secondary)}
+  article p{margin:10px 0;color:#d4d8de}
+  article ul,article ol{margin:10px 0 10px 22px}
+  article li{margin:5px 0;color:#d4d8de}
+  article a{color:var(--accent)}
+  article code{font-family:var(--mono);font-size:.88em;background:#111318;border:1px solid var(--stroke-subtle);border-radius:5px;padding:1px 6px;color:#ffd9a0}
+  article pre{background:#0c0e13;border:1px solid var(--stroke);border-radius:10px;padding:15px 17px;overflow:auto;margin:14px 0}
+  article pre code{background:none;border:0;padding:0;color:#cfe3ff;font-size:.86rem;line-height:1.55}
+  article img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--stroke);margin:14px 0;display:block}
+  article blockquote{border-left:3px solid var(--accent);background:var(--bg-elevated);padding:10px 16px;border-radius:0 8px 8px 0;margin:14px 0;color:var(--text-secondary)}
+  article hr{border:0;border-top:1px solid var(--stroke-subtle);margin:22px 0}
+  .tbl{overflow-x:auto;margin:14px 0}
+  article table{border-collapse:collapse;width:100%;font-size:14px}
+  article th,article td{border:1px solid var(--stroke);padding:9px 12px;text-align:left;vertical-align:top}
+  article th{background:var(--bg-elevated);font-weight:600}
+  article strong{color:var(--text)}
+  .foot{max-width:1180px;margin:20px auto 40px;padding:0 24px;color:var(--text-tertiary);font-size:13px}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;gap:18px}aside.toc{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:6px}aside.toc a{margin:0}.toc-h{width:100%}}
+</style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <svg class="logo" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#26262b"/><circle cx="50" cy="50" r="24" fill="none" stroke="#4cc2ff" stroke-width="5"/><circle cx="50" cy="50" r="7" fill="#4cc2ff"/></svg>
+        WinForge Web · Wiki
+      </a>
+      <div class="nav-right">
+        <a href="index.html">← Home</a>
+        <a href="https://github.com/codingmachineedge/winforge-web" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="toc">
+      <div class="toc-h">Wiki pages · 維基頁面</div>
+      <a href="#Home" data-slug="Home">Home</a>
+      <a href="#Modules" data-slug="Modules">Modules</a>
+      <a href="#Reactor-Control-Room" data-slug="Reactor-Control-Room">Reactor Control Room</a>
+      <a href="#Development" data-slug="Development">Development</a>
+      <a href="#Build-from-Source" data-slug="Build-from-Source">Build from Source</a>
+    </aside>
+    <main>
+      <div class="crumb"><a href="index.html">Home</a> / <span>Wiki</span> / <span id="crumb-page"></span></div>
+<article class="wpage" id="page-Home" hidden>
+<h1>WinForge Web · 網頁版</h1>
+<p>A <strong>Windows desktop app</strong> (Tauri v2, Rust backend) with a React + TypeScript frontend: <strong>315 working modules</strong> plus a browsable <strong>895-tweak Windows catalog</strong>, headlined by a physics-based <strong>PWR nuclear reactor simulator</strong> with a full control-room console. Trilingual — <strong>English / 粵語 / bilingual</strong>.</p>
+<p><img src="https://raw.githubusercontent.com/codingmachineedge/winforge-web/main/docs/screenshots/control-room.png" alt="Reactor Control Room" loading="lazy"></p>
+<h2>Install</h2>
+<pre><code>powershell -ExecutionPolicy Bypass -Command "irm https://codingmachineedge.github.io/winforge-web/install.ps1 | iex"</code></pre>
+<p>Or grab the installer / portable zip from <a href="https://github.com/codingmachineedge/winforge-web/releases" target="_blank" rel="noopener">Releases</a>.</p>
+<h2>Pages</h2>
+<ul><li><strong><a href="Reactor-Control-Room">Reactor Control Room</a></strong> — operating the plant: warm start, turbine</li></ul>
+<p>  sync, SCRAM, the core cutaway, what the physics engine simulates</p>
+<ul><li><strong><a href="Modules">Modules</a></strong> — the 315-module catalog and the 895-tweak Windows catalog: sections,</li></ul>
+<p>  the <strong>Simulations</strong> tab, native backend, File Browser, filters and favorites</p>
+<ul><li><strong><a href="Development">Development</a></strong> — building from source, architecture, engine rules, testing</li></ul>
+<h2>Highlights</h2>
+<ul><li><strong>Material 3 shell</strong> — navigation rail + modal drawer, md-* design tokens, light/dark/system</li><li><strong>Reactor Control Room</strong> — CRT console with an animated plant mimic, analog gauges, latching</li></ul>
+<p>  annunciator, SCRAM button, core cutaway and a synthesized soundscape; behind it run six-group   point kinetics plus full protection/ESF engines (RPS, PORV/PRT, App-G/LTOP, SI/MSSV,   containment, CSF trees) and a turbine/generator model</p>
+<ul><li><strong>Real native operations</strong> through the built-in Rust backend — services, startup, network,</li></ul>
+<p>  drives, events, a full <strong>File Browser</strong> with Recycle-Bin delete, and 100+ more</p>
+<ul><li><strong>895-tweak Windows catalog</strong> — WinForge's entire desktop <code>TweakCatalog</code> (22 categories),</li></ul>
+<p>  browsable and searchable in English and 粵語, each tweak carrying its real metadata (kind,   elevation, destructiveness, restart scope); generated straight from the live app</p>
+<ul><li><strong>Zero missing translations</strong>, enforced by a CI guard across all three language modes</li></ul>
+</article>
+<article class="wpage" id="page-Modules" hidden>
+<h1>Module Catalog · 模組目錄</h1>
+<p>WinForge Web ships <strong>315 modules</strong> across 4 sections — every one with a real working implementation, no stubs — plus a browsable <strong>895-tweak Windows catalog</strong> (22 categories). The catalog is data-driven from the original WinForge desktop suite's navigation tree and <code>TweakCatalog</code>, plus web-first additions.</p>
+<p><img src="https://raw.githubusercontent.com/codingmachineedge/winforge-web/main/docs/screenshots/catalog.png" alt="Module catalog" loading="lazy"></p>
+<h2>Sections</h2>
+<div class="tbl"><table><thead><tr><th>Section</th><th>What lives there</th></tr></thead><tbody><tr><td><strong>Simulations</strong> (its own nav-rail tab)</td><td>The reactor simulator and its 18 industrial power-consumer sims (smelter, desalination, district heat, EV charging, hydrogen plant, HPC, data centre, collider, …) that buy the reactor's megawatts, plus the Dashboard, Reactor Settings and Reactor Bank</td></tr><tr><td><strong>Categories</strong></td><td>System tools that drive real Windows facilities through the built-in Rust backend — services, startup apps, connections, environment variables, drives, events, devices, battery, hosts, File Locksmith, <strong>File Browser</strong>, and many more</td></tr><tr><td><strong>Toolbox</strong></td><td>Developer &amp; power-user utilities — Git workbench, REST client, SQLite browser, hex editor, regex/JSON/YAML tools, OCR, screen recorder, VS Code/VirtualBox/Wireshark/qBittorrent/Ollama front-ends, …</td></tr><tr><td><strong>Windows 11</strong></td><td>The <strong>All Tweaks</strong> catalog — WinForge's 895 desktop tweaks across 22 categories, browsable and searchable in both languages</td></tr></tbody></table></div>
+<p>Filters: <strong>All / Web-capable / Native-only</strong>, fuzzy search with typo tolerance and match highlighting, grid or list view, favorites (pin ⭐) and a recents strip. The nav rail exposes <strong>Modules · Simulations · Reactor · Settings · About</strong>.</p>
+<h2>The Windows tweak catalog</h2>
+<p>The <strong>Windows 11 › All Tweaks</strong> section is a faithful, browsable port of WinForge's desktop <code>TweakCatalog</code> — <strong>895 tweaks across 22 categories</strong> (Appearance, Explorer, Taskbar, Privacy, Performance, Network, Cleanup, Security, System, Debloat, Winaero, Vault, Network Pro, Windows 11 Advanced, Recipes, …). Each category opens a searchable, fully-bilingual list where every tweak shows a kind-appropriate control preview (toggle / action / slider / choice / colour / info) and its real metadata — <strong>kind, elevation (admin), destructiveness, and restart scope</strong>. A global search for any tweak name (e.g. "bitlocker") surfaces its category.</p>
+<p>Registry writes are desktop-only, so — like the native modules — the tweaks render as a searchable reference in the browser and apply through the installed app. The data lives in <code>src/data/tweaks.ts</code>, generated straight from WinForge's own <code>--export-docs</code> exporter by <code>tools/gen-tweaks.mjs</code>.</p>
+<h2>Native modules &amp; the backend</h2>
+<p>Native modules do their real work through the Tauri <strong>Rust backend</strong> — a command runner, a PowerShell runner (Windows PowerShell 5.1), typed filesystem commands, and a vetted-operation allowlist (<code>run_op</code>) for common Windows housekeeping. In a plain browser (<code>npm run dev</code>) the same UI renders with a note that live results need the installed app.</p>
+<p>Highlight — <strong>File Browser</strong> (<code>module.filebrowser</code>): a full file manager with drive picker, breadcrumbs, size/date/attribute listing, new-folder / rename / copy / move, delete to the <strong>Recycle Bin</strong> (via in-process .NET — no separate helper), hidden-file toggle and a text preview pane, powered by dedicated Rust <code>fs_*</code> commands.</p>
+<h2>Trilingual UI</h2>
+<p>Every module is <strong>English / 粵語 (written Cantonese, Traditional Chinese) / bilingual</strong>, switched from the shell. A CI guard (<code>src/i18n/moduleKeys.test.ts</code>) scans every <code>t('…')</code> call in the source and fails the build if any key lacks either language — the catalog is enforced at **zero missing strings**.</p>
+</article>
+<article class="wpage" id="page-Reactor-Control-Room" hidden>
+<h1>Reactor Control Room · 反應堆主控室</h1>
+<p>The flagship of WinForge Web: a physics-based <strong>PWR nuclear power plant simulator</strong> presented as a full CRT-style control room console.</p>
+<p><img src="https://raw.githubusercontent.com/codingmachineedge/winforge-web/main/docs/screenshots/control-room.png" alt="Reactor Control Room" loading="lazy"></p>
+<h2>The console</h2>
+<div class="tbl"><table><thead><tr><th>Surface</th><th>What it shows</th></tr></thead><tbody><tr><td><strong>HUD bar</strong></td><td>Plant identity, criticality status lamp (SUBCRITICAL / CRITICAL / SUPERCRIT / SCRAMMED / MELTDOWN), UI mode, Tech-Spec MODE 1–6, active-alarm counter, gross <strong>MWe</strong> output, <strong>MWt</strong> + % RTP, time compression ×1–×20, core-cutaway and sound toggles</td></tr><tr><td><strong>Nuclear instrumentation</strong></td><td>Source range (cps, log), intermediate range (amps, log), power range (% RTP), startup rate (DPM)</td></tr><tr><td><strong>Reactimeter</strong></td><td>Net reactivity (pcm) on a centre-zero bar, k-effective</td></tr><tr><td><strong>Rod banks</strong></td><td>Live per-bank positions A–D in steps withdrawn (0–228)</td></tr><tr><td><strong>Plant mimic</strong></td><td>Animated primary + secondary loop schematic — RPV with glowing core and descending rods, pressurizer level, steam generator level, turbine with spinning rotor and RPM, generator sync state, grid, condenser, RCP / feedwater pumps, dash-animated flow in every pipe. Drag to pan, scroll to zoom.</td></tr><tr><td><strong>Analog gauges</strong></td><td>Thermal power, reactivity, fuel temperature, coolant T-avg — needle dials with warning/danger arcs</td></tr><tr><td><strong>Annunciator</strong></td><td>Latching alarm board: unacknowledged alarms flash red with a master strobe and (with sound on) a two-tone klaxon; ACK per tile or ACK ALL; cleared-but-unacked tiles fall back to amber</td></tr><tr><td><strong>Control console</strong></td><td>Reactor mode (Shutdown / Startup / Run), rod withdrawal, target boron, RCP flow, feedwater, turbine latch, easy-startup assist, warm start, reset</td></tr><tr><td><strong>Plant status</strong></td><td>Electric output, primary pressure, pressurizer level, boron, SG pressure, RCS flow, decay heat, xenon, burnup, period + P-6…P-10 permissive lamps</td></tr><tr><td><strong>SCRAM</strong></td><td>The big red button. Drops all rod banks by gravity and trips the turbine.</td></tr></tbody></table></div>
+<h2>Core cutaway</h2>
+<p><img src="https://raw.githubusercontent.com/codingmachineedge/winforge-web/main/docs/screenshots/core-cutaway.png" alt="Core cutaway" loading="lazy"></p>
+<p>The <code>grain</code> button opens a live vessel cross-section: 15 fuel-assembly columns coloured by local power (centre-peaked radial shape), control rods descending to the true insertion depth, coolant up-flow, and the axial power shape (a rod-skewed cosine). Readouts include peak fuel temperature, neutron flux and the peaking factor Fq.</p>
+<h2>Sound</h2>
+<p>Opt-in (off by default): an ambient reactor-hall hum that swells with power, neutron-detector clicks whose rate follows the source-range count rate, the alarm klaxon, and a SCRAM whoop. Everything is synthesized live with WebAudio — nothing is downloaded.</p>
+<h2>Quick start</h2>
+<ol><li>Press <strong>Warm Start</strong> — the plant comes up hot and critical with the turbine latched.</li><li>Watch the turbine roll to <strong>1800 rpm</strong>; the generator auto-syncs (<strong>SYNC</strong>) and megawatts</li></ol>
+<p>   appear on the HUD.</p>
+<ol><li>Try a <strong>SCRAM</strong>: rods drop, the strobe fires, the annunciator lights up — acknowledge with</li></ol>
+<p>   <strong>ACK ALL</strong>, then investigate what tripped.</p>
+<ol><li>Or start from cold iron: pumps on, feedwater up, mode <strong>Startup</strong>, dilute boron toward</li></ol>
+<p>   criticality and withdraw rods slowly — the Reactor Protection System is watching.</p>
+<h2>What is simulated</h2>
+<p>The engine (<code>src/reactor/</code>) is a faithful TypeScript port of WinForge's C# <code>ReactorSimService</code>:</p>
+<ul><li><strong>Six-group point kinetics</strong> (implicit Euler, 50 Hz sub-stepping) with a neutron source term</li><li>Reactivity feedback: rod S-curves (4 Westinghouse banks), soluble-boron differential worth,</li></ul>
+<p>  Doppler, moderator temperature coefficient, xenon/samarium poisons, burnup defect</p>
+<ul><li>ANS-5.1 <strong>decay heat</strong> (23 groups + actinides), fuel-cycle burnup BOL→EOL</li><li>Thermal-hydraulics: fuel/coolant lumps, saturated pressurizer, RCP spin-up/coastdown with a</li></ul>
+<p>  natural-circulation floor</p>
+<ul><li><strong>Nuclear instrumentation</strong> (SR/IR/PR), P-6…P-10 permissives, Tech-Spec MODE 1–6, a full</li></ul>
+<p>  Reactor Protection System trip set, and an inverse-kinetics reactimeter</p>
+<ul><li>Protection &amp; ESF engines running behind the console and alarming into the annunciator:</li></ul>
+<p>  rod-bank overlap program + Tavg/Tref auto control, PORV / code safeties / pressurizer relief   tank (with the TMI-2 stuck-PORV drill), Appendix-G P/T limits + LTOP + PTS, safety injection +   accumulators + MSSVs, containment + RCP seal-LOCA, the six Critical Safety Function trees</p>
+<ul><li><strong>Turbine &amp; balance-of-plant</strong>: governor roll, generator auto-sync, steam-dump valves,</li></ul>
+<p>  SG level, breaker-gated electric output</p>
+<ul><li>Fuel factory (fabricate → load → burn → auto-discharge) with signed assemblies, and</li></ul>
+<p>  power-generation credits</p>
+<p>The full fidelity checklist against the C# source lives in <a href="https://github.com/codingmachineedge/winforge-web/blob/main/docs/reactor-parity.md" target="_blank" rel="noopener"><code>docs/reactor-parity.md</code></a>.</p>
+<p>*Engineering numbers are tuned for plausibility and playability — this is a simulator game, not licensing-grade analysis.*</p>
+</article>
+<article class="wpage" id="page-Development" hidden>
+<h1>Development · 開發</h1>
+<h2>Stack</h2>
+<ul><li><strong>Frontend</strong>: React 18 + TypeScript, Vite, react-i18next, PWA (offline-capable)</li><li><strong>Desktop shell</strong>: Tauri v2 — Rust backend (<code>src-tauri/</code>) builds a Windows <code>.exe</code> / installer</li><li><strong>Design</strong>: Material 3 shell (navigation rail + modal drawer, md-* token system, light/dark);</li></ul>
+<p>  the reactor renders as a self-contained CRT console</p>
+<ul><li><strong>Fonts/icons</strong>: bundled locally (<code>@fontsource/*</code>, Material Symbols) — no CDN calls, CSP-safe</li></ul>
+<h2>Commands</h2>
+<pre><code>npm install --legacy-peer-deps
+npm run dev           # browser dev server (native panels degrade gracefully)
+npm run tauri:dev     # desktop app, hot reload
+npm run tauri:build   # Windows installer under src-tauri/target/release/bundle
+npm run typecheck     # tsc --noEmit
+npm test              # vitest</code></pre>
+<h2>Layout</h2>
+<div class="tbl"><table><thead><tr><th>Path</th><th>What</th></tr></thead><tbody><tr><td><code>src/reactor/</code></td><td>The physics engines: <code>physics.ts</code> (point kinetics core, framework-free), one pure module per protection/ESF subsystem, <code>reactorAux.ts</code> (the single coordinator that wires them onto the live sim), <code>useReactorSim.ts</code> (the only React bridge)</td></tr><tr><td><code>src/components/reactor/controlRoom/</code></td><td>The Control Room console (HUD, mimic, gauges, annunciator, core cutaway, WebAudio)</td></tr><tr><td><code>src/modules/</code></td><td>One <code>.tsx</code> per catalog module; registered in <code>registry*.tsx</code></td></tr><tr><td><code>src/i18n/</code></td><td>Trilingual string slices; <code>moduleKeys.test.ts</code> enforces <strong>zero</strong> missing keys</td></tr><tr><td><code>src-tauri/src/</code></td><td>Rust backend: <code>commands.rs</code> (runner, PowerShell, <code>fs_*</code>), <code>ops.rs</code> (vetted-op allowlist)</td></tr><tr><td><code>src/data/catalog.ts</code></td><td>Generated catalog (<code>node tools/gen-catalog.mjs</code>); web-only modules survive regeneration via its <code>WEB_EXTRAS</code> list</td></tr><tr><td><code>docs/reactor-parity.md</code></td><td>Reactor fidelity checklist vs the original C# engine</td></tr></tbody></table></div>
+<h2>Engine architecture rules</h2>
+<ol><li><code>physics.ts</code> stays <strong>framework-free</strong>; new reactor subsystems are separate pure</li></ol>
+<p>   <code>step(inputs, dt) → outputs</code> modules wired <strong>only</strong> through <code>reactorAux.ts</code>.</p>
+<ol><li>Modules never punt to the old desktop app — WinForge Web <strong>is</strong> the product.</li><li>Everything user-facing is trilingual (EN / 粵語 / bilingual); the i18n guard fails CI on any</li></ol>
+<p>   missing key.</p>
+<ol><li>Native work goes through the Rust backend; in-process .NET (<code>Add-Type</code> via PowerShell) covers</li></ol>
+<p>   Win32 APIs Rust std can't reach — no separate helper processes.</p>
+<h2>Testing</h2>
+<p>~760 vitest tests: per-subsystem physics suites (kinetics, CVCS, rods, relief, P/T, ESF, containment, CSF, turbine), coordinator integration scenarios (LTOP arming, stuck-PORV isolation, SI boration, seal-LOCA…), fuel factory + credits, i18n guards, registry guards.</p>
+</article>
+<article class="wpage" id="page-Build-from-Source" hidden>
+<h1>Build from Source · 由原始碼建置</h1>
+<p>WinForge Web is a <strong>Tauri v2</strong> desktop app with a <strong>React + TypeScript (Vite)</strong> frontend.</p>
+<h2>Prerequisites</h2>
+<ul><li><strong>Node.js</strong> 18+ and npm</li><li><strong>Rust toolchain</strong> (<code>rustup</code>, MSVC host) + <strong>VS Build Tools / MSVC</strong></li><li><strong>WebView2</strong> runtime (bundled on Windows 11)</li></ul>
+<h2>Frontend (browser)</h2>
+<pre><code>npm install --legacy-peer-deps
+npm run dev        # Vite dev server at http://localhost:5199
+npm run typecheck  # tsc --noEmit
+npm test           # vitest
+npm run build      # tsc --noEmit &amp;&amp; vite build</code></pre>
+<p>In a plain browser <code>isTauri()</code> is false, so native panels render with a note that live results need the installed app; web-safe modules run fully.</p>
+<h2>Desktop app (Tauri v2)</h2>
+<pre><code>npm run tauri:dev     # desktop app, hot-reload frontend + Rust backend
+npm run tauri:build   # Windows .exe + NSIS/MSI installer under src-tauri/target/release/bundle</code></pre>
+<h2>Regenerating the catalog &amp; tweaks</h2>
+<pre><code>node tools/gen-catalog.mjs "C:/path/to/WinForge"   # module catalog + the 22 tweak categories
+node tools/gen-tweaks.mjs                           # the 895-tweak catalog from WinForge --export-docs
+node tools/gen-registry-keys.mjs                    # registry-guard mirror</code></pre>
+</article>
+    </main>
+  </div>
+  <div class="foot">WinForge Web · 網頁版 — 315 modules · 895-tweak Windows catalog · PWR reactor control room. Bilingual EN / 粵語.</div>
+
+<script>
+  (function(){
+    var pages = [{"slug":"Home","title":"Home"},{"slug":"Modules","title":"Modules"},{"slug":"Reactor-Control-Room","title":"Reactor Control Room"},{"slug":"Development","title":"Development"},{"slug":"Build-from-Source","title":"Build from Source"}];
+    var links = Array.prototype.slice.call(document.querySelectorAll('aside.toc a'));
+    function show(slug){
+      var found = pages.some(function(p){ return p.slug === slug; });
+      if(!found) slug = pages[0].slug;
+      pages.forEach(function(p){
+        var el = document.getElementById('page-' + p.slug);
+        if(el) el.hidden = (p.slug !== slug);
+      });
+      links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('data-slug') === slug); });
+      var cur = pages.filter(function(p){ return p.slug === slug; })[0];
+      var c = document.getElementById('crumb-page'); if(c && cur) c.textContent = cur.title;
+      document.title = 'WinForge Web · Wiki — ' + (cur ? cur.title : '');
+    }
+    function current(){ return (location.hash || '').replace(/^#/, '') || pages[0].slug; }
+    window.addEventListener('hashchange', function(){ show(current()); window.scrollTo(0,0); });
+    show(current());
+  })();
+</script>
+</body>
+</html>
