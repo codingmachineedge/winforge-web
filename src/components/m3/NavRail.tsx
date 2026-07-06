@@ -52,6 +52,13 @@ export function NavRail({ view, onNavigate, onOpenDrawer }: Props) {
       go: () => onNavigate({ kind: 'catalog', sectionId: null }),
     },
     {
+      key: 'simulations',
+      icon: 'science',
+      label: t('shellm3.railSimulations'),
+      on: view.kind === 'catalog' && view.sectionId === 'suite',
+      go: () => onNavigate({ kind: 'catalog', sectionId: 'suite' }),
+    },
+    {
       key: 'reactor',
       icon: 'bolt',
       label: t('shellm3.railReactor'),

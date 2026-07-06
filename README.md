@@ -62,7 +62,8 @@ WinForge's C# reactor engine:
 | **Tauri v2 desktop shell** (`src-tauri`, Rust) — builds a Windows `.exe`/installer via `tauri build` | ✅ |
 | Rust backend: `run_command`, `run_powershell`, `system_info`, `list_dir`, `get_env`, `resolve_tool`, vetted `run_op`, `fs_*` (list/rename/mkdir/copy/move/delete/read) | ✅ |
 | **315 / 315 modules working** — every catalog module has a real implementation (no stubs) | ✅ |
-| **Material 3 shell** — navigation rail + modal drawer, md-* tokens, light/dark/system theme | ✅ |
+| **895-tweak Windows catalog** — WinForge's desktop `TweakCatalog` (22 categories) as a browsable, searchable, fully-bilingual reference, generated from the live app | ✅ |
+| **Material 3 shell** — navigation rail (**Modules · Simulations · Reactor · Settings · About**) + modal drawer, md-* tokens, light/dark/system theme | ✅ |
 | **PWR Reactor Control Room** — console UI + protection/ESF/turbine engines, 394 physics tests | ✅ |
 | **File Browser** — drives, breadcrumbs, file ops, Recycle-Bin delete, text preview | ✅ |
 | Trilingual i18n (EN / 粵語 / bilingual) with a CI guard enforcing **zero missing strings** | ✅ |
@@ -85,10 +86,10 @@ Requires the **Rust toolchain** (`rustup`, MSVC host), **VS Build Tools / MSVC**
 
 ## Catalog structure (mirrors WinForge)
 
-- **Suite · 套件** — Dashboard, the Nuclear Reactor, Reactor Settings, and 18 reactor-powered industrial loads.
+- **Simulations · 模擬** — its own nav-rail tab: Dashboard, the Nuclear Reactor, Reactor Settings, and 18 reactor-powered industrial loads (Cake Factory, Grid Dispatch, Hydrogen, AI Cluster, HPC, smelter, data centre, collider, …).
 - **Categories · 分類** — Files & Disks, System, Media & Capture, Tweaks & Input, Apps & Git, Security & Privacy (native-only).
 - **Toolbox · 工具箱** — 12 groups of pure client-side utilities (JSON/Data, Text, Encoding, Crypto, Web/HTTP, Network, Dev, Time, Calculators, Colors, Everyday). Web-portable.
-- **Windows 11 · 視窗 11** — system tweaks (native-only).
+- **Windows 11 · 視窗 11** — a browsable, searchable, fully-bilingual catalog of **895 Windows tweaks across 22 categories** (WinForge's desktop `TweakCatalog`), grouped under **All Tweaks**. Registry writes run in the desktop app; the web renders each tweak as a reference card with its real metadata (kind, elevation, destructiveness, restart scope).
 
 ## Develop (frontend only, in a browser)
 
@@ -113,7 +114,17 @@ node tools/gen-catalog.mjs "C:/path/to/WinForge"
 It parses `MainWindow.xaml` (the navigation tree → sections/groups) and
 `Services/ModuleRegistry.cs` (per-module English/中文 titles, glyphs, keywords), classifies each
 module web-portable vs native-only, and emits the typed catalog. Web-only modules (e.g. the File
-Browser) are declared in the generator's `WEB_EXTRAS` list so they survive regeneration.
+Browser) are declared in the generator's `WEB_EXTRAS` list so they survive regeneration, and the
+desktop "Suite" section is relabelled **Simulations** (`SECTION_RENAMES`).
+
+The **895-tweak catalog** in `src/data/tweaks.ts` is generated separately, straight from the live
+app's own headless exporter:
+
+```bash
+node tools/gen-tweaks.mjs          # runs WinForge.exe --export-docs and parses the result
+node tools/gen-catalog.mjs         # injects the 22 tweak categories under "Windows 11 › All Tweaks"
+node tools/gen-registry-keys.mjs   # mirror the dynamic module.tweaks.* tags for the registry guard
+```
 
 ## Power-generation credits
 

@@ -128,6 +128,22 @@ const sections = sectionsRaw.map((s) => {
   };
 });
 
+// Web-side section relabels. The desktop "Suite" section is the reactor plus the
+// reactor-powered simulations (Cake Factory, Grid Dispatch, Hydrogen, AI Cluster, HPC,
+// smelter, data center, collider, …), so the web surfaces it as its own "Simulations"
+// tab (see NavRail). The id stays 'suite' so existing sectionId references and deep
+// links keep working — only the display label changes.
+const SECTION_RENAMES = {
+  suite: { en: 'Simulations', zh: '模擬' },
+};
+for (const s of sections) {
+  const r = SECTION_RENAMES[s.id];
+  if (r) {
+    s.en = r.en;
+    s.zh = r.zh;
+  }
+}
+
 // Splice in the web-only extras (no WinForge counterpart) so they survive regeneration.
 for (const extra of WEB_EXTRAS) {
   const sec = sections.find((s) => s.id === extra.sectionId);
