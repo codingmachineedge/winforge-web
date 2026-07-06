@@ -30,8 +30,8 @@ export interface CatalogSection {
 export const catalog: CatalogSection[] = [
   {
     "id": "suite",
-    "en": "Suite",
-    "zh": "套件",
+    "en": "Simulations",
+    "zh": "模擬",
     "native": false,
     "directModules": [
       {
